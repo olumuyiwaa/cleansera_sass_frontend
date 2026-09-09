@@ -1,5 +1,14 @@
 "use client";
 
+// NOT CURRENTLY WIRED UP — no page imports this modal, and the backend has
+// no matching endpoint that issues a payment-intent clientSecret. It also
+// runs against CleanSera's agreed subscription-only billing model: job/
+// booking payments happen outside the platform, so there's no invoice for
+// CleanSera itself to collect on. This is the "optional per-booking Stripe
+// payment link" feature flagged as a possible v1.1 addition, left half-built
+// — if picking it back up, it needs a backend route before it does anything;
+// if abandoning it, this file and its backend counterpart can both go.
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Invoice } from "@/app/api/types";
 import {authFetch} from "@/app/api/authFetch";
