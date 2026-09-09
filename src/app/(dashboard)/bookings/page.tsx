@@ -19,6 +19,9 @@ import {
   confirmBooking,
   completeBooking,
   assignBookingCleaner,
+  cancelBooking,
+  rescheduleBooking,
+  updateBookingPayment,
 } from "@/app/api/bookings.api";
 import { listCustomers, createCustomer } from "@/app/api/customers.api";
 import { listServices } from "@/app/api/services.api";
@@ -48,6 +51,12 @@ export default function BookingsPage() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCustomerMode, setNewCustomerMode] = useState(false);
+  const [actionBooking, setActionBooking] = useState<Booking | null>(null);
+  const [actionType, setActionType] = useState<"cancel" | "reschedule" | "payment" | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [rescheduleStart, setRescheduleStart] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<"UNPAID" | "PAID" | "PARTIAL" | "REFUNDED">("PAID");
+  const [paymentNote, setPaymentNote] = useState("");
 
   const [form, setForm] = useState({
     customerId: "",
@@ -144,6 +153,45 @@ export default function BookingsPage() {
     }
   };
 
+  const openAction = (b: Booking, type: "cancel" | "reschedule" | "payment") => {
+    setActionBooking(b);
+    setActionType(type);
+    setCancelReason("");
+    setPaymentNote("");
+    setPaymentStatus((b.paymentStatus as any) || "PAID");
+    if (type === "reschedule") {
+      const d = new Date(b.scheduledStart);
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      setRescheduleStart(local);
+    }
+  };
+
+  const closeAction = () => {
+    setActionBooking(null);
+    setActionType(null);
+  };
+
+  const submitAction = async () => {
+    if (!actionBooking || !actionType) return;
+    setSaving(true);
+    setError("");
+    try {
+      if (actionType === "cancel") {
+        await cancelBooking(actionBooking.id, cancelReason || undefined);
+      } else if (actionType === "reschedule") {
+        await rescheduleBooking(actionBooking.id, new Date(rescheduleStart).toISOString());
+      } else if (actionType === "payment") {
+        await updateBookingPayment(actionBooking.id, paymentStatus, paymentNote || undefined);
+      }
+      closeAction();
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Action failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -214,22 +262,37 @@ export default function BookingsPage() {
                     <TableCell className="px-5 py-4">
                       <Badge color={STATUS_COLOR[b.status]} size="sm">{b.status}</Badge>
                     </TableCell>
-                    <TableCell className="px-5 py-4 space-x-3">
-                      {b.status === "REQUESTED" && (
-                        <button onClick={() => handleConfirm(b.id)} className="text-sm font-medium text-brand-500 hover:text-brand-600">
-                          Confirm
+                    <TableCell className="px-5 py-4">
+                      <div className="flex flex-wrap gap-2">
+                        {b.status === "REQUESTED" && (
+                          <button onClick={() => handleConfirm(b.id)} className="text-sm font-medium text-brand-500 hover:text-brand-600">
+                            Confirm
+                          </button>
+                        )}
+                        {b.status === "CONFIRMED" && (
+                          <button onClick={() => handleAutoAssign(b.id)} className="text-sm font-medium text-brand-500 hover:text-brand-600">
+                            Auto-assign
+                          </button>
+                        )}
+                        {(b.status === "ASSIGNED" || b.status === "IN_PROGRESS") && (
+                          <button onClick={() => handleComplete(b.id)} className="text-sm font-medium text-success-500 hover:text-success-600">
+                            Complete
+                          </button>
+                        )}
+                        {!["COMPLETED", "CANCELLED"].includes(b.status) && (
+                          <>
+                            <button onClick={() => openAction(b, "reschedule")} className="text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-300">
+                              Reschedule
+                            </button>
+                            <button onClick={() => openAction(b, "cancel")} className="text-sm font-medium text-error-500 hover:text-error-600">
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                        <button onClick={() => openAction(b, "payment")} className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                          Pay: {b.paymentStatus || "UNPAID"}
                         </button>
-                      )}
-                      {(b.status === "CONFIRMED") && (
-                        <button onClick={() => handleAutoAssign(b.id)} className="text-sm font-medium text-brand-500 hover:text-brand-600">
-                          Auto-assign
-                        </button>
-                      )}
-                      {(b.status === "ASSIGNED" || b.status === "IN_PROGRESS") && (
-                        <button onClick={() => handleComplete(b.id)} className="text-sm font-medium text-success-500 hover:text-success-600">
-                          Mark Complete
-                        </button>
-                      )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -315,6 +378,58 @@ export default function BookingsPage() {
             <Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create Booking"}</Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal isOpen={!!actionType && !!actionBooking} onClose={closeAction} className="max-w-md p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
+          {actionType === "cancel" && "Cancel booking"}
+          {actionType === "reschedule" && "Reschedule booking"}
+          {actionType === "payment" && "Update payment"}
+        </h2>
+        {actionType === "cancel" && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">This will mark the booking as cancelled.</p>
+            <div>
+              <Label>Reason (optional)</Label>
+              <Input value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} placeholder="Customer requested…" />
+            </div>
+          </div>
+        )}
+        {actionType === "reschedule" && (
+          <div className="space-y-4">
+            <div>
+              <Label>New start time</Label>
+              <Input type="datetime-local" value={rescheduleStart} onChange={(e) => setRescheduleStart(e.target.value)} required />
+            </div>
+          </div>
+        )}
+        {actionType === "payment" && (
+          <div className="space-y-4">
+            <div>
+              <Label>Payment status</Label>
+              <select
+                value={paymentStatus}
+                onChange={(e) => setPaymentStatus(e.target.value as any)}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              >
+                <option value="UNPAID">Unpaid</option>
+                <option value="PAID">Paid</option>
+                <option value="PARTIAL">Partial</option>
+                <option value="REFUNDED">Refunded</option>
+              </select>
+            </div>
+            <div>
+              <Label>Note (optional)</Label>
+              <Input value={paymentNote} onChange={(e) => setPaymentNote(e.target.value)} placeholder="Cash / transfer reference…" />
+            </div>
+          </div>
+        )}
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" type="button" onClick={closeAction}>Close</Button>
+          <Button type="button" disabled={saving} onClick={submitAction}>
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

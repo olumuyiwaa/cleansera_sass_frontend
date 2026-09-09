@@ -87,3 +87,31 @@ export async function cancelRecurringSchedule(id: string) {
     const result = await authFetch(`/bookings/recurring/${id}/cancel`, { method: "POST" });
     return result.data as RecurringSchedule;
 }
+
+export async function cancelBooking(id: string, reason?: string) {
+    const result = await authFetch(`/bookings/${id}/cancel`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+    });
+    return result.data as Booking;
+}
+
+export async function rescheduleBooking(id: string, scheduledStart: string, scheduledEnd?: string) {
+    const result = await authFetch(`/bookings/${id}/reschedule`, {
+        method: "POST",
+        body: JSON.stringify({ scheduledStart, scheduledEnd }),
+    });
+    return result.data as Booking;
+}
+
+export async function updateBookingPayment(
+    id: string,
+    paymentStatus: "UNPAID" | "PAID" | "PARTIAL" | "REFUNDED",
+    paymentNote?: string
+) {
+    const result = await authFetch(`/bookings/${id}/payment`, {
+        method: "POST",
+        body: JSON.stringify({ paymentStatus, paymentNote }),
+    });
+    return result.data as Booking;
+}

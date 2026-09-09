@@ -59,6 +59,11 @@ const AppSidebar: React.FC = () => {
       path: "/bookings",
     },
     {
+      icon: <PieChartIcon />,
+      name: "Reports",
+      path: "/reports",
+    },
+    {
       icon: <CalenderIcon />,
       name: "Dispatch",
       path: "/dispatch",

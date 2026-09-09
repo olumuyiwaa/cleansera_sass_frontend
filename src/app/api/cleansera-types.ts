@@ -109,7 +109,7 @@ export type Booking = {
     scheduledEnd: string;
     status: BookingStatus;
     quotedPriceCents: number;
-    paymentStatus: "UNPAID" | "PAID" | "PARTIAL";
+    paymentStatus: "UNPAID" | "PAID" | "PARTIAL" | "REFUNDED";
     paymentNote: string | null;
     cancelReason: string | null;
     createdAt: string;
