@@ -23,7 +23,7 @@ import {
   rescheduleBooking,
   updateBookingPayment,
 } from "@/app/api/bookings.api";
-import { listCustomers, createCustomer } from "@/app/api/customers.api";
+import {listCustomers, createCustomer, listCustomersForBooking} from "@/app/api/customers.api";
 import { listServices } from "@/app/api/services.api";
 import { Booking, BookingStatus, Customer, Service, formatMoney } from "@/app/api/cleansera-types";
 
@@ -74,7 +74,7 @@ export default function BookingsPage() {
     try {
       const [b, c, s] = await Promise.all([
         listBookings(statusFilter === "ALL" ? undefined : statusFilter),
-        listCustomers(),
+        listCustomersForBooking(),
         listServices(),
       ]);
       setBookings(b);

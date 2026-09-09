@@ -22,7 +22,7 @@ import {
   Business,
   GroupIcon,
   BellIcon,
-  ChatIcon, DocsIcon, DollarLineIcon, MailIcon, EnvelopeIcon, TaskIcon, BoltIcon,
+  ChatIcon, DocsIcon, DollarLineIcon, MailIcon, EnvelopeIcon, TaskIcon, BoltIcon, ShootingStarIcon,
 } from "../icons/index";
 import {useAuth} from "@/app/auth/useAuth";
 import {getUserRole} from "@/app/api/types";
@@ -50,8 +50,17 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <GroupIcon />,
-      name: "Cleaners",
-      path: "/cleaners",
+      name: "Users",
+      subItems: [
+        {
+          name: "Customers",
+          path: "/customers",
+        },
+        {
+          name: "Cleaners",
+          path: "/cleaners",
+        },
+      ],
     },
     {
       icon: <TableIcon />,
@@ -74,6 +83,11 @@ const AppSidebar: React.FC = () => {
       path: "/cleaner-documents",
     },
     {
+      icon: <FileIcon />,
+      name: "Reviews",
+      path: "/reviews",
+    },
+    {
       icon: <BellIcon />,
       name: "Notifications",
       path: "/notifications",
@@ -82,6 +96,11 @@ const AppSidebar: React.FC = () => {
       icon: <DollarLineIcon />,
       name: "Subscription",
       path: "/subscription",
+    },
+    {
+      icon: <ShootingStarIcon />,
+      name: "Coupons",
+      path: "/coupons",
     },
   ];
 
