@@ -3,8 +3,17 @@
 import { useEffect, useState, useCallback } from "react";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
-import { listPlans, getSubscription, createSubscription, cancelSubscription } from "@/app/api/subscriptions.api";
-import { BusinessSubscription, SubscriptionPlan } from "@/app/api/cleansera-types";
+import {
+  listPlans,
+  getSubscription,
+  createSubscription,
+  cancelSubscription,
+} from "@/app/api/subscriptions.api";
+import {
+  BusinessSubscription,
+  SubscriptionPlan,
+  formatMoney,
+} from "@/app/api/cleansera-types";
 
 const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "light"> = {
   TRIALING: "warning",
@@ -24,8 +33,11 @@ export default function SubscriptionPage() {
     setLoading(true);
     setError("");
     try {
-      const [p, s] = await Promise.all([listPlans(), getSubscription().catch(() => null)]);
-      setPlans(p);
+      const [p, s] = await Promise.all([
+        listPlans(),
+        getSubscription().catch(() => null),
+      ]);
+      setPlans(Array.isArray(p) ? p : []);
       setSubscription(s);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load subscription info");
@@ -52,7 +64,13 @@ export default function SubscriptionPage() {
   };
 
   const handleCancel = async () => {
-    if (!confirm("Cancel your CleanSera subscription? This only affects your CleanSera billing — customer payments for jobs are unaffected.")) return;
+    if (
+        !confirm(
+            "Cancel your CleanSera subscription? This only affects your CleanSera billing — customer payments for jobs are unaffected."
+        )
+    ) {
+      return;
+    }
     setBusy("cancel");
     setError("");
     try {
@@ -65,80 +83,112 @@ export default function SubscriptionPage() {
     }
   };
 
+  const showPlans = !subscription || subscription.status === "CANCELED";
+
   return (
-    <div className="p-4 md:p-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Subscription</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          This is your business&apos;s CleanSera billing only — job payments from your customers happen outside the platform.
-        </p>
-      </div>
-
-      {error && (
-        <div className="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
-          {error}
+      <div className="p-4 md:p-6">
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Subscription</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            This is your business&apos;s CleanSera billing only — job payments from your customers
+            happen via Stripe Connect and are unaffected by this plan.
+          </p>
         </div>
-      )}
 
-      {loading ? (
-        <p className="text-sm text-gray-500">Loading…</p>
-      ) : subscription ? (
-        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Current plan</p>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white/90">{subscription.plan.name}</p>
+        {error && (
+            <div className="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+              {error}
             </div>
-            <Badge color={STATUS_COLOR[subscription.status] || "light"}>{subscription.status}</Badge>
-          </div>
-          {subscription.trialEndsAt && subscription.status === "TRIALING" && (
-            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-              Trial ends {new Date(subscription.trialEndsAt).toLocaleDateString()}
-            </p>
-          )}
-          {subscription.currentPeriodEnd && (
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-            </p>
-          )}
-          {subscription.status !== "CANCELED" && (
-            <div className="mt-4">
-              <Button variant="outline" onClick={handleCancel} disabled={busy === "cancel"}>
-                {busy === "cancel" ? "Cancelling…" : "Cancel Subscription"}
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="mb-8 rounded-xl border border-dashed border-gray-300 p-6 text-center dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">No active subscription yet — pick a plan below to get started.</p>
-        </div>
-      )}
+        )}
 
-      {(!subscription || subscription.status === "CANCELED") && (
-        <>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Available Plans
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {plans.map((plan) => (
-              <div key={plan.id} className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">{plan.name}</h3>
-                <p className="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(plan.monthlyPriceCents / 100)}
-                  <span className="text-sm font-normal text-gray-500"> /mo</span>
-                </p>
-                {plan.maxCleaners && (
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Up to {plan.maxCleaners} cleaners</p>
-                )}
-                <Button className="mt-4 w-full" onClick={() => handleSubscribe(plan.id)} disabled={busy === plan.id}>
-                  {busy === plan.id ? "Starting…" : "Choose Plan"}
-                </Button>
+        {loading ? (
+            <p className="text-sm text-gray-500">Loading…</p>
+        ) : subscription ? (
+            <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Current plan</p>
+                  <p className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    {subscription.plan?.name ?? "Unknown plan"}
+                  </p>
+                </div>
+                <Badge color={STATUS_COLOR[subscription.status] || "light"}>
+                  {subscription.status}
+                </Badge>
               </div>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+              {subscription.trialEndsAt && subscription.status === "TRIALING" && (
+                  <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    Trial ends {new Date(subscription.trialEndsAt).toLocaleDateString()}
+                  </p>
+              )}
+              {subscription.currentPeriodEnd && subscription.status !== "CANCELED" && (
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  </p>
+              )}
+              {subscription.plan?.maxCleaners != null && (
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Up to {subscription.plan.maxCleaners} cleaners
+                  </p>
+              )}
+              {subscription.status !== "CANCELED" && (
+                  <div className="mt-4">
+                    <Button variant="outline" onClick={handleCancel} disabled={busy === "cancel"}>
+                      {busy === "cancel" ? "Cancelling…" : "Cancel Subscription"}
+                    </Button>
+                  </div>
+              )}
+            </div>
+        ) : (
+            <div className="mb-8 rounded-xl border border-dashed border-gray-300 p-6 text-center dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No active subscription yet — pick a plan below to get started.
+              </p>
+            </div>
+        )}
+
+        {showPlans && (
+            <>
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Available Plans
+              </h2>
+              {plans.length === 0 ? (
+                  <p className="text-sm text-gray-500">
+                    No plans available. Seed SubscriptionPlan rows in the database (and attach Stripe
+                    price IDs) to show plans here.
+                  </p>
+              ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {plans.map((plan) => (
+                        <div
+                            key={plan.id}
+                            className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]"
+                        >
+                          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                            {plan.name}
+                          </h3>
+                          <p className="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">
+                            {formatMoney(plan.monthlyPriceCents)}
+                            <span className="text-sm font-normal text-gray-500"> /mo</span>
+                          </p>
+                          {plan.maxCleaners != null && (
+                              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Up to {plan.maxCleaners} cleaners
+                              </p>
+                          )}
+                          <Button
+                              className="mt-4 w-full"
+                              onClick={() => handleSubscribe(plan.id)}
+                              disabled={busy === plan.id}
+                          >
+                            {busy === plan.id ? "Starting…" : "Choose Plan"}
+                          </Button>
+                        </div>
+                    ))}
+                  </div>
+              )}
+            </>
+        )}
+      </div>
   );
 }

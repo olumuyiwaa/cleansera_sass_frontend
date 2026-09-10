@@ -1,118 +1,77 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { authFetch } from "@/app/api/authFetch";
-import {TwoFactorModal} from "@/components/modals/twoFactorModal/twoFactorModal";
-import { Disable2FAModal } from "@/components/modals/twoFactorModal/Disable2FAModal";
-import {useAuth} from "@/app/auth/useAuth";
-import {useRouter} from "next/navigation";
-
-type Credential = {
-    type: string;
-    status: string;
-    expiresAt?: string | null;
-};
-
-type Wallet = {
-    pendingBalance: number;
-    availableBalance: number;
-    lifetimeEarnings: number;
-};
-
-type UserProfile = {
-    id: string;
-    email: string;
-    phone?: string;
-    role: string;
-    status: string;
-    verificationStatus: string;
-    twoFactorEnabled: boolean;
-    lastLoginAt?: string;
-
-    adminProfile?: {
-        firstName: string;
-        lastName: string;
-        avatarUrl?: string;
-    };
-
-    cleanerProfile?: {
-        firstName: string;
-        lastName: string;
-        designation: string;
-        bio?: string;
-        availabilityRadius?: number;
-        credentials: Credential[];
-        wallet?: Wallet;
-    };
-
-    businessMember?: {
-        businessId: string;
-        firstName: string;
-        lastName: string;
-        jobTitle?: string;
-    };
-};
+import { useAuth } from "@/app/auth/useAuth";
+import { useRouter } from "next/navigation";
+import {
+    getMe,
+    updateMe,
+    changePassword,
+    generate2FA,
+    verifyEnable2FA,
+    disable2FA,
+    type CurrentUserProfile,
+} from "@/app/api/profile.api";
 
 function formatDate(value?: string | null) {
-    if (!value) return "-";
+    if (!value) return "—";
     return new Intl.DateTimeFormat("en", {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(new Date(value));
 }
 
-export default function ProfilePage() {
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+function formatRole(role?: string | null) {
+    if (!role) return "—";
+    return role
+        .split("_")
+        .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+        .join(" ");
+}
 
+export default function ProfilePage() {
+    const { user, setUser } = useAuth();
+    const router = useRouter();
+
+    const [profile, setProfile] = useState<CurrentUserProfile | null>(null);
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [phone, setPhone] = useState("");
-    const [bio, setBio] = useState("");
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
 
     const [isLoading, setIsLoading] = useState(true);
-    const { user } = useAuth();
-    const router = useRouter();
-    useEffect(() => {
-        if (!isLoading && user === null) {
-            router.replace("/");
-        }
-    }, [user,isLoading, router]);
     const [isSaving, setIsSaving] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    // ── 2FA modal state ───────────────────────────────────────────────────
-    const [show2FAModal, setShow2FAModal] = useState(false);
-    const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
+    // 2FA
+    const [show2FASetup, setShow2FASetup] = useState(false);
+    const [otpauthUrl, setOtpauthUrl] = useState("");
+    const [base32, setBase32] = useState("");
+    const [totpCode, setTotpCode] = useState("");
+    const [twoFaBusy, setTwoFaBusy] = useState(false);
+
+    useEffect(() => {
+        if (!isLoading && user === null) {
+            router.replace("/");
+        }
+    }, [user, isLoading, router]);
 
     const fetchProfile = useCallback(async () => {
         setIsLoading(true);
+        setError("");
         try {
-            const result = await authFetch("/users/me", { method: "GET" });
-
-            if (!result.success) throw new Error(result.message);
-
-            const data = result.data;
+            const data = await getMe();
             setProfile(data);
+            setFirstName(data.firstName || "");
+            setLastName(data.lastName || "");
             setPhone(data.phone || "");
-
-            if (data.cleanerProfile) {
-                setFirstName(data.cleanerProfile.firstName || "");
-                setLastName(data.cleanerProfile.lastName || "");
-                setBio(data.cleanerProfile.bio || "");
-            }
-
-            if (data.adminProfile) {
-                setFirstName(data.adminProfile.firstName || "");
-                setLastName(data.adminProfile.lastName || "");
-            }
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to load profile");
         } finally {
             setIsLoading(false);
         }
@@ -122,267 +81,307 @@ export default function ProfilePage() {
         fetchProfile();
     }, [fetchProfile]);
 
-    async function updateProfile() {
+    async function handleUpdateProfile() {
         setIsSaving(true);
         setError("");
         setSuccess("");
-
         try {
-            const result = await authFetch("/users/me", {
-                method: "PATCH",
-                body: JSON.stringify({ firstName, lastName, phone, bio }),
-            });
-
-            if (!result.success) throw new Error(result.message);
-
+            const updated = await updateMe({ firstName, lastName, phone: phone || null });
+            setProfile(updated);
             setSuccess("Profile updated successfully.");
-            fetchProfile();
-        } catch (err: any) {
-            setError(err.message);
+            // Keep auth context in sync if shape matches
+            if (setUser && user) {
+                setUser({ ...user, firstName: updated.firstName, lastName: updated.lastName, phone: updated.phone } as typeof user);
+            }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to update profile");
         } finally {
             setIsSaving(false);
         }
     }
 
-    async function changePassword() {
+    async function handleChangePassword() {
         setIsChangingPassword(true);
+        setError("");
+        setSuccess("");
         try {
-            const result = await authFetch("/users/me/password", {
-                method: "PATCH",
-                body: JSON.stringify({ currentPassword, newPassword }),
-            });
-
-            if (!result.success) throw new Error(result.message);
-
-            setSuccess("Password changed successfully.");
+            await changePassword({ currentPassword, newPassword });
+            setSuccess("Password changed. You may need to sign in again on other devices.");
             setCurrentPassword("");
             setNewPassword("");
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to change password");
         } finally {
             setIsChangingPassword(false);
         }
     }
 
+    async function handleStart2FA() {
+        setTwoFaBusy(true);
+        setError("");
+        try {
+            const secret = await generate2FA();
+            setOtpauthUrl(secret.otpauth_url || "");
+            setBase32(secret.base32 || "");
+            setShow2FASetup(true);
+            setTotpCode("");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to start 2FA setup");
+        } finally {
+            setTwoFaBusy(false);
+        }
+    }
+
+    async function handleConfirm2FA() {
+        if (!totpCode.trim()) return;
+        setTwoFaBusy(true);
+        setError("");
+        try {
+            await verifyEnable2FA(totpCode.trim());
+            setShow2FASetup(false);
+            setSuccess("Two-factor authentication enabled.");
+            await fetchProfile();
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Invalid code");
+        } finally {
+            setTwoFaBusy(false);
+        }
+    }
+
+    async function handleDisable2FA() {
+        if (!confirm("Disable two-factor authentication?")) return;
+        setTwoFaBusy(true);
+        setError("");
+        try {
+            await disable2FA();
+            setSuccess("Two-factor authentication disabled.");
+            await fetchProfile();
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to disable 2FA");
+        } finally {
+            setTwoFaBusy(false);
+        }
+    }
+
     if (isLoading) {
         return (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-                Loading profile...
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                Loading profile…
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-
-            {/* 2FA Modal */}
-            {show2FAModal && (
-                <TwoFactorModal
-                    isEnabled={profile?.twoFactorEnabled ?? false}
-                    onClose={() => setShow2FAModal(false)}
-                    onSuccess={() => {
-                        // Refresh profile so twoFactorEnabled reflects the new state
-                        fetchProfile();
-                        setSuccess("Two-factor authentication has been enabled.");
-                    }}
-                />
-            )}
-
-            {showDisable2FAModal && (
-                <Disable2FAModal
-                    onClose={() => setShowDisable2FAModal(false)}
-                    onSuccess={() => {
-                    fetchProfile();
-                    setSuccess("Two-factor authentication has been disabled.");
-                    }}
-                />
-                )}
-
-            {/* Profile Summary */}
+        <div className="space-y-6 p-4 md:p-6">
+            {/* Summary */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-xl font-semibold text-brand-600">
-                        {firstName?.charAt(0)}
-                        {lastName?.charAt(0)}
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-xl font-semibold text-brand-600 dark:bg-brand-500/20 dark:text-brand-300">
+                        {(firstName?.charAt(0) || "?").toUpperCase()}
+                        {(lastName?.charAt(0) || "").toUpperCase()}
                     </div>
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
                             {firstName} {lastName}
                         </h1>
                         <p className="text-sm text-gray-500">{profile?.email}</p>
-                        <div className="mt-2 flex gap-2">
-                            <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
-                                {profile?.status}
-                            </span>
-                            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                                {profile?.verificationStatus}
-                            </span>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {profile?.businessRole && (
+                                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                  {formatRole(profile.businessRole)}
+                </span>
+                            )}
+                            {profile?.business?.name && (
+                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-white/[0.06] dark:text-gray-300">
+                  {profile.business.name}
+                </span>
+                            )}
+                            <span
+                                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                                    profile?.isEmailVerified
+                                        ? "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300"
+                                        : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
+                                }`}
+                            >
+                {profile?.isEmailVerified ? "Email verified" : "Email not verified"}
+              </span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
                     {error}
                 </div>
             )}
-
             {success && (
-                <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
+                <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400">
                     {success}
                 </div>
             )}
 
-            {/* Personal Information */}
+            {/* Personal info */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                    Personal Information
+                    Personal information
                 </h2>
                 <div className="grid gap-4 md:grid-cols-2">
                     <input
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="First Name"
-                        className="rounded-lg border p-3 text-gray-900 dark:text-white"
+                        placeholder="First name"
+                        className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Last Name"
-                        className="rounded-lg border p-3 text-gray-900 dark:text-white"
+                        placeholder="Last name"
+                        className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Phone Number"
-                        className="rounded-lg border p-3 text-gray-900 dark:text-white"
+                        placeholder="Phone number"
+                        className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    />
+                    <input
+                        value={profile?.email || ""}
+                        disabled
+                        className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-gray-500 dark:border-gray-800 dark:bg-gray-900/50"
                     />
                 </div>
-
-                {profile?.cleanerProfile && (
-                    <textarea
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        rows={4}
-                        placeholder="Bio"
-                        className="mt-4 w-full rounded-lg border p-3 text-gray-900 dark:text-white"
-                    />
-                )}
-
                 <button
-                    onClick={updateProfile}
+                    type="button"
+                    onClick={handleUpdateProfile}
                     disabled={isSaving}
-                    className="mt-5 rounded-lg bg-brand-500 px-5 py-3 text-white"
+                    className="mt-5 rounded-lg bg-brand-500 px-5 py-3 text-white hover:bg-brand-600 disabled:opacity-60"
                 >
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ? "Saving…" : "Save changes"}
                 </button>
             </div>
 
-            {/* Account Information */}
+            {/* Account */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                    Account Information
+                    Account
                 </h2>
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Info label="Role" value={profile?.role} />
-                    <Info label="Email" value={profile?.email} />
-                    <Info
-                        label="2FA Enabled"
-                        value={profile?.twoFactorEnabled ? "Yes" : "No"}
-                        twoFactorEnabled={profile?.twoFactorEnabled}
-                        onEnable2FA={() => setShow2FAModal(true)}
-                        onDisable2FA={() => setShowDisable2FAModal(true)}
-                        />
-                    <Info label="Last Login" value={formatDate(profile?.lastLoginAt)} />
+                    <Info label="Role" value={formatRole(profile?.businessRole)} />
+                    <Info label="Business" value={profile?.business?.name} />
+                    <Info label="Timezone" value={profile?.business?.timezone} />
+                    <Info label="Member since" value={formatDate(profile?.createdAt)} />
+                </div>
+
+                <div className="mt-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p className="text-xs uppercase text-gray-500">Two-factor authentication</p>
+                            <p className="mt-1 font-medium text-gray-900 dark:text-white">
+                                {profile?.twoFactorEnabled ? "Enabled" : "Disabled"}
+                            </p>
+                        </div>
+                        {profile?.twoFactorEnabled ? (
+                            <button
+                                type="button"
+                                onClick={handleDisable2FA}
+                                disabled={twoFaBusy}
+                                className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400"
+                            >
+                                Disable
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={handleStart2FA}
+                                disabled={twoFaBusy}
+                                className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+                            >
+                                {twoFaBusy ? "…" : "Enable"}
+                            </button>
+                        )}
+                    </div>
+
+                    {show2FASetup && (
+                        <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 dark:border-gray-800">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Add this secret to your authenticator app, then enter a 6-digit code to confirm.
+                            </p>
+                            {base32 && (
+                                <p className="break-all rounded-lg bg-gray-50 p-3 font-mono text-xs dark:bg-gray-900">
+                                    {base32}
+                                </p>
+                            )}
+                            {otpauthUrl && (
+                                <p className="break-all text-xs text-gray-400">{otpauthUrl}</p>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                                <input
+                                    value={totpCode}
+                                    onChange={(e) => setTotpCode(e.target.value)}
+                                    placeholder="6-digit code"
+                                    className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleConfirm2FA}
+                                    disabled={twoFaBusy || !totpCode.trim()}
+                                    className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+                                >
+                                    Confirm & enable
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShow2FASetup(false)}
+                                    className="rounded-lg border px-4 py-2 text-sm text-gray-600 dark:border-gray-700"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Change Password */}
+            {/* Password */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                    Change Password
+                    Change password
                 </h2>
-                <div className="grid gap-4">
+                <div className="grid max-w-md gap-4">
                     <input
                         type="password"
-                        placeholder="Current Password"
+                        placeholder="Current password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="rounded-lg border p-3 text-gray-900 dark:text-white"
+                        className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
                         type="password"
-                        placeholder="New Password"
+                        placeholder="New password (min 8 characters)"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="rounded-lg border p-3 text-gray-900 dark:text-white"
+                        className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <button
-                        onClick={changePassword}
-                        disabled={isChangingPassword}
-                        className="rounded-lg bg-brand-500 px-5 py-3 text-white"
+                        type="button"
+                        onClick={handleChangePassword}
+                        disabled={isChangingPassword || !currentPassword || newPassword.length < 8}
+                        className="rounded-lg bg-brand-500 px-5 py-3 text-white hover:bg-brand-600 disabled:opacity-60"
                     >
-                        {isChangingPassword ? "Updating..." : "Change Password"}
+                        {isChangingPassword ? "Updating…" : "Change password"}
                     </button>
                 </div>
             </div>
-
         </div>
     );
 }
 
-// ── Info card ─────────────────────────────────────────────────────────────────
-
-function Info({
-  label,
-  value,
-  twoFactorEnabled,
-  onEnable2FA,
-  onDisable2FA,
-}: {
-  label: string;
-  value?: string | number;
-  twoFactorEnabled?: boolean;
-  onEnable2FA?: () => void;
-  onDisable2FA?: () => void;
-}) {
-  return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase text-gray-500">{label}</p>
-          <p className="mt-1 font-medium text-gray-900 dark:text-white">
-            {value || "-"}
-          </p>
+function Info({ label, value }: { label: string; value?: string | null }) {
+    return (
+        <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+            <p className="text-xs uppercase text-gray-500">{label}</p>
+            <p className="mt-1 font-medium text-gray-900 dark:text-white">{value || "—"}</p>
         </div>
-
-        {label === "2FA Enabled" && !twoFactorEnabled && (
-          <button
-            onClick={onEnable2FA}
-            className="rounded-lg bg-brand-500 hover:bg-brand-600 px-4 py-2 text-sm font-medium text-white transition"
-          >
-            Enable
-          </button>
-        )}
-
-        {label === "2FA Enabled" && twoFactorEnabled && (
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              Active
-            </span>
-            <button
-              onClick={onDisable2FA}
-              className="rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 px-3 py-1.5 text-xs font-medium transition"
-            >
-              Disable
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 }
