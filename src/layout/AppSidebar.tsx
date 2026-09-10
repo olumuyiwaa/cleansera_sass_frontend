@@ -106,6 +106,16 @@ const AppSidebar: React.FC = () => {
       name: "Coupons",
       path: "/coupons",
     },
+    {
+      icon: <CalenderIcon />,
+      name: "Recurring Schedules",
+      path: "/recurring-schedules",
+    },
+    {
+      icon: <ListIcon />,
+      name: "Checklist Templates",
+      path: "/checklist-templates",
+    },
   ];
 
   const othersItems: NavItem[] = [

@@ -88,6 +88,16 @@ export async function cancelRecurringSchedule(id: string) {
     return result.data as RecurringSchedule;
 }
 
+export async function pauseRecurringSchedule(id: string) {
+    const result = await authFetch(`/bookings/recurring/${id}/pause`, { method: "POST" });
+    return result.data as { id: string; isActive: boolean };
+}
+
+export async function resumeRecurringSchedule(id: string) {
+    const result = await authFetch(`/bookings/recurring/${id}/resume`, { method: "POST" });
+    return result.data as { id: string; isActive: boolean };
+}
+
 export async function cancelBooking(id: string, reason?: string) {
     const result = await authFetch(`/bookings/${id}/cancel`, {
         method: "POST",
