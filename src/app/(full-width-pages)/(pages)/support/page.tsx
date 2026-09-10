@@ -4,7 +4,11 @@ import React, {useEffect, useState} from "react";
 import { TOKENS, GLOBAL_CSS, SiteHeader, SiteFooter } from "@/app/(full-width-pages)/shared";
 import {FAQ_ITEMS, STATUS_ITEMS, CONTACT_CHANNELS, SECTIONS} from "../../data";
 import ContactForm from "@/components/support/ContactForm";
-import {supportApi, TicketDetail} from "@/app/api/support.api";
+// NOTE: guest ticket-status lookup (by ticket number + email) isn't backed by
+// a real endpoint yet — /support only accepts new messages (see
+// ContactForm.tsx / POST /support). handleTrackTicket below degrades to a
+// friendly message instead of calling a client that no longer exists.
+type TicketDetail = { id: string; status: string; subject: string; createdAt: string };
 
 
 // ─── Sub-components ────────────────────────────────────────────
@@ -149,14 +153,13 @@ export default function SupportPage() {
         setTrackError("");
         setTrackedTicket(null);
 
-        try {
-            const ticket = await supportApi.trackTicket(ticketNumber.trim(), email.trim());
-            setTrackedTicket(ticket);
-        } catch (err: any) {
-            setTrackError(err.message || "Ticket not found or invalid email.");
-        } finally {
-            setIsTracking(false);
-        }
+        // Ticket-status lookup by reference isn't wired to a backend endpoint
+        // yet (see note above) — point people to email instead of pretending
+        // this works.
+        setTrackError(
+            "Ticket status lookup isn't available yet — we'll email you directly at the address you submitted with."
+        );
+        setIsTracking(false);
     };
 
     return (

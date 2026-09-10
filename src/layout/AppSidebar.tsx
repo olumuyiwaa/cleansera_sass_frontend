@@ -5,7 +5,6 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
   CalenderIcon,
   ChevronDownIcon,
   GridIcon,
@@ -61,6 +60,11 @@ const AppSidebar: React.FC = () => {
           path: "/cleaners",
         },
       ],
+    },
+    {
+      icon: <FolderIcon />,
+      name: "Services",
+      path: "/services",
     },
     {
       icon: <TableIcon />,

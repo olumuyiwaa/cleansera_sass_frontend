@@ -23,6 +23,7 @@ import {
   rescheduleBooking,
   updateBookingPayment,
 } from "@/app/api/bookings.api";
+import { createPaymentLink } from "@/app/api/bookings.api.paymentLink";
 import {listCustomers, createCustomer, listCustomersForBooking} from "@/app/api/customers.api";
 import { listServices } from "@/app/api/services.api";
 import { Booking, BookingStatus, Customer, Service, formatMoney } from "@/app/api/cleansera-types";
@@ -49,6 +50,7 @@ export default function BookingsPage() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [paymentLinkBusyId, setPaymentLinkBusyId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCustomerMode, setNewCustomerMode] = useState(false);
   const [actionBooking, setActionBooking] = useState<Booking | null>(null);
@@ -150,6 +152,28 @@ export default function BookingsPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to assign a cleaner");
+    }
+  };
+
+  const handleGetPaymentLink = async (id: string) => {
+    setError("");
+    setPaymentLinkBusyId(id);
+    try {
+      const result = await createPaymentLink(id);
+      const url = result?.data?.url;
+      if (!url) throw new Error("No checkout URL returned");
+      if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(url);
+        } catch {
+          // clipboard permissions can fail silently in some browsers — the window.open below still works
+        }
+      }
+      window.open(url, "_blank");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create payment link");
+    } finally {
+      setPaymentLinkBusyId(null);
     }
   };
 
@@ -292,6 +316,16 @@ export default function BookingsPage() {
                         <button onClick={() => openAction(b, "payment")} className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400">
                           Pay: {b.paymentStatus || "UNPAID"}
                         </button>
+                        {b.paymentStatus !== "PAID" && b.status !== "CANCELLED" && (
+                          <button
+                            onClick={() => handleGetPaymentLink(b.id)}
+                            disabled={paymentLinkBusyId === b.id}
+                            className="text-sm font-medium text-brand-500 hover:text-brand-600 disabled:opacity-60"
+                            title="Create a Stripe checkout link the customer can pay with directly"
+                          >
+                            {paymentLinkBusyId === b.id ? "Creating link…" : "Payment link"}
+                          </button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

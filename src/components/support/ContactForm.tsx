@@ -5,7 +5,27 @@
 // Wires the existing form to POST /support/tickets.
 
 import { useState } from "react";
-import { supportApi } from "@/app/api/support.api";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+
+async function submitContactMessage(payload: {
+  name: string;
+  email: string;
+  subject?: string;
+  category?: string;
+  message: string;
+}): Promise<{ received: boolean; reference: string }> {
+  const res = await fetch(`${API_BASE_URL}/support`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const result = await res.json();
+  if (!res.ok || !result.success) {
+    throw new Error(result.message || "Failed to send message");
+  }
+  return result.data;
+}
 
 type FormState = {
   name:     string;
@@ -70,15 +90,15 @@ export default function ContactForm() {
     try {
       setLoading(true);
 
-      const result = await supportApi.submit({
+      const result = await submitContactMessage({
         name:     form.name.trim(),
         email:    form.email.trim(),
         subject:  `${form.category.charAt(0).toUpperCase() + form.category.slice(1)}: ${form.message.slice(0, 60)}${form.message.length > 60 ? "…" : ""}`,
-        category: form.category as any,
+        category: form.category,
         message:  form.message.trim(),
       });
 
-      setTicketRef(result.ticketNumber);
+      setTicketRef(result.reference);
       setSubmitted(true);
     } catch (err: any) {
       const apiErrors = err.response?.data?.errors;
