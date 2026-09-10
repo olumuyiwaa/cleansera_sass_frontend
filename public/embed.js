@@ -35,7 +35,7 @@
             return;
         }
         var iframe = document.createElement("iframe");
-        iframe.src = WIDGET_ORIGIN + "/widget/" + encodeURIComponent(subdomain);
+        iframe.src = WIDGET_ORIGIN + "/book-now/" + encodeURIComponent(subdomain);
         iframe.style.width = "100%";
         iframe.style.border = "0";
         iframe.style.minHeight = "480px";
