@@ -15,7 +15,7 @@ import type { Service } from "@/app/api/cleansera-types";
 type Step = "service" | "schedule" | "details" | "success";
 
 function centsToDisplay(cents: number) {
-  return `₦${(cents / 100).toLocaleString(undefined, {
+  return `$${(cents / 100).toLocaleString(undefined, {
     maximumFractionDigits: 0,
   })}`;
 }

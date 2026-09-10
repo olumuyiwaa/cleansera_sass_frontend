@@ -11,7 +11,7 @@ type SiteServicesProps = {
 };
 
 function centsToDisplay(cents: number) {
-  return `₦${(cents / 100).toLocaleString(undefined, {
+  return `$${(cents / 100).toLocaleString(undefined, {
     maximumFractionDigits: 0,
   })}`;
 }
