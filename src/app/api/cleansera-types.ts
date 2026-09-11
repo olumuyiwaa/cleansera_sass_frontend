@@ -176,8 +176,8 @@ export type Business = {
     } | null;
 };
 
-export function formatMoney(cents: number, currency = "NGN") {
-    return new Intl.NumberFormat("en-NG", { style: "currency", currency }).format(cents / 100);
+export function formatMoney(cents: number, currency = "USD") {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
 }
 
 export function cleanerDisplayName(c: Cleaner) {
