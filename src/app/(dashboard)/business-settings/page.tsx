@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -196,12 +196,33 @@ export default function BusinessSettingsPage() {
       </section>
 
       {/* Connect Stripe */}
-      <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Connect To Stripe</h2>
-        <form onSubmit={connectStripe} className="space-y-4 max-w-md">
-          <Button type="submit" disabled={stripeLoading}>{stripeLoading ? "Connecting…" : "Connect"}</Button>
-        </form>
-      </section>
+      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase text-gray-500">Connect Stripe</p>
+            <p className="mt-1 font-medium text-gray-900 dark:text-white">
+              {stripe?.enabled ? "Enabled" : "Disabled"}
+            </p>
+          </div>
+          {stripe?.enabled ? (
+              <button
+                  type="button"
+                  className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400"
+              >
+                Enabled
+              </button>
+          ) : (
+              <button
+                  type="button"
+                  onClick={connectStripe}
+                  disabled={stripeLoading}
+                  className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+              >
+                {stripeLoading ? "…" : "Enable"}
+              </button>
+          )}
+        </div>
+      </div>
 
       {/* Hours */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
@@ -247,7 +268,6 @@ export default function BusinessSettingsPage() {
                   />
                 </>
               )}
-
             </div>
           ))}
         </div>
