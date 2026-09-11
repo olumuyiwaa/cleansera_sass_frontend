@@ -48,6 +48,11 @@ const AppSidebar: React.FC = () => {
       path: "/dashboard",
     },
     {
+      icon: <PieChartIcon />,
+      name: "Reports",
+      path: "/reports",
+    },
+    {
       icon: <GroupIcon />,
       name: "Users",
       subItems: [
@@ -62,24 +67,31 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
+      icon: <TableIcon />,
+      name: "Booking & Schedules",
+      subItems: [
+        {
+          name: "Calendar",
+          path: "/calendar",
+        },
+        {
+          name: "Bookings",
+          path: "/bookings",
+        },
+        {
+          name: "Dispatch",
+          path: "/dispatch",
+        },
+        {
+          name: "Recurring Schedules",
+          path: "/recurring-schedules",
+        },
+      ],
+    },
+    {
       icon: <FolderIcon />,
       name: "Services",
       path: "/services",
-    },
-    {
-      icon: <TableIcon />,
-      name: "Bookings",
-      path: "/bookings",
-    },
-    {
-      icon: <PieChartIcon />,
-      name: "Reports",
-      path: "/reports",
-    },
-    {
-      icon: <CalenderIcon />,
-      name: "Dispatch",
-      path: "/dispatch",
     },
     {
       icon: <FileIcon />,
@@ -92,29 +104,24 @@ const AppSidebar: React.FC = () => {
       path: "/reviews",
     },
     {
-      icon: <BellIcon />,
-      name: "Notifications",
-      path: "/notifications",
-    },
-    {
-      icon: <DollarLineIcon />,
-      name: "Subscription",
-      path: "/subscription",
-    },
-    {
       icon: <ShootingStarIcon />,
       name: "Coupons",
       path: "/coupons",
     },
     {
-      icon: <CalenderIcon />,
-      name: "Recurring Schedules",
-      path: "/recurring-schedules",
-    },
-    {
       icon: <ListIcon />,
       name: "Checklist Templates",
       path: "/checklist-templates",
+    },
+    {
+      icon: <EnvelopeIcon />,
+      name: "Support Tickets",
+      path: "/support-tickets",
+    },
+    {
+      icon: <TaskIcon />,
+      name: "Audit-Trail",
+      path: "/audit-trail",
     },
   ];
 
@@ -124,39 +131,26 @@ const AppSidebar: React.FC = () => {
       name: "User Profile",
       path: "/profile",
     },
-    ...(["BUSINESS_OWNER", "BUSINESS_MANAGER"].includes(userRole.toUpperCase())
-        ? [
-          {
-            icon: <Business />,
-            name: "Business Settings",
-            path: "/business-settings",
-          },
-        ]
-        : []),
     {
-      icon: <CalenderIcon />,
-      name: "Calendar",
-      path: "/calendar",
+      icon: <Business />,
+      name: "Business Settings",
+      path: "/business-settings",
+    },
+    {
+      icon: <BellIcon />,
+      name: "Notifications",
+      path: "/notifications",
     },
     {
       icon: <ChatIcon />,
       name: "Messages",
       path: "/messages",
     },
-    ...(userRole?.toUpperCase() === "SUPER_ADMIN"
-        ? [
-          {
-            icon: <EnvelopeIcon />,
-            name: "Support Tickets",
-            path: "/support-tickets",
-          },
-          {
-            icon: <TaskIcon />,
-            name: "Audit-Trail",
-            path: "/audit-trail",
-          },
-        ]
-        : []),
+    {
+      icon: <DollarLineIcon />,
+      name: "Subscription",
+      path: "/subscription",
+    },
   ];
 
 
