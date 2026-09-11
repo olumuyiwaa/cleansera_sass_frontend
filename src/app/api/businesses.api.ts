@@ -37,6 +37,16 @@ export type BusinessBranding = {
     widgetEmbedEnabled: boolean;
 };
 
+
+export type StripeConnectStatus = {
+    connected: boolean;
+    onboarded: boolean;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+    readyForPayments: boolean;
+};
+
+
 export async function getBusiness() {
     const result = await authFetch(`/businesses`, { method: "GET" });
     return result.data as Business & { addresses: BusinessAddress[]; hours: BusinessHours[] };
@@ -79,4 +89,29 @@ export async function listHours() {
 export async function updateHours(hours: BusinessHours[]) {
     const result = await authFetch(`/businesses/hours`, { method: "PUT", body: JSON.stringify(hours) });
     return result.data as BusinessHours[];
+}
+
+export async function getStripeConnectStatus() {
+    const result = await authFetch(`/businesses/stripe-connect/status`, { method: "GET" });
+    return result.data as StripeConnectStatus;
+}
+
+export async function startStripeConnectOnboarding(payload?: {
+    refreshUrl?: string;
+    returnUrl?: string;
+}) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const result = await authFetch(`/businesses/stripe-connect/onboard`, {
+        method: "POST",
+        body: JSON.stringify({
+            refreshUrl: payload?.refreshUrl ?? `${origin}/business-settings?stripe=refresh`,
+            returnUrl: payload?.returnUrl ?? `${origin}/business-settings?stripe=return`,
+        }),
+    });
+    return result.data as { accountId: string; url: string };
+}
+
+export async function refreshStripeConnectStatus() {
+    const result = await authFetch(`/businesses/stripe-connect/refresh`, { method: "POST" });
+    return result.data;
 }

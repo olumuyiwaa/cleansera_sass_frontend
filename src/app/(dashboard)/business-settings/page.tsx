@@ -13,6 +13,10 @@ import {
   updateHours,
   BusinessHours,
   BusinessBranding,
+  StripeConnectStatus,
+  refreshStripeConnectStatus,
+  getStripeConnectStatus,
+  startStripeConnectOnboarding,
 } from "@/app/api/businesses.api";
 import { Business } from "@/app/api/cleansera-types";
 
@@ -95,6 +99,36 @@ export default function BusinessSettingsPage() {
     }
   };
 
+  // state
+  const [stripe, setStripe] = useState<StripeConnectStatus | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
+
+// on load + when ?stripe=return|refresh
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const stripeParam = params.get("stripe");
+    (async () => {
+      if (stripeParam === "return" || stripeParam === "refresh") {
+        try { await refreshStripeConnectStatus(); } catch {}
+      }
+      try {
+        setStripe(await getStripeConnectStatus());
+      } catch {}
+    })();
+  }, []);
+
+  const connectStripe = async () => {
+    setStripeLoading(true);
+    try {
+      const { url } = await startStripeConnectOnboarding();
+      window.location.href = url; // Stripe hosted onboarding
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not start Stripe onboarding");
+    } finally {
+      setStripeLoading(false);
+    }
+  };
+
   if (loading) return <div className="p-6 text-sm text-gray-500">Loading…</div>;
 
   return (
@@ -161,6 +195,14 @@ export default function BusinessSettingsPage() {
         </form>
       </section>
 
+      {/* Connect Stripe */}
+      <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Connect To Stripe</h2>
+        <form onSubmit={connectStripe} className="space-y-4 max-w-md">
+          <Button type="submit" disabled={stripeLoading}>{stripeLoading ? "Connecting…" : "Connect"}</Button>
+        </form>
+      </section>
+
       {/* Hours */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Business Hours</h2>
@@ -205,6 +247,7 @@ export default function BusinessSettingsPage() {
                   />
                 </>
               )}
+
             </div>
           ))}
         </div>
