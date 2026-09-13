@@ -120,6 +120,8 @@ export type Booking = {
 
 export type RecurrenceFrequency = "WEEKLY" | "BIWEEKLY" | "MONTHLY";
 
+export type RecurringScheduleStatus = "ACTIVE" | "PAUSED" | "CANCELLED";
+
 export type RecurringSchedule = {
     id: string;
     businessId: string;
@@ -129,7 +131,7 @@ export type RecurringSchedule = {
     frequency: RecurrenceFrequency;
     dayOfWeek: number;
     startTime: string;
-    isActive: boolean;
+    status: RecurringScheduleStatus;
     nextRunDate: string;
     customer?: Customer;
     service?: Service;

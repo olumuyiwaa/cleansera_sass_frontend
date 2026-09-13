@@ -260,16 +260,22 @@ export default function RecurringSchedulesPage() {
                                 <td className="p-3">
                                     <span
                                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                            s.isActive
+                                            s.status === "ACTIVE"
                                                 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                : s.status === "PAUSED"
+                                                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                                                 : "bg-gray-100 text-gray-500 dark:bg-white/10"
                                         }`}
                                     >
-                                        {s.isActive ? "Active" : "Paused"}
+                                        {s.status === "ACTIVE"
+                                            ? "Active"
+                                            : s.status === "PAUSED"
+                                            ? "Paused"
+                                            : "Cancelled"}
                                     </span>
                                 </td>
                                 <td className="space-x-2 p-3 text-right">
-                                    {s.isActive ? (
+                                    {s.status === "ACTIVE" && (
                                         <button
                                             disabled={busyId === s.id}
                                             onClick={() =>
@@ -281,7 +287,8 @@ export default function RecurringSchedulesPage() {
                                         >
                                             Pause
                                         </button>
-                                    ) : (
+                                    )}
+                                    {s.status === "PAUSED" && (
                                         <button
                                             disabled={busyId === s.id}
                                             onClick={() =>
@@ -294,23 +301,25 @@ export default function RecurringSchedulesPage() {
                                             Resume
                                         </button>
                                     )}
-                                    <button
-                                        disabled={busyId === s.id}
-                                        onClick={() => {
-                                            if (
-                                                !confirm(
-                                                    "Cancel this recurring schedule? This can't be undone."
+                                    {s.status !== "CANCELLED" && (
+                                        <button
+                                            disabled={busyId === s.id}
+                                            onClick={() => {
+                                                if (
+                                                    !confirm(
+                                                        "Cancel this recurring schedule? This can't be undone — you'll need to create a new schedule to restart it."
+                                                    )
                                                 )
-                                            )
-                                                return;
-                                            withBusy(s.id, () =>
-                                                cancelRecurringSchedule(s.id)
-                                            );
-                                        }}
-                                        className="text-xs font-medium text-red-600 disabled:opacity-40"
-                                    >
-                                        Cancel
-                                    </button>
+                                                    return;
+                                                withBusy(s.id, () =>
+                                                    cancelRecurringSchedule(s.id)
+                                                );
+                                            }}
+                                            className="text-xs font-medium text-red-600 disabled:opacity-40"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}

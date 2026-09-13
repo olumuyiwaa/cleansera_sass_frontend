@@ -90,12 +90,15 @@ export async function cancelRecurringSchedule(id: string) {
 
 export async function pauseRecurringSchedule(id: string) {
     const result = await authFetch(`/bookings/recurring/${id}/pause`, { method: "POST" });
-    return result.data as { id: string; isActive: boolean };
+    return result.data as { id: string; status: "PAUSED" };
 }
 
 export async function resumeRecurringSchedule(id: string) {
+    // 409 with code RECURRING_SCHEDULE_CONFLICT means either the schedule was
+    // cancelled (cannot resume) or another schedule now occupies this slot —
+    // surface the server's message rather than a generic failure.
     const result = await authFetch(`/bookings/recurring/${id}/resume`, { method: "POST" });
-    return result.data as { id: string; isActive: boolean };
+    return result.data as { id: string; status: "ACTIVE" };
 }
 
 export async function cancelBooking(id: string, reason?: string) {

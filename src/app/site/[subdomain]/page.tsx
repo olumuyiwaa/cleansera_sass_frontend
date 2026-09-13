@@ -3,7 +3,7 @@
 import { use, useCallback, useEffect, useState } from "react";
 import {
   getStorefront,
-  type WidgetStorefront,
+  type StorefrontResponse,
 } from "@/app/api/widget.api";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteHero } from "@/components/site/SiteHero";
@@ -21,7 +21,7 @@ export default function BusinessSitePage({
   params: Promise<{ subdomain: string }>;
 }) {
   const { subdomain } = use(params);
-  const [data, setData] = useState<WidgetStorefront | null>(null);
+  const [data, setData] = useState<StorefrontResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookOpen, setBookOpen] = useState(false);

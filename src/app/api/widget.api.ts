@@ -50,6 +50,7 @@ export type WidgetBranding = {
   primaryColor?: string | null;
   logoUrl?: string | null;
   accentColor?: string | null;
+  tagline?: string | null;
 };
 
 export type WidgetBusiness = {
@@ -142,6 +143,7 @@ export type SubmitBookingPayload = {
   addOnIds?: string[];
   scheduledStart: string;
   couponCode?: string;
+  referralCode?: string;
   rooms?: number;
   bathrooms?: number;
   sqft?: number;
@@ -190,5 +192,12 @@ export async function submitBooking(slug: string, payload: SubmitBookingPayload)
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return result.data as { id: string; scheduledStart: string; quotedPriceCents: number; status: string };
+  return result.data as {
+    id: string;
+    scheduledStart: string;
+    quotedPriceCents: number;
+    status: string;
+    referralCode?: string;
+    referralDiscountCents?: number;
+  };
 }

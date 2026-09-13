@@ -115,3 +115,16 @@ export async function refreshStripeConnectStatus() {
     const result = await authFetch(`/businesses/stripe-connect/refresh`, { method: "POST" });
     return result.data;
 }
+
+export type OnboardingStepKey = "stripeConnect" | "services" | "hours" | "serviceAreas";
+
+export type OnboardingStatus = {
+    isComplete: boolean;
+    steps: { key: OnboardingStepKey; label: string; complete: boolean }[];
+    nextIncompleteStep: OnboardingStepKey | null;
+};
+
+export async function getOnboardingStatus() {
+    const result = await authFetch(`/businesses/onboarding-status`, { method: "GET" });
+    return result.data as OnboardingStatus;
+}

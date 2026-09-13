@@ -1,18 +1,27 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   getStorefront,
   getQuote,
   getSlots,
   submitBooking,
-  type WidgetStorefront,
-  type WidgetQuote,
-  type WidgetSlot,
+  type StorefrontResponse,
+  type QuoteResponse,
+  type Slot,
+  type WidgetService,
 } from "@/app/api/widget.api";
-import type { Service } from "@/app/api/cleansera-types";
 
 type Step = "service" | "schedule" | "details" | "success";
+const STEPS: Step[] = ["service", "schedule", "details"];
+const STEP_LABELS: Record<Step, string> = {
+  service: "Service",
+  schedule: "Schedule",
+  details: "Your details",
+  success: "Done",
+};
 
 function centsToDisplay(cents: number) {
   return `$${(cents / 100).toLocaleString(undefined, {
@@ -29,30 +38,53 @@ export type BookingWidgetFormProps = {
 
 /**
  * Multi-step booking form. Used by:
- * - /widget/[subdomain] (full page / iframe embed)
+ * - /book-now/[slug] (full page / iframe embed)
  * - BookingWidgetModal on /site/[subdomain]
+ *
+ * Note: /book-now/[slug] itself actually renders the newer BookingWizard
+ * component (components/booking/), not this one — this form is currently
+ * only reachable via the BookingWidgetModal preview on the mini-site. Kept
+ * as its own export (wrapped in Suspense below, required by useSearchParams
+ * in the app router) in case that changes.
  */
-export function BookingWidgetForm({
+export function BookingWidgetForm(props: BookingWidgetFormProps) {
+  return (
+    <Suspense fallback={<div className="flex min-h-[280px] items-center justify-center p-8 text-gray-500">Loading booking form…</div>}>
+      <BookingWidgetFormInner {...props} />
+    </Suspense>
+  );
+}
+
+function BookingWidgetFormInner({
   subdomain,
   compact = false,
   onSuccess,
 }: BookingWidgetFormProps) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [storefront, setStorefront] = useState<WidgetStorefront | null>(null);
+  const [storefront, setStorefront] = useState<StorefrontResponse | null>(null);
 
   const [step, setStep] = useState<Step>("service");
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedService, setSelectedService] = useState<WidgetService | null>(null);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const [couponCode, setCouponCode] = useState("");
-  const [quote, setQuote] = useState<WidgetQuote | null>(null);
+
+  // Only relevant for PER_SQFT / PER_ROOM services — the quote is wrong
+  // (silently priced as if it were a flat-rate job) if these aren't
+  // collected and sent, so they're required before a quote request fires
+  // for those pricing models.
+  const [sqft, setSqft] = useState("");
+  const [rooms, setRooms] = useState("");
+  const [bathrooms, setBathrooms] = useState("");
+
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
 
   const [selectedDate, setSelectedDate] = useState("");
-  const [slots, setSlots] = useState<WidgetSlot[]>([]);
+  const [slots, setSlots] = useState<Slot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<WidgetSlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -66,6 +98,17 @@ export function BookingWidgetForm({
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [bookingResult, setBookingResult] = useState<{
+    referralCode?: string;
+    referralDiscountCents?: number;
+  } | null>(null);
+
+  // A referral link looks like /book-now/acme-cleaning?ref=AB12CD — carry
+  // that through to the booking submission so the referrer gets credited
+  // and the new customer gets their discount, without them having to type
+  // anything in.
+  const searchParams = useSearchParams();
+  const referralCode = searchParams?.get("ref") || undefined;
 
   const branding = storefront?.business?.branding;
   const primaryColor = branding?.primaryColor || "#3F6B52";
@@ -110,37 +153,69 @@ export function BookingWidgetForm({
     };
   }, [subdomain]);
 
+  // Reset the dimension inputs whenever the selected service changes so a
+  // sqft value entered for one service doesn't silently carry over and
+  // get sent for a totally different service's quote.
   useEffect(() => {
-    if (!selectedService) {
+    setSqft("");
+    setRooms("");
+    setBathrooms("");
+  }, [selectedService?.id]);
+
+  const sqftNum = sqft ? Number(sqft) : undefined;
+  const roomsNum = rooms ? Number(rooms) : undefined;
+  const bathroomsNum = bathrooms ? Number(bathrooms) : undefined;
+
+  // A quote is only meaningful once the pricing model's required dimension
+  // has actually been entered — otherwise we'd be firing requests (and
+  // showing a misleading price) for an incomplete PER_SQFT/PER_ROOM job.
+  const dimensionsReady = useMemo(() => {
+    if (!selectedService) return false;
+    if (selectedService.pricingModel === "PER_SQFT") return !!sqftNum && sqftNum > 0;
+    if (selectedService.pricingModel === "PER_ROOM") return !!roomsNum && roomsNum > 0;
+    return true;
+  }, [selectedService, sqftNum, roomsNum]);
+
+  // Debounced live pricing: fires ~400ms after the customer stops typing/
+  // toggling instead of on every keystroke, so a coupon code or sqft value
+  // being typed out doesn't spam the quote endpoint mid-entry.
+  useEffect(() => {
+    if (!selectedService || !dimensionsReady) {
       setQuote(null);
       return;
     }
     let cancelled = false;
-    setQuoteLoading(true);
-    setQuoteError(null);
-    getQuote(subdomain, {
-      serviceId: selectedService.id,
-      addOnIds: selectedAddOnIds,
-      couponCode: couponCode || undefined,
-    })
-      .then((q) => {
-        if (!cancelled) setQuote(q);
+    const timer = setTimeout(() => {
+      setQuoteLoading(true);
+      setQuoteError(null);
+      getQuote(subdomain, {
+        serviceId: selectedService.id,
+        addOnIds: selectedAddOnIds,
+        couponCode: couponCode || undefined,
+        sqft: sqftNum,
+        rooms: roomsNum,
+        bathrooms: bathroomsNum,
       })
-      .catch((e) => {
-        if (!cancelled) {
-          setQuote(null);
-          setQuoteError(
-            e instanceof Error ? e.message : "Couldn't get a quote"
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setQuoteLoading(false);
-      });
+        .then((q) => {
+          if (!cancelled) setQuote(q);
+        })
+        .catch((e) => {
+          if (!cancelled) {
+            setQuote(null);
+            setQuoteError(
+              e instanceof Error ? e.message : "Couldn't get a quote"
+            );
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setQuoteLoading(false);
+        });
+    }, 400);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
-  }, [subdomain, selectedService, selectedAddOnIds, couponCode]);
+  }, [subdomain, selectedService, selectedAddOnIds, couponCode, dimensionsReady, sqftNum, roomsNum, bathroomsNum]);
 
   useEffect(() => {
     if (!selectedService || !selectedDate) {
@@ -190,6 +265,15 @@ export function BookingWidgetForm({
         addOnIds: selectedAddOnIds,
         scheduledStart: selectedSlot.start,
         couponCode: couponCode || undefined,
+        referralCode,
+        sqft: sqftNum,
+        rooms: roomsNum,
+        bathrooms: bathroomsNum,
+      }).then((res) => {
+        setBookingResult({
+          referralCode: res.referralCode,
+          referralDiscountCents: res.referralDiscountCents,
+        });
       });
       setStep("success");
       onSuccess?.();
@@ -218,6 +302,8 @@ export function BookingWidgetForm({
     );
   }
 
+  const stepIndex = STEPS.indexOf(step === "success" ? "details" : step);
+
   return (
     <div
       className={`mx-auto w-full max-w-xl ${compact ? "p-0" : "p-4 sm:p-6"}`}
@@ -245,24 +331,32 @@ export function BookingWidgetForm({
       )}
 
       {step !== "success" && (
-        <ol className="mb-6 flex gap-2 text-xs font-medium text-gray-400">
-          {(["service", "schedule", "details"] as Step[]).map((s, i) => (
-            <li
-              key={s}
-              className={`flex-1 rounded-full border-b-2 pb-2 text-center ${
-                step === s
-                  ? "border-[var(--brand)] text-gray-900"
-                  : "border-gray-200"
-              }`}
-            >
-              {i + 1}.{" "}
-              {s === "service"
-                ? "Service"
-                : s === "schedule"
-                  ? "Schedule"
-                  : "Your details"}
-            </li>
-          ))}
+        <ol className="mb-6 flex gap-2 text-xs font-medium">
+          {STEPS.map((s, i) => {
+            const isDone = i < stepIndex;
+            const isCurrent = s === step;
+            return (
+              <li
+                key={s}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-full border-b-2 pb-2 text-center ${
+                  isCurrent
+                    ? "border-[var(--brand)] text-gray-900"
+                    : isDone
+                    ? "border-[var(--brand)]/50 text-gray-500"
+                    : "border-gray-200 text-gray-400"
+                }`}
+              >
+                {isDone ? (
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand)] text-[10px] text-white">
+                    ✓
+                  </span>
+                ) : (
+                  <span>{i + 1}.</span>
+                )}
+                {STEP_LABELS[s]}
+              </li>
+            );
+          })}
         </ol>
       )}
 
@@ -287,6 +381,8 @@ export function BookingWidgetForm({
                   <span className="font-medium text-gray-900">{svc.name}</span>
                   <span className="shrink-0 text-sm text-gray-500">
                     from {centsToDisplay(svc.basePriceCents)}
+                    {svc.pricingModel === "PER_SQFT" && " · priced by sq ft"}
+                    {svc.pricingModel === "PER_ROOM" && " · priced by rooms"}
                   </span>
                 </div>
                 {svc.description && (
@@ -295,6 +391,56 @@ export function BookingWidgetForm({
               </button>
             ))}
           </div>
+
+          {selectedService?.pricingModel === "PER_SQFT" && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Home size (sq ft)
+              </label>
+              <input
+                type="number"
+                min={1}
+                inputMode="numeric"
+                value={sqft}
+                onChange={(e) => setSqft(e.target.value)}
+                placeholder="e.g. 1500"
+                className="w-full rounded-md border border-gray-300 p-2 text-sm"
+              />
+            </div>
+          )}
+
+          {selectedService?.pricingModel === "PER_ROOM" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Bedrooms
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={rooms}
+                  onChange={(e) => setRooms(e.target.value)}
+                  placeholder="e.g. 3"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Bathrooms
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={bathrooms}
+                  onChange={(e) => setBathrooms(e.target.value)}
+                  placeholder="e.g. 2"
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm"
+                />
+              </div>
+            </div>
+          )}
 
           {selectedService && selectedService.addOns.length > 0 && (
             <div>
@@ -334,23 +480,6 @@ export function BookingWidgetForm({
                 className="w-full rounded-md border border-gray-300 p-2 text-sm"
                 placeholder="SAVE10"
               />
-            </div>
-          )}
-
-          {selectedService && (
-            <div className="rounded-md bg-gray-50 p-3 text-sm">
-              {quoteLoading && (
-                <span className="text-gray-500">Calculating price…</span>
-              )}
-              {quoteError && (
-                <span className="text-red-600">{quoteError}</span>
-              )}
-              {quote && !quoteLoading && (
-                <div className="flex items-center justify-between font-medium text-gray-900">
-                  <span>Estimated total</span>
-                  <span>{centsToDisplay(quote.priceCents)}</span>
-                </div>
-              )}
             </div>
           )}
 
@@ -496,13 +625,6 @@ export function BookingWidgetForm({
             />
           </div>
 
-          {quote && (
-            <div className="flex items-center justify-between rounded-md bg-gray-50 p-3 text-sm font-medium text-gray-900">
-              <span>Total due at service</span>
-              <span>{centsToDisplay(quote.priceCents)}</span>
-            </div>
-          )}
-
           {submitError && (
             <p className="text-sm text-red-600">{submitError}</p>
           )}
@@ -545,7 +667,69 @@ export function BookingWidgetForm({
             {selectedService?.name} appointment shortly. A confirmation was
             sent to you.
           </p>
+          {!!bookingResult?.referralDiscountCents && (
+            <p className="mt-3 text-sm font-medium text-green-600">
+              {centsToDisplay(bookingResult.referralDiscountCents)} referral
+              discount applied 🎉
+            </p>
+          )}
+          {bookingResult?.referralCode && (
+            <div className="mx-auto mt-6 max-w-xs rounded-lg border border-dashed border-gray-300 p-4">
+              <p className="text-xs text-gray-500">
+                Know someone who needs a clean home? Share your code — you
+                both get $10 off.
+              </p>
+              <p className="mt-2 text-lg font-semibold tracking-wide text-gray-900">
+                {bookingResult.referralCode}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}${window.location.pathname}?ref=${bookingResult.referralCode}`;
+                  navigator.clipboard?.writeText(url);
+                }}
+                className="mt-2 text-xs font-medium text-[var(--brand)] underline"
+              >
+                Copy your referral link
+              </button>
+            </div>
+          )}
         </div>
+      )}
+
+      {/* Persistent price summary — visible on every step once a service is
+          picked, not just the step that happens to render it, so the
+          customer never loses sight of the number they're committing to. */}
+      {step !== "success" && selectedService && (
+        <div className="sticky bottom-0 mt-4 -mx-4 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border sm:px-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">
+              {quoteLoading ? "Calculating price…" : "Estimated total"}
+            </span>
+            {quoteError ? (
+              <span className="text-red-600">{quoteError}</span>
+            ) : (
+              <span className="text-base font-semibold text-gray-900">
+                {quote ? centsToDisplay(quote.priceCents) : "—"}
+              </span>
+            )}
+          </div>
+          {quote?.coupon?.valid && (
+            <p className="mt-0.5 text-xs text-green-600">Coupon applied</p>
+          )}
+          {quote?.coupon && quote.coupon.valid === false && (
+            <p className="mt-0.5 text-xs text-amber-600">
+              {quote.coupon.reason || "Coupon not applicable"}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!compact && step !== "success" && (
+        <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-gray-400">
+          <span aria-hidden>🔒</span> Secure booking · No payment required to
+          request a slot
+        </p>
       )}
     </div>
   );

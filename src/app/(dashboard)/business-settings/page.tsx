@@ -11,6 +11,10 @@ import {
   updateBranding,
   listHours,
   updateHours,
+  listServiceAreas,
+  createServiceArea,
+  deleteServiceArea,
+  ServiceArea,
   BusinessHours,
   BusinessBranding,
   StripeConnectStatus,
@@ -26,6 +30,9 @@ export default function BusinessSettingsPage() {
   const [business, setBusiness] = useState<Business | null>(null);
   const [branding, setBranding] = useState<BusinessBranding | null>(null);
   const [hours, setHours] = useState<BusinessHours[]>([]);
+  const [areas, setAreas] = useState<ServiceArea[]>([]);
+  const [areaForm, setAreaForm] = useState({ name: "", centerLat: "", centerLng: "", radiusMeters: "10000" });
+  const [areaSaving, setAreaSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
@@ -44,6 +51,7 @@ export default function BusinessSettingsPage() {
       setHours(h.length ? h : DAYS.map((_, i) => ({ dayOfWeek: i, openTime: "08:00", closeTime: "18:00", isClosed: i === 0 })));
       setNameForm({ name: b.name, timezone: b.timezone, customDomain: b.customDomain || "" });
       setBrandForm({ tagline: br.tagline || "", primaryColor: br.primaryColor || "", accentColor: br.accentColor || "" });
+      setAreas(await listServiceAreas());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load business settings");
     } finally {
@@ -126,6 +134,41 @@ export default function BusinessSettingsPage() {
       setError(e instanceof Error ? e.message : "Could not start Stripe onboarding");
     } finally {
       setStripeLoading(false);
+    }
+  };
+
+  const addServiceArea = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const lat = parseFloat(areaForm.centerLat);
+    const lng = parseFloat(areaForm.centerLng);
+    const radius = parseInt(areaForm.radiusMeters, 10);
+    if (!areaForm.name.trim() || Number.isNaN(lat) || Number.isNaN(lng) || Number.isNaN(radius)) {
+      setError("Enter a name, valid latitude/longitude, and a radius for the service area");
+      return;
+    }
+    setAreaSaving(true);
+    setError("");
+    setSaved("");
+    try {
+      const created = await createServiceArea({ name: areaForm.name.trim(), centerLat: lat, centerLng: lng, radiusMeters: radius });
+      setAreas((prev) => [...prev, created]);
+      setAreaForm({ name: "", centerLat: "", centerLng: "", radiusMeters: "10000" });
+      setSaved("Service area added");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add service area");
+    } finally {
+      setAreaSaving(false);
+    }
+  };
+
+  const removeServiceArea = async (id: string) => {
+    if (!confirm("Remove this service area? Bookings outside it will no longer be accepted by the widget.")) return;
+    setError("");
+    try {
+      await deleteServiceArea(id);
+      setAreas((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove service area");
     }
   };
 
@@ -272,6 +315,55 @@ export default function BusinessSettingsPage() {
           ))}
         </div>
         <Button className="mt-4" onClick={saveHours} disabled={saving}>{saving ? "Saving…" : "Save Hours"}</Button>
+      </section>
+
+      {/* Service Areas */}
+      <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Service Areas</h2>
+        <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+          The widget only accepts bookings whose address falls inside one of these areas. Add at least one before going live.
+        </p>
+
+        {areas.length > 0 && (
+          <ul className="mb-4 divide-y divide-gray-100 dark:divide-gray-800">
+            {areas.map((a) => (
+              <li key={a.id} className="flex items-center justify-between py-2 text-sm">
+                <span className="text-gray-700 dark:text-gray-200">
+                  {a.name} — {a.centerLat.toFixed(4)}, {a.centerLng.toFixed(4)} · {(a.radiusMeters / 1000).toFixed(1)}km radius
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeServiceArea(a.id)}
+                  className="text-xs font-medium text-red-600 hover:underline"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form onSubmit={addServiceArea} className="grid gap-4 sm:grid-cols-2 max-w-2xl">
+          <div>
+            <Label>Area Name</Label>
+            <Input value={areaForm.name} onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })} placeholder="Downtown Lagos" />
+          </div>
+          <div>
+            <Label>Radius (meters)</Label>
+            <Input type="number" value={areaForm.radiusMeters} onChange={(e) => setAreaForm({ ...areaForm, radiusMeters: e.target.value })} placeholder="10000" />
+          </div>
+          <div>
+            <Label>Center Latitude</Label>
+            <Input type="number" step="any" value={areaForm.centerLat} onChange={(e) => setAreaForm({ ...areaForm, centerLat: e.target.value })} placeholder="6.5244" />
+          </div>
+          <div>
+            <Label>Center Longitude</Label>
+            <Input type="number" step="any" value={areaForm.centerLng} onChange={(e) => setAreaForm({ ...areaForm, centerLng: e.target.value })} placeholder="3.3792" />
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={areaSaving}>{areaSaving ? "Adding…" : "Add Service Area"}</Button>
+          </div>
+        </form>
       </section>
     </div>
   );
