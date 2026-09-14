@@ -154,8 +154,7 @@ export default function SubscriptionPage() {
               </h2>
               {plans.length === 0 ? (
                   <p className="text-sm text-gray-500">
-                    No plans available. Seed SubscriptionPlan rows in the database (and attach Stripe
-                    price IDs) to show plans here.
+                    No plans available.
                   </p>
               ) : (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
