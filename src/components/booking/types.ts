@@ -43,6 +43,14 @@ export type BookingWizardProps = {
   slug: string;
   business: WidgetBusiness;
   services: WidgetService[];
+  /**
+   * Render for the compact modal context (BookingWidgetModal) instead of a
+   * full page (book-now/[slug]): no duplicate business header (the modal
+   * chrome already shows it), tighter spacing, and the price/continue bar
+   * flows inline with the card instead of pinning to the viewport bottom —
+   * a viewport-fixed bar would float outside the modal panel.
+   */
+  compact?: boolean;
 };
 
 export const INITIAL_STATE: BookingFormState = {

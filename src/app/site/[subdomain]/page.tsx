@@ -123,6 +123,8 @@ export default function BusinessSitePage({
         open={bookOpen}
         onClose={closeBook}
         subdomain={subdomain}
+        business={business}
+        services={data.services}
         businessName={name}
         primaryColor={primaryColor}
       />

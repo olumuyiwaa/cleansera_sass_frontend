@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { BookingWidgetForm } from "./BookingWidgetForm";
+import { BookingWizard } from "@/components/booking/BookingWizard";
+import type { WidgetBusiness, WidgetService } from "@/app/api/widget.api";
 
 type BookingWidgetModalProps = {
   open: boolean;
   onClose: () => void;
   subdomain: string;
+  business: WidgetBusiness;
+  services: WidgetService[];
   businessName?: string;
   primaryColor?: string;
 };
@@ -14,11 +17,18 @@ type BookingWidgetModalProps = {
 /**
  * Full-screen overlay modal that hosts the booking form.
  * Locks body scroll while open; closes on Escape or backdrop click.
+ *
+ * Booking itself is the same BookingWizard used at /book-now/[slug]
+ * (rendered with compact), rather than a separate form implementation —
+ * so the two entry points can't drift out of sync on validation, pricing,
+ * or copy.
  */
 export function BookingWidgetModal({
   open,
   onClose,
   subdomain,
+  business,
+  services,
   businessName,
   primaryColor = "#3F6B52",
 }: BookingWidgetModalProps) {
@@ -83,9 +93,11 @@ export function BookingWidgetModal({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
-          <BookingWidgetForm
+          <BookingWizard
             key={open ? subdomain : "closed"}
-            subdomain={subdomain}
+            slug={subdomain}
+            business={business}
+            services={services}
             compact
           />
         </div>

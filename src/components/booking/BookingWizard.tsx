@@ -30,6 +30,8 @@ export function BookingWizard(props: BookingWizardProps) {
     bookingResult,
   } = useBookingState(props);
 
+  const compact = props.compact ?? false;
+
   const primary =
     props.business.branding?.primaryColor ||
     props.business.branding?.accentColor ||
@@ -38,7 +40,7 @@ export function BookingWizard(props: BookingWizardProps) {
   // ─── Success screen ───────────────────────────────────────────
   if (bookingResult) {
     return (
-      <div className="mx-auto max-w-lg text-center py-12 px-4">
+      <div className={compact ? "mx-auto max-w-lg text-center py-2" : "mx-auto max-w-lg text-center py-12 px-4"}>
         <div
           className="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-white"
           style={{ backgroundColor: primary }}
@@ -81,29 +83,36 @@ export function BookingWizard(props: BookingWizardProps) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
-      {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-        {props.business.branding?.logoUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={props.business.branding.logoUrl}
-            alt=""
-            className="h-10 w-10 rounded-lg object-cover"
-          />
-        )}
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">{props.business.name}</h1>
-          <p className="text-sm text-gray-500">Book a cleaning</p>
+    <div className={compact ? "mx-auto w-full" : "mx-auto max-w-5xl px-4 py-8 sm:py-10"}>
+      {/* Header — skipped in compact mode; the modal chrome already shows
+          the business name, and duplicating it wastes vertical space in a
+          panel that's already height-constrained. */}
+      {!compact && (
+        <div className="mb-6 flex items-center gap-3">
+          {props.business.branding?.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={props.business.branding.logoUrl}
+              alt=""
+              className="h-10 w-10 rounded-lg object-cover"
+            />
+          )}
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">{props.business.name}</h1>
+            <p className="text-sm text-gray-500">Book a cleaning</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <ProgressBar current={step} primaryColor={primary} />
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className={compact ? "" : "grid gap-8 lg:grid-cols-[1fr_320px]"}>
         {/* Steps */}
         <div className="min-w-0">
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-7 shadow-sm">
+          {/* Card framing dropped in compact mode — the modal panel already
+              provides the border/shadow/padding, so a nested card here would
+              just double it up. */}
+          <div className={compact ? "py-1" : "rounded-2xl border border-gray-200 bg-white p-5 sm:p-7 shadow-sm"}>
             {step === 1 && (
               <StepService
                 state={state}
@@ -186,26 +195,44 @@ export function BookingWizard(props: BookingWizardProps) {
           </div>
         </div>
 
-        {/* Sticky summary — desktop */}
-        <div className="hidden lg:block">
-          <StickySummary state={state} service={selectedService} primaryColor={primary} />
-        </div>
+        {/* Sticky summary — desktop only, and only in the full-page layout.
+            In compact mode the modal panel never reaches the lg breakpoint
+            (max-w-lg), so this would never show anyway; skip rendering it. */}
+        {!compact && (
+          <div className="hidden lg:block">
+            <StickySummary state={state} service={selectedService} primaryColor={primary} />
+          </div>
+        )}
       </div>
 
-      {/* Mobile sticky price bar */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-200 bg-white/95 backdrop-blur px-4 py-3 safe-area-pb">
-        <div className="flex items-center justify-between gap-3 max-w-5xl mx-auto">
-          <div>
-            <p className="text-xs text-gray-500">Total</p>
-            <p className="text-lg font-bold" style={{ color: primary }}>
-              {state.quoteLoading
-                ? "…"
-                : state.quote
-                  ? formatMoney(state.quote.priceCents)
-                  : "—"}
-            </p>
-          </div>
-          {step < 5 ? (
+      {/* Price + continue bar. Full-page mode pins this to the viewport
+          bottom on mobile (lg:hidden fixed …). That positioning breaks
+          inside the modal — the modal panel floats mid-screen, so a
+          viewport-fixed bar would render outside it — so compact mode uses
+          a normal in-flow bar instead, shown at every width since the
+          modal never reaches the desktop two-column layout above.
+          Hidden on step 5 either way: StepReview has its own full-width
+          "Confirm booking · $price" button, so a second Confirm button
+          down here would just duplicate it. */}
+      {step < 5 && (
+        <div
+          className={
+            compact
+              ? "mt-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+              : "lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-200 bg-white/95 backdrop-blur px-4 py-3 safe-area-pb"
+          }
+        >
+          <div className={compact ? "flex items-center justify-between gap-3" : "flex items-center justify-between gap-3 max-w-5xl mx-auto"}>
+            <div>
+              <p className="text-xs text-gray-500">Total</p>
+              <p className="text-lg font-bold" style={{ color: primary }}>
+                {state.quoteLoading
+                  ? "…"
+                  : state.quote
+                    ? formatMoney(state.quote.priceCents)
+                    : "—"}
+              </p>
+            </div>
             <button
               type="button"
               onClick={goNext}
@@ -215,19 +242,9 @@ export function BookingWizard(props: BookingWizardProps) {
             >
               Continue
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={confirmBooking}
-              disabled={submitting || !state.quote}
-              className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-              style={{ backgroundColor: primary }}
-            >
-              {submitting ? "Booking…" : "Confirm"}
-            </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
