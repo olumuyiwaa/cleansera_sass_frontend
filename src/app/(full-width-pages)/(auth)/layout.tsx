@@ -39,12 +39,12 @@ export default function AuthLayout({
               <div className="relative flex items-center justify-center z-1">
                 <GridShape />
 
-                <div className="flex flex-col items-center max-w-xs">
+                <div className="flex flex-col items-center max-w-xl">
                   {/* Lottie Animation */}
                   <LottieAnimation/>
 
                   {/* Logo */}
-                  <Link href="/public" className="block mb-4">
+                  <Link href="/" className="block mb-4">
                     <Image
                         width={331}
                         height={68}
