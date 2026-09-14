@@ -2,21 +2,21 @@ import { authFetch } from "./authFetch";
 
 const BASE = "/super-admin";
 
+/**
+ * authFetch already parses JSON and returns the envelope
+ * { success, message, data }. Do NOT call .json() on the result.
+ */
 async function getJson<T>(path: string): Promise<T> {
-  const res = await authFetch(`${BASE}${path}`);
-  const json = await res.json();
-  if (!json.success) throw new Error(json.message || "Request failed");
+  const json = await authFetch(`${BASE}${path}`);
   return json.data as T;
 }
 
 async function patchJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await authFetch(`${BASE}${path}`, {
+  const json = await authFetch(`${BASE}${path}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.message || "Request failed");
   return json.data as T;
 }
 
