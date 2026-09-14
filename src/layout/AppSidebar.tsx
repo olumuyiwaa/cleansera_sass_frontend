@@ -108,14 +108,9 @@ const AppSidebar: React.FC = () => {
       path: "/audit-trail",
     },
     {
-      icon: <FolderIcon />,   // or any existing icon you prefer
+      icon: <FolderIcon />,
       name: "Inventory",
       path: "/inventory",
-    },
-    {
-      icon: <FileIcon />,
-      name: "Compliance",
-      path: "/compliance",
     },
   ];
 
@@ -144,6 +139,11 @@ const AppSidebar: React.FC = () => {
       icon: <DollarLineIcon />,
       name: "Subscription",
       path: "/subscription",
+    },
+    {
+      icon: <FileIcon />,
+      name: "Compliance",
+      path: "/compliance",
     },
   ];
 
