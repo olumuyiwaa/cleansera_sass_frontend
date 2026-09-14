@@ -107,6 +107,16 @@ const AppSidebar: React.FC = () => {
       name: "Audit-Trail",
       path: "/audit-trail",
     },
+    {
+      icon: <FolderIcon />,   // or any existing icon you prefer
+      name: "Inventory",
+      path: "/inventory",
+    },
+    {
+      icon: <FileIcon />,
+      name: "Compliance",
+      path: "/compliance",
+    },
   ];
 
   const businessOthersItems: NavItem[] = [

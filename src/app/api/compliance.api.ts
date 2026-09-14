@@ -1,0 +1,169 @@
+import { authFetch } from "./authFetch";
+
+const BASE = "/compliance";
+
+export type ComplianceDocType =
+  | "SDS"
+  | "RISK_ASSESSMENT"
+  | "COSHH_ASSESSMENT"
+  | "TRAINING_RECORD"
+  | "INSPECTION_REPORT"
+  | "CERTIFICATE"
+  | "OTHER";
+
+export interface ComplianceDocument {
+  id: string;
+  type: ComplianceDocType;
+  title: string;
+  storageKey: string;
+  mimeType?: string | null;
+  fileSize?: number | null;
+  version?: string | null;
+  effectiveAt?: string | null;
+  expiresAt?: string | null;
+  notes?: string | null;
+  uploadedById?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  inventoryItems?: { id: string; name: string; sku?: string | null }[];
+}
+
+export interface ChemicalTrainingAck {
+  id: string;
+  cleanerId: string;
+  documentId: string;
+  acknowledgedAt: string;
+  notes?: string | null;
+  cleaner?: {
+    id: string;
+    user: { firstName: string; lastName: string; email: string };
+  };
+}
+
+export interface ComplianceAudit {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  findings?: any;
+  score?: number | null;
+  conductedAt: string;
+  conductedBy?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+// ─── Documents ────────────────────────────────────────────
+
+export async function listDocuments(params?: {
+  type?: ComplianceDocType;
+  expiringSoon?: boolean;
+}): Promise<ComplianceDocument[]> {
+  const q = new URLSearchParams();
+  if (params?.type) q.set("type", params.type);
+  if (params?.expiringSoon) q.set("expiringSoon", "true");
+  const qs = q.toString();
+  return authFetch(`${BASE}/documents${qs ? `?${qs}` : ""}`);
+}
+
+export async function getDocument(id: string): Promise<ComplianceDocument> {
+  return authFetch(`${BASE}/documents/${id}`);
+}
+
+export async function createDocument(data: {
+  type?: ComplianceDocType;
+  title: string;
+  storageKey: string;
+  mimeType?: string;
+  fileSize?: number;
+  version?: string;
+  effectiveAt?: string;
+  expiresAt?: string;
+  notes?: string;
+}): Promise<ComplianceDocument> {
+  return authFetch(`${BASE}/documents`, { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateDocument(
+  id: string,
+  data: Partial<{
+    type: ComplianceDocType;
+    title: string;
+    storageKey: string;
+    mimeType: string;
+    fileSize: number;
+    version: string;
+    effectiveAt: string;
+    expiresAt: string;
+    notes: string;
+  }>
+): Promise<ComplianceDocument> {
+  return authFetch(`${BASE}/documents/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
+
+export async function deleteDocument(id: string): Promise<void> {
+  return authFetch(`${BASE}/documents/${id}`, { method: "DELETE" });
+}
+
+// ─── Training acks ────────────────────────────────────────
+
+export async function listTrainingAcks(params?: {
+  cleanerId?: string;
+  documentId?: string;
+}): Promise<ChemicalTrainingAck[]> {
+  const q = new URLSearchParams();
+  if (params?.cleanerId) q.set("cleanerId", params.cleanerId);
+  if (params?.documentId) q.set("documentId", params.documentId);
+  const qs = q.toString();
+  return authFetch(`${BASE}/training-acks${qs ? `?${qs}` : ""}`);
+}
+
+export async function recordTrainingAck(data: {
+  cleanerId: string;
+  documentId: string;
+  notes?: string;
+}): Promise<ChemicalTrainingAck> {
+  return authFetch(`${BASE}/training-acks`, { method: "POST", body: JSON.stringify(data) });
+}
+
+// ─── Audits ───────────────────────────────────────────────
+
+export async function listAudits(params?: { status?: string }): Promise<ComplianceAudit[]> {
+  const q = new URLSearchParams();
+  if (params?.status) q.set("status", params.status);
+  const qs = q.toString();
+  return authFetch(`${BASE}/audits${qs ? `?${qs}` : ""}`);
+}
+
+export async function getAudit(id: string): Promise<ComplianceAudit> {
+  return authFetch(`${BASE}/audits/${id}`);
+}
+
+export async function createAudit(data: {
+  title: string;
+  type: string;
+  status?: string;
+  findings?: any;
+  score?: number;
+  conductedAt: string;
+  conductedBy?: string;
+  notes?: string;
+}): Promise<ComplianceAudit> {
+  return authFetch(`${BASE}/audits`, { method: "POST", body: JSON.stringify(data) });
+}
+
+export async function updateAudit(
+  id: string,
+  data: Partial<{
+    title: string;
+    type: string;
+    status: string;
+    findings: any;
+    score: number;
+    conductedAt: string;
+    conductedBy: string;
+    notes: string;
+  }>
+): Promise<ComplianceAudit> {
+  return authFetch(`${BASE}/audits/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+}
