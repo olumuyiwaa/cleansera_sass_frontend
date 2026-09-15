@@ -41,7 +41,7 @@ export interface CurrentUser {
     createdAt: string;
     globalRole: "SUPER_ADMIN" | "PLATFORM_USER";
     businessId: string | null;
-    businessRole: "BUSINESS_OWNER" | "BUSINESS_MANAGER" | "CLEANER" | null;
+    businessRole: "BUSINESS_OWNER" | "BUSINESS_MANAGER" | "ORG_ADMIN" | "CLEANER" | null;
     business: { id: string; name: string; subdomain: string; timezone: string } | null;
 }
 

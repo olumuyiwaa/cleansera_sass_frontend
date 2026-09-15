@@ -244,10 +244,10 @@ export default function BusinessSettingsPage() {
           <div>
             <p className="text-xs uppercase text-gray-500">Connect Stripe</p>
             <p className="mt-1 font-medium text-gray-900 dark:text-white">
-              {stripe?.enabled ? "Enabled" : "Disabled"}
+              {stripe?.readyForPayments ? "Enabled" : "Disabled"}
             </p>
           </div>
-          {stripe?.enabled ? (
+          {stripe?.readyForPayments ? (
               <button
                   type="button"
                   className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400"

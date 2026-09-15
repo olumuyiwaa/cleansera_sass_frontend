@@ -60,6 +60,7 @@ const AppSidebar: React.FC = () => {
       subItems: [
         { name: "Customers", path: "/customers" },
         { name: "Cleaners", path: "/cleaners" },
+        { name: "Team", path: "/team" },
       ],
     },
     {
@@ -111,6 +112,11 @@ const AppSidebar: React.FC = () => {
       icon: <FolderIcon />,
       name: "Inventory",
       path: "/inventory",
+    },
+    {
+      icon: <DollarLineIcon />,
+      name: "Payroll",
+      path: "/payroll",
     },
   ];
 

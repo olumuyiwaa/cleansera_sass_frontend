@@ -185,3 +185,93 @@ export function formatMoney(cents: number, currency = "USD") {
 export function cleanerDisplayName(c: Cleaner) {
     return `${c.user.firstName} ${c.user.lastName}`.trim();
 }
+
+// ---- Staff (BusinessMember) ----
+
+export type StaffRole = "BUSINESS_OWNER" | "BUSINESS_MANAGER" | "ORG_ADMIN";
+
+export type StaffMember = {
+    id: string;
+    businessId: string;
+    userId: string;
+    role: StaffRole;
+    isActive: boolean;
+    invitedByUserId: string | null;
+    invitedAt: string;
+    joinedAt: string | null;
+    removedAt: string | null;
+    user: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string | null;
+    };
+};
+
+export function staffDisplayName(m: StaffMember) {
+    return `${m.user.firstName} ${m.user.lastName}`.trim();
+}
+
+// ---- Payroll ----
+
+export type CompensationType = "PERCENT" | "FLAT_PER_JOB" | "HOURLY";
+
+export type CleanerCompensation = {
+    id: string;
+    businessId: string;
+    cleanerId: string;
+    type: CompensationType;
+    value: number;
+    updatedAt: string;
+    createdAt: string;
+    cleaner: {
+        id: string;
+        userId: string;
+        user: { firstName: string; lastName: string; email: string };
+    };
+};
+
+export type EarningStatus = "PENDING" | "IN_PAYOUT" | "PAID" | "VOIDED";
+
+export type CleanerEarning = {
+    id: string;
+    businessId: string;
+    cleanerId: string;
+    bookingId: string;
+    amountCents: number;
+    compensationType: CompensationType;
+    compensationValue: number;
+    status: EarningStatus;
+    payoutId: string | null;
+    earnedAt: string;
+    booking?: { id: string; scheduledAt: string; quotedPriceCents: number };
+};
+
+export type PayoutStatus = "PENDING" | "PAID" | "CANCELED";
+
+export type Payout = {
+    id: string;
+    businessId: string;
+    cleanerId: string;
+    periodStart: string;
+    periodEnd: string;
+    totalCents: number;
+    status: PayoutStatus;
+    method: string | null;
+    reference: string | null;
+    paidAt: string | null;
+    createdAt: string;
+    cleaner: {
+        id: string;
+        userId: string;
+        user: { firstName: string; lastName: string };
+    };
+};
+
+export function compensationLabel(c: { type: CompensationType; value: number }) {
+    if (c.type === "PERCENT") return `${c.value}% per job`;
+    if (c.type === "FLAT_PER_JOB") return `${formatMoney(c.value)} per job`;
+    return `${formatMoney(c.value)} / hour`;
+}
+
