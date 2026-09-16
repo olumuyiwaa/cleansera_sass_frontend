@@ -119,11 +119,6 @@ const AppSidebar: React.FC = () => {
       name: "Payroll",
       path: "/payroll",
     },
-    {
-      icon: <PageIcon />,
-      name: "Website",
-      path: "/website",
-    },
   ];
 
   const businessOthersItems: NavItem[] = [
@@ -141,6 +136,11 @@ const AppSidebar: React.FC = () => {
       icon: <BellIcon />,
       name: "Notifications",
       path: "/notifications",
+    },
+    {
+      icon: <PageIcon />,
+      name: "Website",
+      path: "/website",
     },
     {
       icon: <ChatIcon />,

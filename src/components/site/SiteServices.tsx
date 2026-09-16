@@ -2,10 +2,11 @@
 
 import { Reveal } from "./Reveal";
 import type { Service } from "@/app/api/cleansera-types";
+import type { WidgetService } from "@/app/api/widget.api";
 
 type SiteServicesProps = {
   subdomain: string;
-  services: Service[];
+  services: WidgetService[];
   primaryColor: string;
   onBook?: () => void;
 };
