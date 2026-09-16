@@ -354,11 +354,11 @@ export default function BusinessSettingsPage() {
           </div>
           <div>
             <Label>Center Latitude</Label>
-            <Input type="number" step="any" value={areaForm.centerLat} onChange={(e) => setAreaForm({ ...areaForm, centerLat: e.target.value })} placeholder="6.5244" />
+            <Input type="number" value={areaForm.centerLat} onChange={(e) => setAreaForm({ ...areaForm, centerLat: e.target.value })} placeholder="6.5244" />
           </div>
           <div>
             <Label>Center Longitude</Label>
-            <Input type="number" step="any" value={areaForm.centerLng} onChange={(e) => setAreaForm({ ...areaForm, centerLng: e.target.value })} placeholder="3.3792" />
+            <Input type="number" value={areaForm.centerLng} onChange={(e) => setAreaForm({ ...areaForm, centerLng: e.target.value })} placeholder="3.3792" />
           </div>
           <div className="sm:col-span-2">
             <Button type="submit" disabled={areaSaving}>{areaSaving ? "Adding…" : "Add Service Area"}</Button>
