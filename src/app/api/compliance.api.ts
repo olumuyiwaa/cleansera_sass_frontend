@@ -63,11 +63,13 @@ export async function listDocuments(params?: {
   if (params?.type) q.set("type", params.type);
   if (params?.expiringSoon) q.set("expiringSoon", "true");
   const qs = q.toString();
-  return authFetch(`${BASE}/documents${qs ? `?${qs}` : ""}`);
+  const result = await authFetch(`${BASE}/documents${qs ? `?${qs}` : ""}`);
+  return result.data;
 }
 
 export async function getDocument(id: string): Promise<ComplianceDocument> {
-  return authFetch(`${BASE}/documents/${id}`);
+  const result = await authFetch(`${BASE}/documents/${id}`);
+  return result.data;
 }
 
 export async function createDocument(data: {
@@ -81,7 +83,8 @@ export async function createDocument(data: {
   expiresAt?: string;
   notes?: string;
 }): Promise<ComplianceDocument> {
-  return authFetch(`${BASE}/documents`, { method: "POST", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/documents`, { method: "POST", body: JSON.stringify(data) });
+  return result.data;
 }
 
 export async function updateDocument(
@@ -98,11 +101,13 @@ export async function updateDocument(
     notes: string;
   }>
 ): Promise<ComplianceDocument> {
-  return authFetch(`${BASE}/documents/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/documents/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  return result.data;
 }
 
 export async function deleteDocument(id: string): Promise<void> {
-  return authFetch(`${BASE}/documents/${id}`, { method: "DELETE" });
+  const result = await authFetch(`${BASE}/documents/${id}`, { method: "DELETE" });
+  return result.data;
 }
 
 // ─── Training acks ────────────────────────────────────────
@@ -115,7 +120,8 @@ export async function listTrainingAcks(params?: {
   if (params?.cleanerId) q.set("cleanerId", params.cleanerId);
   if (params?.documentId) q.set("documentId", params.documentId);
   const qs = q.toString();
-  return authFetch(`${BASE}/training-acks${qs ? `?${qs}` : ""}`);
+  const result = await authFetch(`${BASE}/training-acks${qs ? `?${qs}` : ""}`);
+  return result.data;
 }
 
 export async function recordTrainingAck(data: {
@@ -123,7 +129,8 @@ export async function recordTrainingAck(data: {
   documentId: string;
   notes?: string;
 }): Promise<ChemicalTrainingAck> {
-  return authFetch(`${BASE}/training-acks`, { method: "POST", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/training-acks`, { method: "POST", body: JSON.stringify(data) });
+  return result.data;
 }
 
 // ─── Audits ───────────────────────────────────────────────
@@ -132,11 +139,13 @@ export async function listAudits(params?: { status?: string }): Promise<Complian
   const q = new URLSearchParams();
   if (params?.status) q.set("status", params.status);
   const qs = q.toString();
-  return authFetch(`${BASE}/audits${qs ? `?${qs}` : ""}`);
+  const result = await authFetch(`${BASE}/audits${qs ? `?${qs}` : ""}`);
+  return result.data;
 }
 
 export async function getAudit(id: string): Promise<ComplianceAudit> {
-  return authFetch(`${BASE}/audits/${id}`);
+  const result = await authFetch(`${BASE}/audits/${id}`);
+  return result.data;
 }
 
 export async function createAudit(data: {
@@ -149,7 +158,8 @@ export async function createAudit(data: {
   conductedBy?: string;
   notes?: string;
 }): Promise<ComplianceAudit> {
-  return authFetch(`${BASE}/audits`, { method: "POST", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/audits`, { method: "POST", body: JSON.stringify(data) });
+  return result.data;
 }
 
 export async function updateAudit(
@@ -165,5 +175,6 @@ export async function updateAudit(
     notes: string;
   }>
 ): Promise<ComplianceAudit> {
-  return authFetch(`${BASE}/audits/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/audits/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  return result.data;
 }

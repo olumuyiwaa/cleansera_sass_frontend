@@ -78,11 +78,13 @@ export async function listItems(params?: {
   if (params?.page) q.set("page", String(params.page));
   if (params?.limit) q.set("limit", String(params.limit));
   const qs = q.toString();
-  return authFetch(`${BASE}/items${qs ? `?${qs}` : ""}`);
+  const result = await authFetch(`${BASE}/items${qs ? `?${qs}` : ""}`);
+  return result.data;
 }
 
 export async function getItem(id: string): Promise<InventoryItem> {
-  return authFetch(`${BASE}/items/${id}`);
+  const result = await authFetch(`${BASE}/items/${id}`);
+  return result.data;
 }
 
 export async function createItem(data: {
@@ -99,7 +101,8 @@ export async function createItem(data: {
   hazardClass?: string;
   sdsId?: string;
 }): Promise<InventoryItem> {
-  return authFetch(`${BASE}/items`, { method: "POST", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/items`, { method: "POST", body: JSON.stringify(data) });
+  return result.data;
 }
 
 export async function updateItem(
@@ -120,13 +123,15 @@ export async function updateItem(
     sdsId: string;
   }>
 ): Promise<InventoryItem> {
-  return authFetch(`${BASE}/items/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/items/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  return result.data;
 }
 
 // ─── Locations ────────────────────────────────────────────
 
 export async function listLocations(): Promise<InventoryLocation[]> {
-  return authFetch(`${BASE}/locations`);
+  const result = await authFetch(`${BASE}/locations`);
+  return result.data;
 }
 
 export async function createLocation(data: {
@@ -134,14 +139,16 @@ export async function createLocation(data: {
   type?: string;
   address?: string;
 }): Promise<InventoryLocation> {
-  return authFetch(`${BASE}/locations`, { method: "POST", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/locations`, { method: "POST", body: JSON.stringify(data) });
+  return result.data;
 }
 
 export async function updateLocation(
   id: string,
   data: Partial<{ name: string; type: string; address: string; isActive: boolean }>
 ): Promise<InventoryLocation> {
-  return authFetch(`${BASE}/locations/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/locations/${id}`, { method: "PATCH", body: JSON.stringify(data) });
+  return result.data;
 }
 
 // ─── Stock ────────────────────────────────────────────────
@@ -154,7 +161,8 @@ export async function getStock(params?: {
   if (params?.locationId) q.set("locationId", params.locationId);
   if (params?.lowStock) q.set("lowStock", "true");
   const qs = q.toString();
-  return authFetch(`${BASE}/stock${qs ? `?${qs}` : ""}`);
+  const result = await authFetch(`${BASE}/stock${qs ? `?${qs}` : ""}`);
+  return result.data;
 }
 
 // ─── Movements ────────────────────────────────────────────
@@ -168,5 +176,6 @@ export async function createMovement(data: {
   bookingId?: string;
   notes?: string;
 }): Promise<StockMovement> {
-  return authFetch(`${BASE}/movements`, { method: "POST", body: JSON.stringify(data) });
+  const result = await authFetch(`${BASE}/movements`, { method: "POST", body: JSON.stringify(data) });
+  return result.data;
 }

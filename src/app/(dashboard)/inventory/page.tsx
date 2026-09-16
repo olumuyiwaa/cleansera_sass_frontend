@@ -92,7 +92,12 @@ export default function InventoryPage() {
             const data = await listItems({
                 type: typeFilter === "ALL" ? undefined : typeFilter,
             });
-            setItems(data.items || data as any);
+            // Previously `data.items || data as any` — a defensive workaround
+            // for listItems() returning the raw {success,data} envelope
+            // instead of its unwrapped payload. Now that inventory.api.ts
+            // unwraps .data itself, `data` really is the {items, total, ...}
+            // shape the type declares, so the fallback is gone.
+            setItems(data.items || []);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load items");
         } finally {
