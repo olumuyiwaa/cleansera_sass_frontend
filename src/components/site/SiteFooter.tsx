@@ -3,6 +3,15 @@ type SiteFooterProps = {
   businessName: string;
   primaryColor: string;
   onBook?: () => void;
+  socialLinks?: Partial<Record<"facebook" | "instagram" | "tiktok" | "linkedin" | "twitter", string>> | null;
+};
+
+const SOCIAL_LABELS: Record<string, string> = {
+  facebook: "Facebook",
+  instagram: "Instagram",
+  tiktok: "TikTok",
+  linkedin: "LinkedIn",
+  twitter: "X (Twitter)",
 };
 
 export function SiteFooter({
@@ -10,9 +19,11 @@ export function SiteFooter({
   businessName,
   primaryColor,
   onBook,
+  socialLinks,
 }: SiteFooterProps) {
   const initial = businessName.trim().charAt(0).toUpperCase() || "C";
   const bookHref = `/book-now/${subdomain}`;
+  const socialEntries = Object.entries(socialLinks || {}).filter(([, url]) => !!url);
 
   function handleBook(e: React.MouseEvent) {
     if (onBook) {
@@ -41,6 +52,21 @@ export function SiteFooter({
               Professional cleaning you can book online — local, reliable, and
               built around your schedule.
             </p>
+            {socialEntries.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {socialEntries.map(([platform, url]) => (
+                  <a
+                    key={platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-medium text-[#5C5546] underline-offset-2 hover:text-[#171B1A] hover:underline"
+                  >
+                    {SOCIAL_LABELS[platform] || platform}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-3 sm:items-end">

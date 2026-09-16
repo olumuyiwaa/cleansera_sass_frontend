@@ -23,6 +23,7 @@ import {
   TaskIcon,
   ShootingStarIcon,
   BoltIcon,
+  PageIcon,
 } from "../icons/index";
 import { useAuth } from "@/app/auth/useAuth";
 import { getUserRole } from "@/app/api/types";
@@ -117,6 +118,11 @@ const AppSidebar: React.FC = () => {
       icon: <DollarLineIcon />,
       name: "Payroll",
       path: "/payroll",
+    },
+    {
+      icon: <PageIcon />,
+      name: "Website",
+      path: "/website",
     },
   ];
 

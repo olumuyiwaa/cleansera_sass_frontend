@@ -46,11 +46,31 @@ async function widgetFetch(
 
 // ─── Types returned by the widget endpoints ─────────────────────
 
+export type WidgetTestimonial = { name: string; quote: string };
+export type WidgetFaqItem = { question: string; answer: string };
+export type WidgetSocialLinks = Partial<Record<"facebook" | "instagram" | "tiktok" | "linkedin" | "twitter", string>>;
+export type WidgetSectionsEnabled = {
+  about?: boolean;
+  testimonials?: boolean;
+  gallery?: boolean;
+  faq?: boolean;
+  order?: Array<"about" | "testimonials" | "gallery" | "faq">;
+};
+
 export type WidgetBranding = {
   primaryColor?: string | null;
   logoUrl?: string | null;
   accentColor?: string | null;
   tagline?: string | null;
+  themeStyle?: "MODERN" | "CLASSIC" | "BOLD";
+  heroImageUrl?: string | null;
+  aboutTitle?: string | null;
+  aboutBody?: string | null;
+  testimonials?: WidgetTestimonial[] | null;
+  faqItems?: WidgetFaqItem[] | null;
+  galleryImageUrls?: string[];
+  socialLinks?: WidgetSocialLinks | null;
+  sectionsEnabled?: WidgetSectionsEnabled | null;
 };
 
 export type WidgetBusiness = {

@@ -163,3 +163,49 @@
     transition: none;
   }
 }
+
+/* ---- Theme style presets ----
+   Applied via a [data-theme-style] attribute on the page's root wrapper
+   (see site/[subdomain]/page.tsx). Targets bare heading elements rather
+   than component classNames so it overrides every section's headings
+   uniformly without each component needing to know about theme styles.
+   MODERN is the default look (no rules needed — it's what the components
+   already render), so only CLASSIC and BOLD have overrides here. */
+
+[data-theme-style="CLASSIC"] h1,
+[data-theme-style="CLASSIC"] h2,
+[data-theme-style="CLASSIC"] h3,
+[data-theme-style="CLASSIC"] .site-hero-title {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+[data-theme-style="CLASSIC"] .site-eyebrow {
+  border-radius: 3px;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-style: italic;
+  font-weight: 600;
+}
+
+[data-theme-style="BOLD"] h1,
+[data-theme-style="BOLD"] h2,
+[data-theme-style="BOLD"] h3,
+[data-theme-style="BOLD"] .site-hero-title {
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+}
+
+[data-theme-style="BOLD"] .site-eyebrow {
+  border-radius: 4px;
+}
+
+[data-theme-style="BOLD"] .site-btn-primary,
+[data-theme-style="BOLD"] .site-btn-secondary {
+  border-radius: 6px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}

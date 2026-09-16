@@ -1,19 +1,30 @@
 "use client";
 
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   getStorefront,
   type StorefrontResponse,
+  type WidgetSectionsEnabled,
 } from "@/app/api/widget.api";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteHero } from "@/components/site/SiteHero";
 import { SiteServices } from "@/components/site/SiteServices";
 import { SiteHowItWorks } from "@/components/site/SiteHowItWorks";
+import { SiteAbout } from "@/components/site/SiteAbout";
+import { SiteTestimonials } from "@/components/site/SiteTestimonials";
+import { SiteGallery } from "@/components/site/SiteGallery";
+import { SiteFaq } from "@/components/site/SiteFaq";
 import { SiteCtaBand } from "@/components/site/SiteCtaBand";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { BookingWidgetModal } from "@/components/widget/BookingWidgetModal";
 
 const DEFAULT_PRIMARY = "#3F6B52";
+const DEFAULT_SECTION_ORDER: NonNullable<WidgetSectionsEnabled["order"]> = [
+  "about",
+  "testimonials",
+  "gallery",
+  "faq",
+];
 
 export default function BusinessSitePage({
   params,
@@ -80,9 +91,40 @@ export default function BusinessSitePage({
   const name = business.name;
   const logoUrl = branding?.logoUrl ?? null;
   const tagline = branding?.tagline ?? null;
+  const themeStyle = branding?.themeStyle || "MODERN";
+
+  // Which optional sections render, and in what order. A section still
+  // renders nothing if it has no real content (each component checks this
+  // itself) even when enabled here — this config only controls
+  // visibility/order, not whether content exists.
+  const sectionsConfig = branding?.sectionsEnabled;
+  const order = sectionsConfig?.order?.length ? sectionsConfig.order : DEFAULT_SECTION_ORDER;
+  const isEnabled = (key: "about" | "testimonials" | "gallery" | "faq") =>
+      sectionsConfig ? sectionsConfig[key] !== false : true; // default on if the business never configured this
+
+  const optionalSections: Record<string, ReactNode> = {
+    about: isEnabled("about") ? (
+        <SiteAbout
+            key="about"
+            title={branding?.aboutTitle ?? null}
+            body={branding?.aboutBody ?? null}
+            heroImageUrl={branding?.heroImageUrl ?? null}
+            primaryColor={primaryColor}
+        />
+    ) : null,
+    testimonials: isEnabled("testimonials") ? (
+        <SiteTestimonials key="testimonials" testimonials={branding?.testimonials} primaryColor={primaryColor} />
+    ) : null,
+    gallery: isEnabled("gallery") ? (
+        <SiteGallery key="gallery" imageUrls={branding?.galleryImageUrls} primaryColor={primaryColor} />
+    ) : null,
+    faq: isEnabled("faq") ? (
+        <SiteFaq key="faq" items={branding?.faqItems} primaryColor={primaryColor} />
+    ) : null,
+  };
 
   return (
-    <>
+    <div data-theme-style={themeStyle}>
       <SiteHeader
         subdomain={subdomain}
         businessName={name}
@@ -105,6 +147,7 @@ export default function BusinessSitePage({
           onBook={openBook}
         />
         <SiteHowItWorks primaryColor={primaryColor} />
+        {order.map((key) => optionalSections[key])}
         <SiteCtaBand
           subdomain={subdomain}
           businessName={name}
@@ -117,6 +160,7 @@ export default function BusinessSitePage({
         businessName={name}
         primaryColor={primaryColor}
         onBook={openBook}
+        socialLinks={branding?.socialLinks}
       />
 
       <BookingWidgetModal
@@ -128,6 +172,6 @@ export default function BusinessSitePage({
         businessName={name}
         primaryColor={primaryColor}
       />
-    </>
+    </div>
   );
 }

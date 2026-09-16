@@ -29,12 +29,38 @@ export type BusinessHours = {
     isClosed: boolean;
 };
 
+export type Testimonial = { name: string; quote: string };
+export type FaqItem = { question: string; answer: string };
+export type SocialLinks = Partial<Record<"facebook" | "instagram" | "tiktok" | "linkedin" | "twitter", string>>;
+export type SectionsEnabled = {
+    about?: boolean;
+    testimonials?: boolean;
+    gallery?: boolean;
+    faq?: boolean;
+    order?: Array<"about" | "testimonials" | "gallery" | "faq">;
+};
+export type ThemeStyle = "MODERN" | "CLASSIC" | "BOLD";
+
 export type BusinessBranding = {
     logoKey: string | null;
     primaryColor: string | null;
     accentColor: string | null;
     tagline: string | null;
     widgetEmbedEnabled: boolean;
+    themeStyle: ThemeStyle;
+    heroImageKey: string | null;
+    aboutTitle: string | null;
+    aboutBody: string | null;
+    testimonials: Testimonial[] | null;
+    faqItems: FaqItem[] | null;
+    galleryImageKeys: string[];
+    socialLinks: SocialLinks | null;
+    sectionsEnabled: SectionsEnabled | null;
+    // Resolved by the backend from the *Key fields above — always present
+    // in a GET, never something the dashboard sends back on PUT.
+    logoUrl?: string | null;
+    heroImageUrl?: string | null;
+    galleryImageUrls?: string[];
 };
 
 
@@ -65,6 +91,21 @@ export async function getBranding() {
 export async function updateBranding(patch: Partial<BusinessBranding>) {
     const result = await authFetch(`/businesses/branding`, { method: "PUT", body: JSON.stringify(patch) });
     return result.data as BusinessBranding;
+}
+
+export async function getBrandingUploadUrl(kind: "logo" | "hero" | "gallery", file: File) {
+    const result = await authFetch(`/businesses/branding/upload-url`, {
+        method: "POST",
+        body: JSON.stringify({ kind, filename: file.name, contentType: file.type }),
+    });
+    return result.data as { key: string; uploadUrl: string; publicUrl: string };
+}
+
+/** Uploads a branding image (logo/hero/gallery) and returns its permanent public key + URL. */
+export async function uploadBrandingImage(kind: "logo" | "hero" | "gallery", file: File) {
+    const { key, uploadUrl, publicUrl } = await getBrandingUploadUrl(kind, file);
+    await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+    return { key, publicUrl };
 }
 
 export async function listServiceAreas() {
