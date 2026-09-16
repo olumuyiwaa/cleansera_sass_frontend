@@ -105,11 +105,6 @@ const AppSidebar: React.FC = () => {
       path: "/support-tickets",
     },
     {
-      icon: <TaskIcon />,
-      name: "Audit-Trail",
-      path: "/audit-trail",
-    },
-    {
       icon: <FolderIcon />,
       name: "Inventory",
       path: "/inventory",
@@ -129,18 +124,22 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <Business />,
-      name: "Business Settings",
-      path: "/business-settings",
+      name: "Business",
+      subItems: [
+        { name: "Business Settings", path: "/business-settings" },
+        { name: "Website", path: "/website" },
+        {
+          name: "Compliance",
+          path: "/compliance"},
+        {
+          name: "Audit-Trail",
+          path: "/audit-trail"},
+      ],
     },
     {
       icon: <BellIcon />,
       name: "Notifications",
       path: "/notifications",
-    },
-    {
-      icon: <PageIcon />,
-      name: "Website",
-      path: "/website",
     },
     {
       icon: <ChatIcon />,
@@ -151,11 +150,6 @@ const AppSidebar: React.FC = () => {
       icon: <DollarLineIcon />,
       name: "Subscription",
       path: "/subscription",
-    },
-    {
-      icon: <FileIcon />,
-      name: "Compliance",
-      path: "/compliance",
     },
   ];
 
