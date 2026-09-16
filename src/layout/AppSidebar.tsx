@@ -127,6 +127,7 @@ const AppSidebar: React.FC = () => {
       name: "Business",
       subItems: [
         { name: "Business Settings", path: "/business-settings" },
+        { name: "Pricing", path: "/pricing" },
         { name: "Website", path: "/website" },
         {
           name: "Compliance",

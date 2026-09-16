@@ -47,3 +47,13 @@ export async function markPayoutPaid(id: string, payload?: { method?: string; re
     });
     return result.data as Payout;
 }
+
+// Automated counterpart to markPayoutPaid: actually moves money, via Stripe
+// Connect, from the business's balance to the cleaner's connected account.
+// Only enabled in the UI once cleaner.user.stripePayoutsEnabled is true.
+export async function payPayoutViaStripe(id: string) {
+    const result = await authFetch(`/payroll/payouts/${id}/pay-stripe`, {
+        method: "POST",
+    });
+    return result.data as Payout;
+}

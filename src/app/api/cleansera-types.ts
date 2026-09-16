@@ -260,12 +260,18 @@ export type Payout = {
     status: PayoutStatus;
     method: string | null;
     reference: string | null;
+    // Set only when method === "STRIPE" — the Stripe Transfer id, for
+    // support/audit lookups against the business's Connect dashboard.
+    stripeTransferId: string | null;
     paidAt: string | null;
     createdAt: string;
     cleaner: {
         id: string;
         userId: string;
-        user: { firstName: string; lastName: string };
+        // stripePayoutsEnabled gates whether "Pay via Stripe" is offered for
+        // this payout — false until the cleaner has completed Connect
+        // onboarding on their own end (see cleaner-app payout-connect screen).
+        user: { firstName: string; lastName: string; stripePayoutsEnabled: boolean };
     };
 };
 

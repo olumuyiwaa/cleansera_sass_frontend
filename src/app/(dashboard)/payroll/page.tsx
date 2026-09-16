@@ -22,6 +22,7 @@ import {
   listPayouts,
   createPayout,
   markPayoutPaid,
+  payPayoutViaStripe,
 } from "@/app/api/payroll.api";
 import {
   Cleaner,
@@ -146,14 +147,32 @@ export default function PayrollPage() {
     }
   };
 
+  const [payingStripeId, setPayingStripeId] = useState<string | null>(null);
+
+  const handlePayStripe = async (payout: Payout) => {
+    setError("");
+    setPayingStripeId(payout.id);
+    try {
+      await payPayoutViaStripe(payout.id);
+      await load();
+    } catch (err) {
+      // Most common cause here is the business's own Connect balance not
+      // having settled enough job payments yet — surfaced by the backend
+      // as a 402 with a clear message, not a generic failure.
+      setError(err instanceof Error ? err.message : "Failed to pay via Stripe");
+    } finally {
+      setPayingStripeId(null);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Payroll</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Set what each cleaner earns per job, track what they&apos;re owed, and record payouts once you&apos;ve
-          actually paid them. CleanSera tracks the numbers — sending the money (bank transfer, cash, your own
-          payroll run) still happens outside the platform.
+          Set what each cleaner earns per job, track what they&apos;re owed, and pay it out — automatically via
+          Stripe once a cleaner has connected a payout account, or manually (bank transfer, cash, your own
+          payroll run) otherwise.
         </p>
       </div>
 
@@ -338,12 +357,30 @@ export default function PayrollPage() {
                       </TableCell>
                       <TableCell className="px-5 py-4">
                         {p.status === "PENDING" && (
-                          <button
-                            onClick={() => handleMarkPaid(p)}
-                            className="text-sm font-medium text-brand-500 hover:text-brand-600"
-                          >
-                            Mark as paid
-                          </button>
+                          <div className="flex items-center gap-3">
+                            {p.cleaner.user.stripePayoutsEnabled ? (
+                              <button
+                                onClick={() => handlePayStripe(p)}
+                                disabled={payingStripeId === p.id}
+                                className="text-sm font-medium text-brand-500 hover:text-brand-600 disabled:opacity-50"
+                              >
+                                {payingStripeId === p.id ? "Paying…" : "Pay via Stripe"}
+                              </button>
+                            ) : (
+                              <span
+                                className="text-xs text-gray-400"
+                                title="This cleaner hasn't connected a payout account yet"
+                              >
+                                Stripe not connected
+                              </span>
+                            )}
+                            <button
+                              onClick={() => handleMarkPaid(p)}
+                              className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                            >
+                              Mark as paid manually
+                            </button>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
