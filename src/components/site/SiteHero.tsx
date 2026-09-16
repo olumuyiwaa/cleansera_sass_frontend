@@ -1,6 +1,6 @@
 "use client";
 
-import { BeforeAfterSlider } from "./BeforeAfterSlider";
+import BeforeAfterSlider from "./BeforeAfterSlider";
 import { Reveal } from "./Reveal";
 
 type SiteHeroProps = {
@@ -121,7 +121,10 @@ export function SiteHero({
                 background: `radial-gradient(circle, ${primaryColor}2e, transparent 70%)`,
               }}
             />
-            <BeforeAfterSlider />
+            <BeforeAfterSlider
+                beforeSrc="/images/before-room.jpg"
+                afterSrc="/images/after-room.jpg"
+            />
           </Reveal>
         </div>
       </div>
