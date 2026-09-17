@@ -58,7 +58,7 @@ export default function BeforeAfterSlider({
   return (
       <div
           ref={trackRef}
-          className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-lg border border-stone-200 shadow-[0_24px_60px_rgba(22,35,28,0.12)]"
+          className="relative aspect-[4/4] w-full select-none overflow-hidden rounded-lg border border-stone-200 shadow-[0_24px_60px_rgba(22,35,28,0.12)]"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={stopDragging}
