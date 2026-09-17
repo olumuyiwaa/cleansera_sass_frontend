@@ -138,6 +138,7 @@ export function BookingWizard(props: BookingWizardProps) {
                 slotsLoading={slotsLoading}
                 slotsError={slotsError}
                 primaryColor={primary}
+                slug={props.slug}
               />
             )}
             {step === 4 && (
@@ -146,6 +147,7 @@ export function BookingWizard(props: BookingWizardProps) {
                 update={update}
                 primaryColor={primary}
                 onApplyCoupon={refreshQuote}
+                onApplyGiftCard={refreshQuote}
               />
             )}
             {step === 5 && (

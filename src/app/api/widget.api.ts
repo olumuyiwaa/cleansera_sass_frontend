@@ -115,6 +115,7 @@ export type QuoteRequest = {
   longitude?: number | null;
   scheduledStart?: string;
   couponCode?: string;
+  giftCardCode?: string;
   /** Passed through for PER_ROOM / PER_SQFT / frequency discounts */
   rooms?: number;
   bathrooms?: number;
@@ -134,6 +135,13 @@ export type QuoteResponse = {
     couponId?: string;
     type?: string;
     value?: number;
+  } | null;
+  giftCard?: {
+    valid: boolean;
+    reason?: string;
+    giftCardId?: string;
+    balanceCents?: number;
+    appliedCents?: number;
   } | null;
 };
 
@@ -163,11 +171,22 @@ export type SubmitBookingPayload = {
   addOnIds?: string[];
   scheduledStart: string;
   couponCode?: string;
+  giftCardCode?: string;
   referralCode?: string;
   rooms?: number;
   bathrooms?: number;
   sqft?: number;
   frequency?: string;
+  notes?: string;
+};
+
+export type JoinWaitlistPayload = {
+  serviceId?: string;
+  desiredStart: string;
+  desiredEnd: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
   notes?: string;
 };
 
@@ -219,5 +238,24 @@ export async function submitBooking(slug: string, payload: SubmitBookingPayload)
     status: string;
     referralCode?: string;
     referralDiscountCents?: number;
+    giftCard?: { giftCardId: string; appliedCents: number } | null;
   };
+}
+
+export async function checkGiftCardBalance(slug: string, code: string) {
+  const result = await widgetFetch(slug, `/gift-cards/${encodeURIComponent(code)}`, { method: "GET" });
+  return result.data as { valid: boolean; reason?: string; balanceCents?: number };
+}
+
+/**
+ * Joins the waitlist for a date range the widget had no open slot for.
+ * The booking wizard's schedule step offers this when getSlots comes back
+ * empty for every date the customer tries — see StepSchedule.tsx.
+ */
+export async function joinWaitlist(slug: string, payload: JoinWaitlistPayload) {
+  const result = await widgetFetch(slug, "/waitlist", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return result.data as { id: string; status: string };
 }

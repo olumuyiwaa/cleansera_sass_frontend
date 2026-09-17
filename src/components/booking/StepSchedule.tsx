@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import type { FormEvent } from "react";
 import type { Slot } from "@/app/api/widget.api";
+import { joinWaitlist } from "@/app/api/widget.api";
 import type { BookingFormState } from "./types";
 
 type Props = {
@@ -10,6 +13,7 @@ type Props = {
   slotsLoading: boolean;
   slotsError: string | null;
   primaryColor?: string;
+  slug: string;
 };
 
 export function StepSchedule({
@@ -19,6 +23,7 @@ export function StepSchedule({
   slotsLoading,
   slotsError,
   primaryColor = "#3F6B52",
+  slug,
 }: Props) {
   // Build next 14 days for the date picker
   const days = Array.from({ length: 14 }, (_, i) => {
@@ -91,9 +96,15 @@ export function StepSchedule({
       )}
 
       {state.selectedDate && !slotsLoading && !slotsError && slots.length === 0 && (
-        <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-6 text-center">
-          No available times on this day. Please try another date.
-        </p>
+        <div className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-6 text-center space-y-3">
+          <p>No available times on this day. Please try another date.</p>
+          <WaitlistJoin
+            slug={slug}
+            serviceId={state.serviceId}
+            selectedDate={state.selectedDate}
+            primaryColor={primaryColor}
+          />
+        </div>
       )}
 
       {state.selectedDate && !slotsLoading && slots.length > 0 && (
@@ -135,5 +146,90 @@ function Spinner() {
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
       />
     </svg>
+  );
+}
+
+/**
+ * Inline "notify me" form for a day with no open slots. Kept self-contained
+ * (its own email/phone fields) rather than waiting for the wizard's later
+ * contact-details step, since a customer who hits a dead end here shouldn't
+ * have to fill out the whole rest of the form just to ask to be notified.
+ */
+function WaitlistJoin({
+  slug,
+  serviceId,
+  selectedDate,
+  primaryColor,
+}: {
+  slug: string;
+  serviceId: string | null;
+  selectedDate: string;
+  primaryColor: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [contact, setContact] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (done) {
+    return <p className="text-sm font-medium text-green-700">You&apos;re on the waitlist — we&apos;ll be in touch!</p>;
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-sm font-medium underline"
+        style={{ color: primaryColor }}
+      >
+        Notify me if a slot opens up
+      </button>
+    );
+  }
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const isEmail = contact.includes("@");
+      const dayStart = new Date(`${selectedDate}T00:00:00`);
+      const dayEnd = new Date(`${selectedDate}T23:59:59`);
+      await joinWaitlist(slug, {
+        serviceId: serviceId || undefined,
+        desiredStart: dayStart.toISOString(),
+        desiredEnd: dayEnd.toISOString(),
+        contactEmail: isEmail ? contact : undefined,
+        contactPhone: isEmail ? undefined : contact,
+      });
+      setDone(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't join the waitlist — please try again");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-2 justify-center items-center">
+      <input
+        required
+        value={contact}
+        onChange={(e) => setContact(e.target.value)}
+        placeholder="Email or phone number"
+        className="h-10 rounded-lg border border-gray-300 px-3 text-sm w-full sm:w-56"
+      />
+      <button
+        type="submit"
+        disabled={submitting}
+        className="h-10 rounded-lg px-4 text-sm font-medium text-white disabled:opacity-60"
+        style={{ backgroundColor: primaryColor }}
+      >
+        {submitting ? "Joining…" : "Join waitlist"}
+      </button>
+      {error && <p className="text-xs text-red-600 basis-full">{error}</p>}
+    </form>
   );
 }

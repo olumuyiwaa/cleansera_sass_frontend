@@ -32,6 +32,7 @@ export type BookingFormState = {
   phone: string;
   notes: string;
   couponCode: string;
+  giftCardCode: string;
 
   // Live quote
   quote: QuoteResponse | null;
@@ -79,6 +80,7 @@ export const INITIAL_STATE: BookingFormState = {
   phone: "",
   notes: "",
   couponCode: "",
+  giftCardCode: "",
 
   quote: null,
   quoteLoading: false,

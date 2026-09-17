@@ -95,6 +95,16 @@ const AppSidebar: React.FC = () => {
       path: "/coupons",
     },
     {
+      icon: <BoltIcon />,
+      name: "Gift Cards",
+      path: "/gift-cards",
+    },
+    {
+      icon: <TaskIcon />,
+      name: "Waitlist",
+      path: "/waitlist",
+    },
+    {
       icon: <ListIcon />,
       name: "Checklist Templates",
       path: "/checklist-templates",

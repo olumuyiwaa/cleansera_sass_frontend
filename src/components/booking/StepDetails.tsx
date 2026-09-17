@@ -7,6 +7,7 @@ type Props = {
   update: (patch: Partial<BookingFormState>) => void;
   primaryColor?: string;
   onApplyCoupon?: () => void;
+  onApplyGiftCard?: () => void;
 };
 
 export function StepDetails({
@@ -14,6 +15,7 @@ export function StepDetails({
   update,
   primaryColor = "#3F6B52",
   onApplyCoupon,
+  onApplyGiftCard,
 }: Props) {
   return (
     <div className="space-y-6">
@@ -109,6 +111,45 @@ export function StepDetails({
             {state.quote.coupon.valid
               ? "Coupon applied"
               : `Coupon: ${state.quote.coupon.reason || "invalid"}`}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Gift card code
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={state.giftCardCode}
+            onChange={(e) => update({ giftCardCode: e.target.value.toUpperCase() })}
+            placeholder="GC-XXXXXXXX"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-0"
+            style={{ ["--tw-ring-color" as string]: primaryColor }}
+          />
+          <button
+            type="button"
+            onClick={onApplyGiftCard}
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-white"
+            style={{ backgroundColor: primaryColor }}
+          >
+            Apply
+          </button>
+        </div>
+        {state.quote?.giftCard && (
+          <p
+            className={`mt-1.5 text-xs ${
+              state.quote.giftCard.valid ? "text-emerald-600" : "text-amber-700"
+            }`}
+          >
+            {state.quote.giftCard.valid
+              ? `Gift card applied: ${
+                  state.quote.giftCard.appliedCents != null
+                    ? `$${(state.quote.giftCard.appliedCents / 100).toFixed(2)} off`
+                    : ""
+                } (balance: $${((state.quote.giftCard.balanceCents ?? 0) / 100).toFixed(2)})`
+              : `Gift card: ${state.quote.giftCard.reason || "invalid"}`}
           </p>
         )}
       </div>
