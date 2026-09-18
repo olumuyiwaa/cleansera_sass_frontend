@@ -110,11 +110,6 @@ const AppSidebar: React.FC = () => {
       path: "/support-tickets",
     },
     {
-      icon: <FolderIcon />,
-      name: "Inventory",
-      path: "/inventory",
-    },
-    {
       icon: <DollarLineIcon />,
       name: "Payroll",
       path: "/payroll",
@@ -135,6 +130,7 @@ const AppSidebar: React.FC = () => {
         { name: "Pricing", path: "/pricing" },
         { name: "Website", path: "/website" },
         { name: "Services", path: "/services" },
+        { name: "Inventory", path: "/inventory" },
         { name: "Compliance", path: "/compliance" },
         { name: "Audit-Trail", path: "/audit-trail" },
       ],

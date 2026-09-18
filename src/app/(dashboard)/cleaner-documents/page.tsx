@@ -110,12 +110,14 @@ export default function CleanerDocumentsPage() {
             </option>
           ))}
         </select>
-        <input
-          type="file"
-          required
-          onChange={(e) => setForm({ ...form, file: e.target.files?.[0] || null })}
-          className="h-11 text-sm"
-        />
+        <div className="rounded-xl border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-white/[0.02]">
+          <input
+              type="file"
+              required
+              onChange={(e) => setForm({ ...form, file: e.target.files?.[0] || null })}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-gray-800 dark:file:text-gray-200 cursor-pointer"
+          />
+        </div>
         <button type="submit" className="h-11 rounded-lg bg-brand-500 text-sm font-medium text-white">
           Upload
         </button>
