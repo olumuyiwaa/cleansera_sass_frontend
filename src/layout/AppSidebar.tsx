@@ -75,11 +75,6 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
-      icon: <FolderIcon />,
-      name: "Services",
-      path: "/services",
-    },
-    {
       icon: <FileIcon />,
       name: "Cleaner Documents",
       path: "/cleaner-documents",
@@ -139,12 +134,9 @@ const AppSidebar: React.FC = () => {
         { name: "Business Settings", path: "/business-settings" },
         { name: "Pricing", path: "/pricing" },
         { name: "Website", path: "/website" },
-        {
-          name: "Compliance",
-          path: "/compliance"},
-        {
-          name: "Audit-Trail",
-          path: "/audit-trail"},
+        { name: "Services", path: "/services" },
+        { name: "Compliance", path: "/compliance" },
+        { name: "Audit-Trail", path: "/audit-trail" },
       ],
     },
     {
