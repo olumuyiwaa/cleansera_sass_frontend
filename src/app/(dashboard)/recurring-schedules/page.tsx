@@ -10,6 +10,7 @@ import {
 } from "@/app/api/bookings.api";
 import { listCustomersForBooking } from "@/app/api/customers.api";
 import { listServices } from "@/app/api/services.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import {
     RecurringSchedule,
     RecurrenceFrequency,
@@ -274,52 +275,50 @@ export default function RecurringSchedulesPage() {
                                             : "Cancelled"}
                                     </span>
                                 </td>
-                                <td className="space-x-2 p-3 text-right">
-                                    {s.status === "ACTIVE" && (
-                                        <button
-                                            disabled={busyId === s.id}
-                                            onClick={() =>
-                                                withBusy(s.id, () =>
-                                                    pauseRecurringSchedule(s.id)
-                                                )
-                                            }
-                                            className="text-xs font-medium text-amber-600 disabled:opacity-40"
-                                        >
-                                            Pause
-                                        </button>
-                                    )}
-                                    {s.status === "PAUSED" && (
-                                        <button
-                                            disabled={busyId === s.id}
-                                            onClick={() =>
-                                                withBusy(s.id, () =>
-                                                    resumeRecurringSchedule(s.id)
-                                                )
-                                            }
-                                            className="text-xs font-medium text-green-600 disabled:opacity-40"
-                                        >
-                                            Resume
-                                        </button>
-                                    )}
-                                    {s.status !== "CANCELLED" && (
-                                        <button
-                                            disabled={busyId === s.id}
-                                            onClick={() => {
-                                                if (
-                                                    !confirm(
-                                                        "Cancel this recurring schedule? This can't be undone — you'll need to create a new schedule to restart it."
-                                                    )
-                                                )
-                                                    return;
-                                                withBusy(s.id, () =>
-                                                    cancelRecurringSchedule(s.id)
-                                                );
-                                            }}
-                                            className="text-xs font-medium text-red-600 disabled:opacity-40"
-                                        >
-                                            Cancel
-                                        </button>
-                                    )}
+                                <td className="p-3 text-right">
+                                    <RowActionsMenu
+                                        label={`Actions for recurring schedule ${s.id}`}
+                                        actions={[
+                                            ...(s.status === "ACTIVE"
+                                                ? [
+                                                      {
+                                                          label: "Pause",
+                                                          disabled: busyId === s.id,
+                                                          onClick: () =>
+                                                              withBusy(s.id, () => pauseRecurringSchedule(s.id)),
+                                                      },
+                                                  ]
+                                                : []),
+                                            ...(s.status === "PAUSED"
+                                                ? [
+                                                      {
+                                                          label: "Resume",
+                                                          disabled: busyId === s.id,
+                                                          onClick: () =>
+                                                              withBusy(s.id, () => resumeRecurringSchedule(s.id)),
+                                                      },
+                                                  ]
+                                                : []),
+                                            ...(s.status !== "CANCELLED"
+                                                ? [
+                                                      {
+                                                          label: "Cancel",
+                                                          variant: "danger" as const,
+                                                          disabled: busyId === s.id,
+                                                          onClick: () => {
+                                                              if (
+                                                                  !confirm(
+                                                                      "Cancel this recurring schedule? This can't be undone — you'll need to create a new schedule to restart it."
+                                                                  )
+                                                              )
+                                                                  return;
+                                                              withBusy(s.id, () => cancelRecurringSchedule(s.id));
+                                                          },
+                                                      },
+                                                  ]
+                                                : []),
+                                        ]}
+                                    />
                                 </td>
                             </tr>
                         ))}

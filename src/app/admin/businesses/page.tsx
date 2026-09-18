@@ -7,6 +7,7 @@ import {
   BusinessListItem,
   Pagination,
 } from "@/app/api/superAdmin.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 export default function SuperAdminBusinessesPage() {
   const [items, setItems] = useState<BusinessListItem[]>([]);
@@ -157,18 +158,17 @@ export default function SuperAdminBusinessesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      disabled={busyId === b.id}
-                      onClick={() => toggleActive(b)}
-                      className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50"
-                    >
-                      {busyId === b.id
-                        ? "…"
-                        : b.isActive
-                          ? "Deactivate"
-                          : "Activate"}
-                    </button>
+                    <RowActionsMenu
+                      label={`Actions for ${b.name}`}
+                      actions={[
+                        {
+                          label: busyId === b.id ? "…" : b.isActive ? "Deactivate" : "Activate",
+                          disabled: busyId === b.id,
+                          variant: b.isActive ? "danger" as const : "default" as const,
+                          onClick: () => toggleActive(b),
+                        },
+                      ]}
+                    />
                   </td>
                 </tr>
               ))}

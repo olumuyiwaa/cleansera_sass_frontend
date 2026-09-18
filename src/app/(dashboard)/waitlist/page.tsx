@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { listWaitlist, cancelWaitlistEntry, type WaitlistEntry, type WaitlistStatus } from "@/app/api/waitlist.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 const STATUS_OPTIONS: { value: WaitlistStatus | ""; label: string }[] = [
   { value: "", label: "All" },
@@ -105,15 +106,14 @@ export default function WaitlistPage() {
                   <td className="px-4 py-3">{w.status}</td>
                   <td className="px-4 py-3 text-gray-500">{new Date(w.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3">
-                    {(w.status === "WAITING" || w.status === "NOTIFIED") && (
-                      <button
-                        type="button"
-                        className="text-red-600 hover:underline"
-                        onClick={() => onCancel(w.id)}
-                      >
-                        Remove
-                      </button>
-                    )}
+                    <RowActionsMenu
+                      label={`Actions for waitlist entry ${w.contactName || w.id}`}
+                      actions={
+                        w.status === "WAITING" || w.status === "NOTIFIED"
+                          ? [{ label: "Remove", variant: "danger" as const, onClick: () => onCancel(w.id) }]
+                          : []
+                      }
+                    />
                   </td>
                 </tr>
               ))}

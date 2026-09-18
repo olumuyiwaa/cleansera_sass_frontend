@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import {
   listBookings,
   createBooking,
@@ -287,46 +288,44 @@ export default function BookingsPage() {
                       <Badge color={STATUS_COLOR[b.status]} size="sm">{b.status}</Badge>
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        {b.status === "REQUESTED" && (
-                          <button onClick={() => handleConfirm(b.id)} className="text-sm font-medium text-brand-500 hover:text-brand-600">
-                            Confirm
-                          </button>
-                        )}
-                        {b.status === "CONFIRMED" && (
-                          <button onClick={() => handleAutoAssign(b.id)} className="text-sm font-medium text-brand-500 hover:text-brand-600">
-                            Auto-assign
-                          </button>
-                        )}
-                        {(b.status === "ASSIGNED" || b.status === "IN_PROGRESS") && (
-                          <button onClick={() => handleComplete(b.id)} className="text-sm font-medium text-success-500 hover:text-success-600">
-                            Complete
-                          </button>
-                        )}
-                        {!["COMPLETED", "CANCELLED"].includes(b.status) && (
-                          <>
-                            <button onClick={() => openAction(b, "reschedule")} className="text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-300">
-                              Reschedule
-                            </button>
-                            <button onClick={() => openAction(b, "cancel")} className="text-sm font-medium text-error-500 hover:text-error-600">
-                              Cancel
-                            </button>
-                          </>
-                        )}
-                        <button onClick={() => openAction(b, "payment")} className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400">
-                          Pay: {b.paymentStatus || "UNPAID"}
-                        </button>
-                        {b.paymentStatus !== "PAID" && b.status !== "CANCELLED" && (
-                          <button
-                            onClick={() => handleGetPaymentLink(b.id)}
-                            disabled={paymentLinkBusyId === b.id}
-                            className="text-sm font-medium text-brand-500 hover:text-brand-600 disabled:opacity-60"
-                            title="Create a Stripe checkout link the customer can pay with directly"
-                          >
-                            {paymentLinkBusyId === b.id ? "Creating link…" : "Payment link"}
-                          </button>
-                        )}
-                      </div>
+                      <RowActionsMenu
+                        label={`Actions for booking ${b.id}`}
+                        actions={[
+                          ...(b.status === "REQUESTED"
+                            ? [{ label: "Confirm", onClick: () => handleConfirm(b.id) }]
+                            : []),
+                          ...(b.status === "CONFIRMED"
+                            ? [{ label: "Auto-assign", onClick: () => handleAutoAssign(b.id) }]
+                            : []),
+                          ...(b.status === "ASSIGNED" || b.status === "IN_PROGRESS"
+                            ? [{ label: "Complete", onClick: () => handleComplete(b.id) }]
+                            : []),
+                          ...(!["COMPLETED", "CANCELLED"].includes(b.status)
+                            ? [
+                                { label: "Reschedule", onClick: () => openAction(b, "reschedule") },
+                                {
+                                  label: "Cancel",
+                                  variant: "danger" as const,
+                                  onClick: () => openAction(b, "cancel"),
+                                },
+                              ]
+                            : []),
+                          {
+                            label: `Pay: ${b.paymentStatus || "UNPAID"}`,
+                            onClick: () => openAction(b, "payment"),
+                          },
+                          ...(b.paymentStatus !== "PAID" && b.status !== "CANCELLED"
+                            ? [
+                                {
+                                  label:
+                                    paymentLinkBusyId === b.id ? "Creating link…" : "Payment link",
+                                  disabled: paymentLinkBusyId === b.id,
+                                  onClick: () => handleGetPaymentLink(b.id),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import {
   listCleaners,
   onboardCleaner,
@@ -170,14 +171,20 @@ export default function CleanersPage() {
                       <Badge color={STATUS_COLOR[c.status]} size="sm">{c.status}</Badge>
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      {c.status === "ACTIVE" && (
-                        <button
-                          onClick={() => setShowOffboardModal(c)}
-                          className="text-sm font-medium text-error-500 hover:text-error-600"
-                        >
-                          Offboard
-                        </button>
-                      )}
+                      <RowActionsMenu
+                        label={`Actions for ${cleanerDisplayName(c)}`}
+                        actions={[
+                          ...(c.status === "ACTIVE"
+                            ? [
+                                {
+                                  label: "Offboard",
+                                  variant: "danger" as const,
+                                  onClick: () => setShowOffboardModal(c),
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

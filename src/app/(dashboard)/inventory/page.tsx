@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import {
     listItems,
     createItem,
@@ -347,12 +348,16 @@ export default function InventoryPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
-                                                <button
-                                                    onClick={() => toggleActive(item)}
-                                                    className="text-sm font-medium text-brand-500 hover:underline"
-                                                >
-                                                    {item.isActive ? "Deactivate" : "Activate"}
-                                                </button>
+                                                <RowActionsMenu
+                                                    label={`Actions for ${item.name}`}
+                                                    actions={[
+                                                        {
+                                                            label: item.isActive ? "Deactivate" : "Activate",
+                                                            variant: item.isActive ? "danger" as const : "default" as const,
+                                                            onClick: () => toggleActive(item),
+                                                        },
+                                                    ]}
+                                                />
                                             </TableCell>
                                         </TableRow>
                                     ))}

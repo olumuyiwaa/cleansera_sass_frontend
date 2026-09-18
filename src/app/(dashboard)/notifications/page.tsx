@@ -6,6 +6,7 @@ import {authFetch} from "@/app/api/authFetch";
 import {NotificationItem, Pagination} from "@/app/api/types";
 import {useAuth} from "@/app/auth/useAuth";
 import {useRouter} from "next/navigation";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) return error.message;
@@ -366,14 +367,24 @@ export default function NotificationsPage() {
                                         </td>
 
                                         <td className="px-5 py-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => markNotificationAsRead(notification.id)}
-                                                disabled={notification.isRead || markingId === notification.id}
-                                                className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
-                                            >
-                                                {markingId === notification.id ? "Saving..." : "Mark Read"}
-                                            </button>
+                                            <RowActionsMenu
+                                                label={`Actions for notification: ${notification.title}`}
+                                                actions={
+                                                    notification.isRead
+                                                        ? []
+                                                        : [
+                                                              {
+                                                                  label:
+                                                                      markingId === notification.id
+                                                                          ? "Saving…"
+                                                                          : "Mark Read",
+                                                                  disabled: markingId === notification.id,
+                                                                  onClick: () =>
+                                                                      markNotificationAsRead(notification.id),
+                                                              },
+                                                          ]
+                                                }
+                                            />
                                         </td>
                                     </tr>
                                 ))

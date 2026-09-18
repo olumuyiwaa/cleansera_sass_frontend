@@ -9,6 +9,7 @@ import {
   deleteDocument,
 } from "@/app/api/cleanerDocuments.api";
 import { authFetch } from "@/app/api/authFetch";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 const DOC_TYPES = ["ID_CARD", "BACKGROUND_CHECK", "CERTIFICATION", "CONTRACT", "INSURANCE", "OTHER"];
 
@@ -144,27 +145,27 @@ export default function CleanerDocumentsPage() {
                   <td className="px-4 py-3">{d.title}</td>
                   <td className="px-4 py-3">{d.type}</td>
                   <td className="px-4 py-3">{new Date(d.createdAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 space-x-2">
-                    <button
-                      type="button"
-                      className="text-brand-500 hover:underline"
-                      onClick={async () => {
-                        const res = await getDownloadUrl(d.id);
-                        if (res.success && res.data?.downloadUrl) window.open(res.data.downloadUrl, "_blank");
-                      }}
-                    >
-                      Download
-                    </button>
-                    <button
-                      type="button"
-                      className="text-red-600 hover:underline"
-                      onClick={async () => {
-                        await deleteDocument(d.id);
-                        load();
-                      }}
-                    >
-                      Delete
-                    </button>
+                  <td className="px-4 py-3">
+                    <RowActionsMenu
+                      label={`Actions for ${d.title}`}
+                      actions={[
+                        {
+                          label: "Download",
+                          onClick: async () => {
+                            const res = await getDownloadUrl(d.id);
+                            if (res.success && res.data?.downloadUrl) window.open(res.data.downloadUrl, "_blank");
+                          },
+                        },
+                        {
+                          label: "Delete",
+                          variant: "danger" as const,
+                          onClick: async () => {
+                            await deleteDocument(d.id);
+                            load();
+                          },
+                        },
+                      ]}
+                    />
                   </td>
                 </tr>
               ))}

@@ -7,6 +7,7 @@ import {
   deactivateGiftCard,
   type GiftCard,
 } from "@/app/api/giftCards.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 function centsToDollars(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -176,15 +177,14 @@ export default function GiftCardsPage() {
                     {g.expiresAt ? new Date(g.expiresAt).toLocaleDateString() : "—"}
                   </td>
                   <td className="px-4 py-3">
-                    {g.isActive && (
-                      <button
-                        type="button"
-                        className="text-red-600 hover:underline"
-                        onClick={() => onDeactivate(g.id)}
-                      >
-                        Deactivate
-                      </button>
-                    )}
+                    <RowActionsMenu
+                      label={`Actions for gift card ${g.code}`}
+                      actions={
+                        g.isActive
+                          ? [{ label: "Deactivate", variant: "danger" as const, onClick: () => onDeactivate(g.id) }]
+                          : []
+                      }
+                    />
                   </td>
                 </tr>
               ))}

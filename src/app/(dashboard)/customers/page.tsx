@@ -9,6 +9,7 @@ import {
   deleteCustomer,
   addAddress,
 } from "@/app/api/customers.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 type Customer = {
   id: string;
@@ -134,9 +135,10 @@ export default function CustomersPage() {
                   <td className="px-4 py-3">{c.email || "—"}</td>
                   <td className="px-4 py-3">{c._count?.bookings ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <button type="button" className="text-brand-500 hover:underline" onClick={() => openDetail(c.id)}>
-                      View
-                    </button>
+                    <RowActionsMenu
+                      label={`Actions for ${c.firstName} ${c.lastName}`.trim()}
+                      actions={[{ label: "View", onClick: () => openDetail(c.id) }]}
+                    />
                   </td>
                 </tr>
               ))}

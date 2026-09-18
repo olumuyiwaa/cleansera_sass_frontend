@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import {
     listDocuments,
     createDocument,
@@ -328,12 +329,16 @@ export default function CompliancePage() {
                                                 )}
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
-                                                <button
-                                                    onClick={() => handleDeleteDoc(doc.id)}
-                                                    className="text-sm font-medium text-error-500 hover:underline"
-                                                >
-                                                    Delete
-                                                </button>
+                                                <RowActionsMenu
+                                                    label={`Actions for ${doc.title}`}
+                                                    actions={[
+                                                        {
+                                                            label: "Delete",
+                                                            variant: "danger" as const,
+                                                            onClick: () => handleDeleteDoc(doc.id),
+                                                        },
+                                                    ]}
+                                                />
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -391,14 +396,14 @@ export default function CompliancePage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
-                                                {a.status !== "CLOSED" && (
-                                                    <button
-                                                        onClick={() => closeAudit(a)}
-                                                        className="text-sm font-medium text-brand-500 hover:underline"
-                                                    >
-                                                        Close
-                                                    </button>
-                                                )}
+                                                <RowActionsMenu
+                                                    label={`Actions for ${a.title}`}
+                                                    actions={
+                                                        a.status !== "CLOSED"
+                                                            ? [{ label: "Close", onClick: () => closeAudit(a) }]
+                                                            : []
+                                                    }
+                                                />
                                             </TableCell>
                                         </TableRow>
                                     ))}

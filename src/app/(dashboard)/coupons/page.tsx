@@ -8,6 +8,7 @@ import {
   type Coupon,
   type CouponType,
 } from "@/app/api/coupons.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -159,15 +160,14 @@ export default function CouponsPage() {
                         {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "—"}
                       </td>
                       <td className="px-4 py-3">
-                        {c.isActive && (
-                            <button
-                                type="button"
-                                className="text-red-600 hover:underline"
-                                onClick={() => onDelete(c.id)}
-                            >
-                              Deactivate
-                            </button>
-                        )}
+                        <RowActionsMenu
+                          label={`Actions for coupon ${c.code}`}
+                          actions={
+                            c.isActive
+                              ? [{ label: "Deactivate", variant: "danger" as const, onClick: () => onDelete(c.id) }]
+                              : []
+                          }
+                        />
                       </td>
                     </tr>
                 ))}

@@ -14,6 +14,7 @@ import {
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Select from "@/components/form/Select";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import { listCleaners } from "@/app/api/cleaners.api";
 import {
   listCompensations,
@@ -237,22 +238,15 @@ export default function PayrollPage() {
                           {formatMoney(pending)}
                         </TableCell>
                         <TableCell className="px-5 py-4">
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => openRateModal(c)}
-                              className="text-sm font-medium text-brand-500 hover:text-brand-600"
-                            >
-                              {comp ? "Edit rate" : "Set rate"}
-                            </button>
-                            {pending > 0 && (
-                              <button
-                                onClick={() => setPayoutCleaner(c)}
-                                className="text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-300"
-                              >
-                                Pay out
-                              </button>
-                            )}
-                          </div>
+                          <RowActionsMenu
+                            label={`Actions for ${cleanerDisplayName(c)}`}
+                            actions={[
+                              { label: comp ? "Edit rate" : "Set rate", onClick: () => openRateModal(c) },
+                              ...(pending > 0
+                                ? [{ label: "Pay out", onClick: () => setPayoutCleaner(c) }]
+                                : []),
+                            ]}
+                          />
                         </TableCell>
                       </TableRow>
                     );
@@ -356,32 +350,27 @@ export default function PayrollPage() {
                         <Badge color={PAYOUT_STATUS_COLOR[p.status]} size="sm">{p.status}</Badge>
                       </TableCell>
                       <TableCell className="px-5 py-4">
-                        {p.status === "PENDING" && (
-                          <div className="flex items-center gap-3">
-                            {p.cleaner.user.stripePayoutsEnabled ? (
-                              <button
-                                onClick={() => handlePayStripe(p)}
-                                disabled={payingStripeId === p.id}
-                                className="text-sm font-medium text-brand-500 hover:text-brand-600 disabled:opacity-50"
-                              >
-                                {payingStripeId === p.id ? "Paying…" : "Pay via Stripe"}
-                              </button>
-                            ) : (
-                              <span
-                                className="text-xs text-gray-400"
-                                title="This cleaner hasn't connected a payout account yet"
-                              >
-                                Stripe not connected
-                              </span>
-                            )}
-                            <button
-                              onClick={() => handleMarkPaid(p)}
-                              className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                            >
-                              Mark as paid manually
-                            </button>
-                          </div>
-                        )}
+                        <RowActionsMenu
+                          label={`Actions for payout to ${p.cleaner.user.firstName} ${p.cleaner.user.lastName}`.trim()}
+                          actions={
+                            p.status === "PENDING"
+                              ? [
+                                  p.cleaner.user.stripePayoutsEnabled
+                                    ? {
+                                        label: payingStripeId === p.id ? "Paying…" : "Pay via Stripe",
+                                        disabled: payingStripeId === p.id,
+                                        onClick: () => handlePayStripe(p),
+                                      }
+                                    : {
+                                        label: "Stripe not connected",
+                                        disabled: true,
+                                        onClick: () => {},
+                                      },
+                                  { label: "Mark as paid manually", onClick: () => handleMarkPaid(p) },
+                                ]
+                              : []
+                          }
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

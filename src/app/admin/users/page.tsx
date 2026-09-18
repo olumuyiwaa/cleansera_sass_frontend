@@ -7,6 +7,7 @@ import {
   UserListItem,
   Pagination,
 } from "@/app/api/superAdmin.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 export default function SuperAdminUsersPage() {
   const [items, setItems] = useState<UserListItem[]>([]);
@@ -159,20 +160,21 @@ export default function SuperAdminUsersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    {u.globalRole !== "SUPER_ADMIN" && (
-                      <button
-                        type="button"
-                        disabled={busyId === u.id}
-                        onClick={() => toggleActive(u)}
-                        className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50"
-                      >
-                        {busyId === u.id
-                          ? "…"
-                          : u.isActive
-                            ? "Deactivate"
-                            : "Activate"}
-                      </button>
-                    )}
+                    <RowActionsMenu
+                      label={`Actions for ${u.firstName} ${u.lastName}`.trim()}
+                      actions={
+                        u.globalRole !== "SUPER_ADMIN"
+                          ? [
+                              {
+                                label: busyId === u.id ? "…" : u.isActive ? "Deactivate" : "Activate",
+                                disabled: busyId === u.id,
+                                variant: u.isActive ? "danger" as const : "default" as const,
+                                onClick: () => toggleActive(u),
+                              },
+                            ]
+                          : []
+                      }
+                    />
                   </td>
                 </tr>
               ))}

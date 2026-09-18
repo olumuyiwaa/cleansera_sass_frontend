@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import Select from "@/components/form/Select";
 import { useAuth } from "@/app/auth/useAuth";
 import { listStaff, inviteStaff, updateStaffRole, removeStaff } from "@/app/api/staff.api";
@@ -176,14 +177,20 @@ export default function TeamPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      {isOwnerOrOrgAdmin && m.role !== "BUSINESS_OWNER" && m.isActive && (
-                        <button
-                          onClick={() => setShowRemoveModal(m)}
-                          className="text-sm font-medium text-error-500 hover:text-error-600"
-                        >
-                          Remove
-                        </button>
-                      )}
+                      <RowActionsMenu
+                        label={`Actions for ${staffDisplayName(m)}`}
+                        actions={
+                          isOwnerOrOrgAdmin && m.role !== "BUSINESS_OWNER" && m.isActive
+                            ? [
+                                {
+                                  label: "Remove",
+                                  variant: "danger" as const,
+                                  onClick: () => setShowRemoveModal(m),
+                                },
+                              ]
+                            : []
+                        }
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

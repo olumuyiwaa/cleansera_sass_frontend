@@ -9,6 +9,7 @@ import {
   addTicketMessage,
   deleteTicket,
 } from "@/app/api/supportTickets.api";
+import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 type TicketStatus = "OPEN" | "IN_PROGRESS" | "WAITING_ON_CUSTOMER" | "RESOLVED" | "CLOSED";
 type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
@@ -334,16 +335,16 @@ export default function SupportTicketsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-500">{fmt(t.updatedAt)}</td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      className="text-red-600 hover:underline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeTicket(t.id);
-                      }}
-                    >
-                      Delete
-                    </button>
+                    <RowActionsMenu
+                      label={`Actions for ticket: ${t.subject}`}
+                      actions={[
+                        {
+                          label: "Delete",
+                          variant: "danger" as const,
+                          onClick: () => removeTicket(t.id),
+                        },
+                      ]}
+                    />
                   </td>
                 </tr>
               ))}
