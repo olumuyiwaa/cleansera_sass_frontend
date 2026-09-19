@@ -23,7 +23,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading: authLoading, isAuthenticated } = useAuth();
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  // const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   // This layout wraps every tenant page (bookings, cleaners, payroll, ...).
   // It previously had no auth gate at all — only /admin (super admin) did —
@@ -38,38 +38,38 @@ export default function AdminLayout({
     }
   }, [authLoading, isAuthenticated, user, router]);
 
-  useEffect(() => {
-    if (authLoading || !isAuthenticated) return;
-
-    let cancelled = false;
-    const isExempt = ONBOARDING_EXEMPT_PATHS.some((p) => pathname?.startsWith(p));
-
-    (async () => {
-      try {
-        const status = await getOnboardingStatus();
-        if (cancelled) return;
-        if (!status.isComplete && !isExempt) {
-          router.replace("/onboarding");
-          return;
-        }
-      } catch {
-        // If the check itself fails (e.g. network hiccup), don't block the
-        // dashboard on it — better to let a fully-set-up business keep
-        // working than to hard-lock everyone out on a transient error.
-        // (Auth failures no longer reach here — the gate above catches
-        // those before this effect is even allowed to run.)
-      } finally {
-        if (!cancelled) setCheckingOnboarding(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-    // Re-check on every route change so finishing a step elsewhere and
-    // navigating back doesn't leave a stale "incomplete" redirect looping.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, authLoading, isAuthenticated]);
+  // useEffect(() => {
+  //   if (authLoading || !isAuthenticated) return;
+  //
+  //   let cancelled = false;
+  //   const isExempt = ONBOARDING_EXEMPT_PATHS.some((p) => pathname?.startsWith(p));
+  //
+  //   (async () => {
+  //     try {
+  //       const status = await getOnboardingStatus();
+  //       if (cancelled) return;
+  //       if (!status.isComplete && !isExempt) {
+  //         router.replace("/onboarding");
+  //         return;
+  //       }
+  //     } catch {
+  //       // If the check itself fails (e.g. network hiccup), don't block the
+  //       // dashboard on it — better to let a fully-set-up business keep
+  //       // working than to hard-lock everyone out on a transient error.
+  //       // (Auth failures no longer reach here — the gate above catches
+  //       // those before this effect is even allowed to run.)
+  //     } finally {
+  //       if (!cancelled) setCheckingOnboarding(false);
+  //     }
+  //   })();
+  //
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  //   // Re-check on every route change so finishing a step elsewhere and
+  //   // navigating back doesn't leave a stale "incomplete" redirect looping.
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [pathname, authLoading, isAuthenticated]);
 
   // Dynamic class for main content margin based on sidebar state
   const mainContentMargin = isMobileOpen
@@ -78,9 +78,9 @@ export default function AdminLayout({
     ? "lg:ml-[290px]"
     : "lg:ml-[90px]";
 
-  if (authLoading || !isAuthenticated || !user || checkingOnboarding) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">Loading…</div>;
-  }
+  // if (authLoading || !isAuthenticated || !user || checkingOnboarding) {
+  //   return <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">Loading…</div>;
+  // }
 
   return (
     <div className="min-h-screen xl:flex">

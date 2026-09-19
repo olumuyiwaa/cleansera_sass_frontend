@@ -35,6 +35,7 @@ export function SiteHeader({
 
   const initial = businessName.trim().charAt(0).toUpperCase() || "C";
   const bookHref = `/book-now/${subdomain}`;
+  const portalHref = `/${subdomain}/portal`;
 
   function handleBook(e: React.MouseEvent) {
     if (onBook) {
@@ -88,7 +89,13 @@ export function SiteHeader({
           ))}
         </nav>
 
-        <div className="hidden md:block shrink-0">
+        <div className="hidden md:flex items-center gap-2 shrink-0">
+          <a
+            href={portalHref}
+            className="inline-flex min-h-[42px] items-center rounded-[12px] border border-[#E2DED3] bg-white px-3.5 py-2 text-sm font-medium text-[#5C5546] transition-colors hover:text-[#171B1A]"
+          >
+            My Account
+          </a>
           <a
             href={bookHref}
             onClick={handleBook}
@@ -137,6 +144,13 @@ export function SiteHeader({
                 {item.label}
               </a>
             ))}
+            <a
+              href={portalHref}
+              className="mt-2 rounded-[12px] border border-[#E2DED3] px-4 py-2.5 text-center text-sm font-medium text-[#5C5546]"
+              onClick={() => setMenuOpen(false)}
+            >
+              My Account
+            </a>
             <a
               href={bookHref}
               onClick={handleBook}

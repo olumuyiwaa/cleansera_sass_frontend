@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
 import "@/components/site/site.css";
 
-export default function SiteLayout({ children }: { children: ReactNode }) {
+/**
+ * Shared layout for the unified business customer experience:
+ *   /[subdomain]         → public storefront
+ *   /[subdomain]/portal  → customer self-service portal
+ *
+ * Keeps the same branding surface (fonts, base colors) for both.
+ */
+export default function BusinessLayout({ children }: { children: ReactNode }) {
   return (
     <div
       id="top"

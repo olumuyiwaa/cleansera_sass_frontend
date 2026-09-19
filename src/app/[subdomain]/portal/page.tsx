@@ -39,9 +39,10 @@ function formatWhen(iso: string) {
     });
 }
 
-export default function CustomerPortalSlugPage() {
+export default function CustomerPortalPage() {
     const params = useParams();
-    const slug = (params?.slug as string) || "";
+    // Unified under /[subdomain]/portal — param is now "subdomain"
+    const slug = (params?.subdomain as string) || (params?.slug as string) || "";
 
     const [step, setStep] = useState<Step>("phone");
     const [phone, setPhone] = useState("");
@@ -248,7 +249,7 @@ export default function CustomerPortalSlugPage() {
         setError("");
         try {
             const origin = typeof window !== "undefined" ? window.location.origin : "";
-            const path = `/portal/${encodeURIComponent(slug)}`;
+            const path = `/${encodeURIComponent(slug)}/portal`;
             const data = await tipPortalBooking(
                 slug,
                 token,
@@ -306,6 +307,12 @@ export default function CustomerPortalSlugPage() {
                 {customer.firstName} {customer.lastName}
               </span>
                         )}
+                        <Link
+                            href={`/${encodeURIComponent(slug)}`}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                        >
+                            Site
+                        </Link>
                         <Link
                             href={`/book-now/${encodeURIComponent(slug)}`}
                             className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700"
