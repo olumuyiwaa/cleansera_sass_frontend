@@ -1,10 +1,10 @@
 # CleanSera Business Dashboard (Frontend)
 
-Next.js App Router frontend for **CleanSera** — the business operations dashboard, public branded booking sites, and customer portal.
+Next.js App Router frontend for **CleanSera** — multi-tenant cleaning business SaaS.
 
-Cleaning businesses use this app to manage roster, bookings, dispatch, payroll, branding, and more. Customers book via subdomain/custom-domain sites or the embeddable widget. Cleaners are managed entirely by their employer business (onboard / offboard), not by a marketplace.
+Businesses use this app to manage roster, bookings, dispatch, payroll, branding, and more. Customers book and manage jobs through a **unified branded experience** per business. Cleaners are owned by their employer business (onboard / offboard), not by a marketplace.
 
-Backend: [cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass)
+**Backend:** [cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass)
 
 ---
 
@@ -17,8 +17,10 @@ Backend: [cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass)
 - [Local setup](#local-setup)
 - [Environment variables](#environment-variables)
 - [Key routes](#key-routes)
+- [URL redirects](#url-redirects)
 - [Features by area](#features-by-area)
 - [Realtime](#realtime)
+- [Scripts](#scripts)
 - [Related repositories](#related-repositories)
 
 ---
@@ -28,11 +30,13 @@ Backend: [cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass)
 | Surface | Description |
 |---------|-------------|
 | **Business dashboard** | Authenticated workspace for owners and managers |
-| **Public site** | Branded marketing + booking pages per business (`/site/[subdomain]`) |
-| **Book now / widget** | Customer booking flows |
-| **Customer portal** | Logged-in customer views (`/portal/[slug]`) |
+| **Public site** | Branded marketing + booking pages per business (`/[subdomain]`) |
+| **Customer portal** | Self-service bookings under the same brand (`/[subdomain]/portal`) |
+| **Book now / widget** | Customer booking flows (`/book-now/[slug]`, embeddable widget) |
 | **Auth** | Sign in, register business, invites, 2FA |
 | **Platform admin** | Super-admin tooling under `/admin` |
+
+Customer-facing pages share one tree so the storefront and “My Account” feel like a single product, not two apps.
 
 ---
 
@@ -58,9 +62,10 @@ Backend: [cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass)
 ```
 cleansera_sass_frontend/
 ├── public/
+│   └── embed.js                 # Embeddable booking widget script
 ├── src/
 │   ├── app/
-│   │   ├── (dashboard)/          # Authenticated business UI
+│   │   ├── (dashboard)/         # Authenticated business UI
 │   │   │   ├── dashboard/
 │   │   │   ├── bookings/
 │   │   │   ├── calendar/
@@ -72,22 +77,28 @@ cleansera_sass_frontend/
 │   │   │   ├── payroll/
 │   │   │   ├── inventory/
 │   │   │   ├── compliance/
-│   │   │   ├── website/          # Branding & public site content
+│   │   │   ├── website/         # Branding & public site content
 │   │   │   ├── subscription/
 │   │   │   ├── team/
 │   │   │   ├── messages/
 │   │   │   ├── reports/
 │   │   │   └── …
 │   │   ├── (full-width-pages)/
-│   │   ├── admin/                # Platform admin
+│   │   ├── [subdomain]/        # Unified customer experience
+│   │   │   ├── layout.tsx       # Shared branded layout
+│   │   │   ├── page.tsx         # Public storefront
+│   │   │   └── portal/
+│   │   │       └── page.tsx     # Customer self-service portal
+│   │   ├── admin/               # Platform admin
 │   │   ├── auth/
-│   │   ├── book-now/
-│   │   ├── portal/[slug]/       # Customer portal
-│   │   ├── site/[subdomain]/    # Public business site
-│   │   ├── api/                  # Next.js route handlers / types
+│   │   ├── book-now/[slug]/    # Standalone booking flow
+│   │   ├── api/                 # Client API modules & types
 │   │   ├── layout.tsx
 │   │   └── globals.css
 │   ├── components/
+│   │   ├── site/                # Storefront sections (hero, services, …)
+│   │   ├── widget/              # Booking modal / form
+│   │   └── …
 │   ├── context/
 │   ├── hooks/
 │   ├── icons/
@@ -95,7 +106,7 @@ cleansera_sass_frontend/
 │   └── lib/
 ├── env.frontend.example
 ├── env.local.example
-├── next.config.ts
+├── next.config.ts               # Includes legacy URL redirects
 └── package.json
 ```
 
@@ -104,7 +115,7 @@ cleansera_sass_frontend/
 ## Prerequisites
 
 - Node.js 18+ (20 recommended)
-- Running CleanSera API (`cleansera_sass`) on the URL you configure
+- Running CleanSera API ([cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass)) on the URL you configure
 - Stripe publishable key (test) for subscription UI
 - Optional: Google Maps API key for address / service-area UX
 
@@ -122,7 +133,8 @@ npm install
 
 # 3. Environment
 cp env.local.example .env.local
-# Edit .env.local — set NEXT_PUBLIC_API_BASE_URL to your API (default http://localhost:8000/api/v1)
+# Edit .env.local — set NEXT_PUBLIC_API_BASE_URL to your API
+# (default http://localhost:8000/api/v1)
 
 # 4. Start
 npm run dev
@@ -131,6 +143,18 @@ npm run dev
 App runs at `http://localhost:3000` by default.
 
 Ensure the backend is running and CORS / `FRONTEND_URL` on the API allow this origin.
+
+### Smoke-test customer routes
+
+| URL | Expected |
+|-----|----------|
+| `http://localhost:3000/{subdomain}` | Public storefront |
+| `http://localhost:3000/{subdomain}/portal` | Customer portal (OTP login) |
+| `http://localhost:3000/book-now/{subdomain}` | Booking flow |
+| `http://localhost:3000/site/{subdomain}` | Redirects → `/{subdomain}` |
+| `http://localhost:3000/portal/{subdomain}` | Redirects → `/{subdomain}/portal` |
+
+Replace `{subdomain}` with a real business subdomain from your seed/API data.
 
 ---
 
@@ -142,7 +166,7 @@ Copy from `env.local.example` or `env.frontend.example`. Important keys:
 |----------|---------|
 | `NEXT_PUBLIC_APP_URL` | Canonical app URL |
 | `NEXT_PUBLIC_API_BASE_URL` | Backend API base (`…/api/v1`) |
-| `API_URL` | Server-side API base (same host usually) |
+| `API_URL` | Server-side API base (usually same host) |
 | `NEXT_PUBLIC_SOCKET_URL` | Socket.io origin for live dispatch / messaging |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Platform subscription checkout |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps & geocoding in the UI |
@@ -180,27 +204,44 @@ Do not commit `.env.local`.
 | `/messages` / `/notifications` | Communication |
 | `/reports` | Analytics |
 | `/reviews` | Customer reviews |
-| `/subscription` | CleanSera plan billing |
-| `/business-settings` | Business profile, hours, areas |
-| `/onboarding` | First-run setup |
+| `/subscription` | CleanSera plan billing (platform fee only) |
+| `/business-settings` | Business profile, hours, service areas |
+| `/onboarding` | First-run setup checklist |
 | `/support-tickets` | Support |
 | `/audit-trail` | Audit log |
 | `/profile` | User profile |
 
-### Public & customer
+### Public & customer (unified)
 
 | Path | Area |
 |------|------|
-| `/site/[subdomain]` | Branded public site |
-| `/book-now` | Booking entry |
-| `/portal/[slug]` | Customer portal |
+| `/[subdomain]` | Branded public storefront |
+| `/[subdomain]/portal` | Customer portal (OTP, bookings, cancel / reschedule / review / tip) |
+| `/book-now/[slug]` | Full-page booking flow |
 | `/auth/*` | Login, register, invites |
+
+Job payments use **Stripe Connect** on the business account. The `/subscription` page is only for the business’s CleanSera plan.
 
 ### Admin
 
 | Path | Area |
 |------|------|
 | `/admin/*` | Platform administration |
+
+---
+
+## URL redirects
+
+Legacy paths remain valid via permanent redirects in `next.config.ts`:
+
+| Old | New |
+|-----|-----|
+| `/site/:subdomain` | `/:subdomain` |
+| `/site/:subdomain/:path*` | `/:subdomain/:path*` |
+| `/portal/:slug` | `/:slug/portal` |
+| `/portal/:slug/:path*` | `/:slug/portal/:path*` |
+
+Update emails, SMS, and dashboard-generated links to the new paths when convenient. Redirects keep old links working in the meantime.
 
 ---
 
@@ -214,7 +255,7 @@ Do not commit `.env.local`.
 - Services, pricing engine, coupons, gift cards, waitlist
 - Payroll: compensation rules, earnings, payout batches
 - Inventory & compliance modules
-- Checklists and job photo workflows
+- Checklists and job workflows
 - Messaging and notifications
 - Reports and audit trail
 
@@ -222,7 +263,9 @@ Do not commit `.env.local`.
 
 - Themed public site (colors, hero, about, testimonials, FAQ, gallery, social)
 - Subdomain and custom-domain ready (configured via API)
-- Customer booking and portal
+- Booking modal on the storefront + full `/book-now` flow
+- Customer portal under the same subdomain (`/[subdomain]/portal`)
+- Header “My Account” links storefront → portal
 
 ### Platform
 
@@ -254,7 +297,7 @@ Socket.io client connects to `NEXT_PUBLIC_SOCKET_URL` for live updates (dispatch
 | Repo | Role |
 |------|------|
 | [cleansera_sass](https://github.com/olumuyiwaa/cleansera_sass) | Backend API |
-| [cleansera_cleaner_app](https://github.com/olumuyiwaa/cleansera_cleaner_app) | Cleaner mobile app |
+| [cleansera_cleaner_app](https://github.com/olumuyiwaa/cleansera_cleaner_app) | Cleaner mobile app (Flutter) |
 | [cleansera_sass_website](https://github.com/olumuyiwaa/cleansera_sass_website) | Marketing site |
 
 ---
