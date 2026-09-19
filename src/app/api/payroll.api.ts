@@ -6,6 +6,18 @@ export async function listCompensations() {
     return result.data as CleanerCompensation[];
 }
 
+export type PayrollSummary = {
+    pendingEarningsCents: number;
+    lifetimePaidCents: number;
+    pendingPayoutsCents: number;
+    cleanersWithPendingEarnings: number;
+};
+
+export async function getPayrollSummary() {
+    const result = await authFetch(`/payroll/summary`, { method: "GET" });
+    return result.data as PayrollSummary;
+}
+
 export async function setCompensation(cleanerId: string, type: CompensationType, value: number) {
     const result = await authFetch(`/payroll/compensation/${cleanerId}`, {
         method: "PUT",

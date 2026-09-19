@@ -10,8 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { listDispatchItems, createAssignment, suggestCleaners, DispatchAssignment } from "@/app/api/dispatch.api";
+import { listDispatchItems, createAssignment, suggestCleaners, getCleanerDayRoute, DispatchAssignment, DayRoute } from "@/app/api/dispatch.api";
 import { listBookings } from "@/app/api/bookings.api";
+import { listCleaners } from "@/app/api/cleaners.api";
 import { Booking, Cleaner, cleanerDisplayName } from "@/app/api/cleansera-types";
 
 export default function DispatchPage() {
@@ -23,22 +24,46 @@ export default function DispatchPage() {
   const [suggestions, setSuggestions] = useState<Cleaner[]>([]);
   const [assigning, setAssigning] = useState<string | null>(null);
 
+  const [activeCleaners, setActiveCleaners] = useState<Cleaner[]>([]);
+  const [routeCleanerId, setRouteCleanerId] = useState("");
+  const [routeDate, setRouteDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [route, setRoute] = useState<DayRoute | null>(null);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState("");
+
+  const checkRoute = async () => {
+    if (!routeCleanerId) return;
+    setRouteLoading(true);
+    setRouteError("");
+    setRoute(null);
+    try {
+      const r = await getCleanerDayRoute(routeCleanerId, routeDate);
+      setRoute(r);
+    } catch (err) {
+      setRouteError(err instanceof Error ? err.message : "Failed to check route");
+    } finally {
+      setRouteLoading(false);
+    }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       // "Needs assignment" = confirmed bookings with no cleaner yet.
       // "In progress" = existing assignments for jobs not yet completed.
-      const [confirmed, assigned, inProgress] = await Promise.all([
+      const [confirmed, assigned, inProgress, cleaners] = await Promise.all([
         listBookings("CONFIRMED"),
         listDispatchItems(),
         listBookings("IN_PROGRESS"),
+        listCleaners("ACTIVE"),
       ]);
       setNeedsAssignment(confirmed);
       const activeAssignments = assigned.filter(
         (a) => a.booking?.status === "ASSIGNED" || a.booking?.status === "IN_PROGRESS"
       );
       setAssignments(activeAssignments.length ? activeAssignments : assigned);
+      setActiveCleaners(cleaners);
       void inProgress; // already covered via assignments' nested booking.status
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load dispatch board");
@@ -91,6 +116,88 @@ export default function DispatchPage() {
           {error}
         </div>
       )}
+
+      <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          Day route check
+        </h2>
+        <p className="mb-3 text-xs text-gray-400">
+          Doesn&apos;t reorder anyone&apos;s schedule — each job keeps its own booked time. This
+          just walks a cleaner&apos;s day in order and flags any back-to-back jobs where the drive
+          between them is longer than the gap they&apos;ve been given.
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Cleaner</label>
+            <select
+              value={routeCleanerId}
+              onChange={(e) => setRouteCleanerId(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-white/[0.03] dark:text-white"
+            >
+              <option value="">Select a cleaner…</option>
+              {activeCleaners.map((c) => (
+                <option key={c.id} value={c.id}>{cleanerDisplayName(c)}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Date</label>
+            <input
+              type="date"
+              value={routeDate}
+              onChange={(e) => setRouteDate(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-white/[0.03] dark:text-white"
+            />
+          </div>
+          <Button size="sm" onClick={checkRoute} disabled={!routeCleanerId || routeLoading}>
+            {routeLoading ? "Checking…" : "Check route"}
+          </Button>
+        </div>
+
+        {routeError && <p className="mt-3 text-sm text-error-500">{routeError}</p>}
+
+        {route && (
+          <div className="mt-4">
+            {route.stops.length === 0 ? (
+              <p className="text-sm text-gray-500">No jobs scheduled for this cleaner on {route.date}.</p>
+            ) : (
+              <ol className="space-y-2">
+                {route.stops.map((stop, i) => {
+                  const leg = route.legs[i - 1];
+                  return (
+                    <li key={stop.bookingId}>
+                      {leg && (
+                        <div
+                          className={`ml-2 mb-2 border-l-2 pl-3 text-xs ${
+                            leg.isTight
+                              ? "border-error-400 text-error-500"
+                              : "border-gray-200 text-gray-400 dark:border-gray-700"
+                          }`}
+                        >
+                          {leg.distanceMeters != null
+                            ? `~${(leg.distanceMeters / 1000).toFixed(1)} km, ~${Math.round(
+                                (leg.estimatedDriveSeconds || 0) / 60
+                              )} min drive`
+                            : "Distance unknown (missing coordinates)"}
+                          {" — "}
+                          {Math.round(leg.gapSeconds / 60)} min scheduled between jobs
+                          {leg.isTight && " — tight, may run late"}
+                        </div>
+                      )}
+                      <div className="rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-800">
+                        <span className="font-medium text-gray-800 dark:text-white/90">
+                          {new Date(stop.scheduledStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="ml-2 text-gray-500 dark:text-gray-400">{stop.address}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </div>
+        )}
+      </div>
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
         Needs assignment ({needsAssignment.length})

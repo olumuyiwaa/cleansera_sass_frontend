@@ -24,6 +24,8 @@ import {
   createPayout,
   markPayoutPaid,
   payPayoutViaStripe,
+  getPayrollSummary,
+  PayrollSummary,
 } from "@/app/api/payroll.api";
 import {
   Cleaner,
@@ -49,6 +51,7 @@ export default function PayrollPage() {
   const [compensations, setCompensations] = useState<CleanerCompensation[]>([]);
   const [earnings, setEarnings] = useState<CleanerEarning[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [summary, setSummary] = useState<PayrollSummary | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -77,16 +80,18 @@ export default function PayrollPage() {
     setLoading(true);
     setError("");
     try {
-      const [c, comp, e, p] = await Promise.all([
+      const [c, comp, e, p, s] = await Promise.all([
         listCleaners("ACTIVE"),
         listCompensations(),
         listEarnings(),
         listPayouts(),
+        getPayrollSummary(),
       ]);
       setCleaners(c);
       setCompensations(comp);
       setEarnings(e);
       setPayouts(p);
+      setSummary(s);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load payroll data");
     } finally {
@@ -180,6 +185,34 @@ export default function PayrollPage() {
       {error && (
         <div className="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
           {error}
+        </div>
+      )}
+
+      {summary && (
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Pending payroll</p>
+            <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
+              {formatMoney(summary.pendingEarningsCents)}
+            </p>
+            <p className="mt-1 text-xs text-gray-400">
+              {summary.cleanersWithPendingEarnings} cleaner{summary.cleanersWithPendingEarnings === 1 ? "" : "s"} owed
+            </p>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Payouts awaiting settlement</p>
+            <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
+              {formatMoney(summary.pendingPayoutsCents)}
+            </p>
+            <p className="mt-1 text-xs text-gray-400">Created but not yet marked paid</p>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Paid to date</p>
+            <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
+              {formatMoney(summary.lifetimePaidCents)}
+            </p>
+            <p className="mt-1 text-xs text-gray-400">Lifetime, all cleaners</p>
+          </div>
         </div>
       )}
 
