@@ -1,4 +1,4 @@
-import type { WidgetService, WidgetBusiness, QuoteResponse } from "@/app/api/widget.api";
+import type {WidgetService, WidgetBusiness, QuoteResponse, StorefrontPayment} from "@/app/api/widget.api";
 
 export type Frequency = "ONE_TIME" | "WEEKLY" | "BIWEEKLY" | "MONTHLY";
 
@@ -44,6 +44,7 @@ export type BookingWizardProps = {
   slug: string;
   business: WidgetBusiness;
   services: WidgetService[];
+  payment?: StorefrontPayment | null;
   /**
    * Render for the compact modal context (BookingWidgetModal) instead of a
    * full page (book-now/[slug]): no duplicate business header (the modal

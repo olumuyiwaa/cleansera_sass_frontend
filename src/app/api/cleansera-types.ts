@@ -162,6 +162,7 @@ export type BusinessSubscription = {
 };
 
 export type BusinessMemberRole = "BUSINESS_OWNER" | "BUSINESS_MANAGER";
+export type PreferredPaymentCollection = "ONLINE_CARD" | "MANUAL_OFFLINE" | "BOTH";
 
 export type Business = {
     id: string;
@@ -170,6 +171,8 @@ export type Business = {
     customDomain: string | null;
     timezone: string;
     isActive: boolean;
+    preferredPaymentCollection?: PreferredPaymentCollection;
+    offlinePaymentInstructions?: string | null;
     branding?: {
         logoKey: string | null;
         primaryColor: string | null;

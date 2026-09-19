@@ -23,7 +23,7 @@ import {
   startStripeConnectOnboarding,
 } from "@/app/api/businesses.api";
 import { Business } from "@/app/api/cleansera-types";
-
+import StripeConnectOptionalCard from "@/components/business/StripeConnectOptionalCard";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default function BusinessSettingsPage() {
@@ -239,33 +239,14 @@ export default function BusinessSettingsPage() {
       </section>
 
       {/* Connect Stripe */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase text-gray-500">Connect Stripe</p>
-            <p className="mt-1 font-medium text-gray-900 dark:text-white">
-              {stripe?.readyForPayments ? "Enabled" : "Disabled"}
-            </p>
-          </div>
-          {stripe?.readyForPayments ? (
-              <button
-                  type="button"
-                  className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400"
-              >
-                Enabled
-              </button>
-          ) : (
-              <button
-                  type="button"
-                  onClick={connectStripe}
-                  disabled={stripeLoading}
-                  className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
-              >
-                {stripeLoading ? "…" : "Enable"}
-              </button>
-          )}
-        </div>
-      </div>
+      <StripeConnectOptionalCard
+          stripe={stripe}
+          onStripeChange={setStripe}
+          onError={setError}
+          onSaved={setSaved}
+          initialPreferred={(business as any)?.preferredPaymentCollection || "BOTH"}
+          initialOfflineInstructions={(business as any)?.offlinePaymentInstructions || ""}
+      />
 
       {/* Hours */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">

@@ -103,9 +103,17 @@ export type WidgetService = {
   addOns: WidgetAddOn[];
 };
 
+export type StorefrontPayment = {
+  onlineCardReady: boolean;
+  offlineAccepted: boolean;
+  offlinePaymentInstructions: string | null;
+};
+
 export type StorefrontResponse = {
   business: WidgetBusiness;
   services: WidgetService[];
+  onboardingComplete?: boolean;
+  payment?: StorefrontPayment;
 };
 
 export type QuoteRequest = {
@@ -239,6 +247,7 @@ export async function submitBooking(slug: string, payload: SubmitBookingPayload)
     referralCode?: string;
     referralDiscountCents?: number;
     giftCard?: { giftCardId: string; appliedCents: number } | null;
+    deposit?: { url: string; sessionId: string; depositRequiredCents: number } | null;
   };
 }
 

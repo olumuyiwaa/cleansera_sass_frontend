@@ -171,6 +171,7 @@ export default function BusinessSitePage({
         services={data.services}
         businessName={name}
         primaryColor={primaryColor}
+        payment={data.payment}
       />
     </div>
   );

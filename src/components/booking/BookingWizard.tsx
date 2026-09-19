@@ -10,6 +10,7 @@ import { StepReview } from "./StepReview";
 import { useBookingState } from "./useBookingState";
 import type { BookingWizardProps } from "./types";
 import { formatMoney } from "./types";
+import OfflinePaymentPanel from "@/components/payment/OfflinePaymentPanel";
 
 export function BookingWizard(props: BookingWizardProps) {
   const {
@@ -39,6 +40,9 @@ export function BookingWizard(props: BookingWizardProps) {
 
   // ─── Success screen ───────────────────────────────────────────
   if (bookingResult) {
+      const payment = props.payment;
+      const showOffline =
+          payment && !payment.onlineCardReady && payment.offlineAccepted !== false;
     return (
       <div className={compact ? "mx-auto max-w-lg text-center py-2" : "mx-auto max-w-lg text-center py-12 px-4"}>
         <div
@@ -73,6 +77,13 @@ export function BookingWizard(props: BookingWizardProps) {
               {formatMoney(bookingResult.quotedPriceCents)}
             </strong>
           </p>
+        {showOffline && (
+            <div className="mt-6 text-left">
+                <OfflinePaymentPanel
+                    instructions={payment?.offlinePaymentInstructions}
+                />
+            </div>
+        )}
           <p className="text-xs text-gray-400">Ref: {bookingResult.id.slice(0, 8).toUpperCase()}</p>
         </div>
         <p className="mt-6 text-sm text-gray-500">

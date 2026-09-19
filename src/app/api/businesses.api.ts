@@ -63,6 +63,7 @@ export type BusinessBranding = {
     galleryImageUrls?: string[];
 };
 
+export type PreferredPaymentCollection = 'ONLINE_CARD' | 'MANUAL_OFFLINE' | 'BOTH';
 
 export type StripeConnectStatus = {
     connected: boolean;
@@ -70,16 +71,31 @@ export type StripeConnectStatus = {
     chargesEnabled: boolean;
     payoutsEnabled: boolean;
     readyForPayments: boolean;
+    optional: boolean;
+    onlineCardReady: boolean;
+    canAcceptCardPayments: boolean;
+    canAcceptOfflinePayments: boolean;
+    preferredPaymentCollection: PreferredPaymentCollection;
+    offlinePaymentInstructions: string | null;
+    message: string;
 };
-
 
 export async function getBusiness() {
     const result = await authFetch(`/businesses`, { method: "GET" });
     return result.data as Business & { addresses: BusinessAddress[]; hours: BusinessHours[] };
 }
 
-export async function updateBusiness(patch: { name?: string; timezone?: string; customDomain?: string }) {
-    const result = await authFetch(`/businesses`, { method: "PUT", body: JSON.stringify(patch) });
+export async function updateBusiness(patch: {
+    name?: string;
+    timezone?: string;
+    customDomain?: string;
+    preferredPaymentCollection?: PreferredPaymentCollection;
+    offlinePaymentInstructions?: string | null;
+}) {
+    const result = await authFetch(`/businesses`, {
+        method: "PUT",
+        body: JSON.stringify(patch),
+    });
     return result.data as Business;
 }
 
@@ -161,8 +177,15 @@ export type OnboardingStepKey = "stripeConnect" | "services" | "hours" | "servic
 
 export type OnboardingStatus = {
     isComplete: boolean;
-    steps: { key: OnboardingStepKey; label: string; complete: boolean }[];
+    steps: {
+        key: OnboardingStepKey;
+        label: string;
+        complete: boolean;
+        required?: boolean;
+    }[];
     nextIncompleteStep: OnboardingStepKey | null;
+    requiredComplete?: boolean;
+    optionalStepsRemaining?: OnboardingStepKey[];
 };
 
 export async function getOnboardingStatus() {

@@ -1,5 +1,6 @@
 import { authFetch } from "./authFetch";
 import { Booking, BookingStatus, RecurrenceFrequency, RecurringSchedule } from "./cleansera-types";
+export type ManualPaymentMethod = "CASH" | "BANK_TRANSFER" | "INVOICE" | "OTHER";
 
 export async function listBookings(status?: BookingStatus) {
     const qs = status ? `?status=${status}` : "";
@@ -125,6 +126,27 @@ export async function updateBookingPayment(
     const result = await authFetch(`/bookings/${id}/payment`, {
         method: "POST",
         body: JSON.stringify({ paymentStatus, paymentNote }),
+    });
+    return result.data as Booking;
+}
+
+export async function markPaymentReceived(
+    id: string,
+    payload: {
+        method?: ManualPaymentMethod;
+        reference?: string;
+        amountCents?: number;
+        note?: string;
+    } = {}
+) {
+    const result = await authFetch(`/bookings/${id}/mark-payment-received`, {
+        method: "POST",
+        body: JSON.stringify({
+            method: payload.method ?? "BANK_TRANSFER",
+            reference: payload.reference,
+            amountCents: payload.amountCents,
+            note: payload.note,
+        }),
     });
     return result.data as Booking;
 }

@@ -146,7 +146,7 @@ export default function PayrollPage() {
   const handleMarkPaid = async (payout: Payout) => {
     setError("");
     try {
-      await markPayoutPaid(payout.id, {});
+      await markPayoutPaid(payout.id, { method: "MANUAL_TRANSFER" });
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to mark payout as paid");
@@ -387,21 +387,22 @@ export default function PayrollPage() {
                           label={`Actions for payout to ${p.cleaner.user.firstName} ${p.cleaner.user.lastName}`.trim()}
                           actions={
                             p.status === "PENDING"
-                              ? [
-                                  p.cleaner.user.stripePayoutsEnabled
-                                    ? {
-                                        label: payingStripeId === p.id ? "Paying…" : "Pay via Stripe",
-                                        disabled: payingStripeId === p.id,
-                                        onClick: () => handlePayStripe(p),
-                                      }
-                                    : {
-                                        label: "Stripe not connected",
-                                        disabled: true,
-                                        onClick: () => {},
-                                      },
-                                  { label: "Mark as paid manually", onClick: () => handleMarkPaid(p) },
+                                ? [
+                                  {
+                                    label: "Mark paid (bank transfer / cash)",
+                                    onClick: () => handleMarkPaid(p),
+                                  },
+                                  ...(p.cleaner.user.stripePayoutsEnabled
+                                      ? [
+                                        {
+                                          label: payingStripeId === p.id ? "Paying…" : "Pay via Stripe",
+                                          disabled: payingStripeId === p.id,
+                                          onClick: () => handlePayStripe(p),
+                                        },
+                                      ]
+                                      : []),
                                 ]
-                              : []
+                                : []
                           }
                         />
                       </TableCell>

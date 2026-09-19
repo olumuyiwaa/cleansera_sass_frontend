@@ -28,6 +28,7 @@ import { createPaymentLink } from "@/app/api/bookings.api.paymentLink";
 import {listCustomers, createCustomer, listCustomersForBooking} from "@/app/api/customers.api";
 import { listServices } from "@/app/api/services.api";
 import { Booking, BookingStatus, Customer, Service, formatMoney } from "@/app/api/cleansera-types";
+import MarkPaymentReceivedModal from "@/components/booking/MarkPaymentReceivedModal";
 
 const STATUS_COLOR: Record<BookingStatus, "success" | "warning" | "error" | "light" | "info"> = {
   REQUESTED: "warning",
@@ -217,6 +218,8 @@ export default function BookingsPage() {
     }
   };
 
+  const [payBooking, setPayBooking] = useState<Booking | null>(null);
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -316,6 +319,11 @@ export default function BookingsPage() {
                           },
                           ...(b.paymentStatus !== "PAID" && b.status !== "CANCELLED"
                             ? [
+                                { label: "Mark payment received", onClick: () => setPayBooking(b) },
+                              ]
+                            : []),
+                          ...(b.paymentStatus !== "PAID" && b.status !== "CANCELLED"
+                            ? [
                                 {
                                   label:
                                     paymentLinkBusyId === b.id ? "Creating link…" : "Payment link",
@@ -412,6 +420,14 @@ export default function BookingsPage() {
           </div>
         </form>
       </Modal>
+
+      <MarkPaymentReceivedModal
+          booking={payBooking}
+          isOpen={!!payBooking}
+          onClose={() => setPayBooking(null)}
+          onSuccess={() => { setPayBooking(null); load(); }}
+          onError={setError}
+      />
 
       <Modal isOpen={!!actionType && !!actionBooking} onClose={closeAction} className="max-w-md p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">

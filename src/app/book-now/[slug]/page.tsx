@@ -24,7 +24,7 @@ export default async function BookPage({ params }: PageProps) {
     );
   }
 
-  const { business, services } = storefront;
+  const { business, services, payment } = storefront;
 
   if (!services?.length) {
     return (
@@ -38,6 +38,6 @@ export default async function BookPage({ params }: PageProps) {
   }
 
   return (
-    <BookingWizard slug={slug} business={business} services={services} />
+      <BookingWizard slug={slug} business={business} services={services} payment={payment} />
   );
 }

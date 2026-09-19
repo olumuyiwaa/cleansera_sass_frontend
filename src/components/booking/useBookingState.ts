@@ -35,6 +35,7 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
     id: string;
     scheduledStart: string;
     quotedPriceCents: number;
+    deposit?: { url: string; sessionId: string; depositRequiredCents: number } | null;
   } | null>(null);
 
   const quoteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -230,10 +231,17 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
         frequency: state.frequency,
         notes: state.notes.trim() || undefined,
       });
+      // Card deposit → Stripe Checkout
+      if (result.deposit?.url) {
+        window.location.href = result.deposit.url;
+        return;
+      }
+
       setBookingResult({
         id: result.id,
         scheduledStart: result.scheduledStart,
         quotedPriceCents: result.quotedPriceCents,
+        deposit: result.deposit ?? null,
       });
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Booking failed");
