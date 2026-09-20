@@ -177,7 +177,9 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
         return (
           state.addressLine1.trim().length > 2 &&
           state.city.trim().length > 1 &&
-          state.state.trim().length >= 1 &&
+          // Postcode identifies an address in NL/EU; a state/province does not
+          // exist there, so it must not block the form.
+          state.postalCode.trim().length >= 4 &&
           state.serviceAreaOk !== false
         );
       case 3:

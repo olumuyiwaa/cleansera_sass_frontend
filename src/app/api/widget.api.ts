@@ -78,6 +78,10 @@ export type WidgetBusiness = {
   name: string;
   subdomain?: string | null;
   branding?: WidgetBranding | null;
+  /** IANA timezone, e.g. Europe/Amsterdam. Slots are computed in it. */
+  timezone?: string;
+  /** ISO 4217, lower-case, e.g. eur. */
+  currency?: string;
   hours?: Array<{
     dayOfWeek: number;
     openTime: string;

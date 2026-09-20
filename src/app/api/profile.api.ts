@@ -59,6 +59,9 @@ export async function verifyEnable2FA(token: string): Promise<void> {
   });
 }
 
-export async function disable2FA(): Promise<void> {
-  await authFetch(`/auth/2fa/disable`, { method: "POST" });
+export async function disable2FA(confirmation: { password: string; code: string }): Promise<void> {
+  await authFetch(`/auth/2fa/disable`, {
+    method: "POST",
+    body: JSON.stringify({ password: confirmation.password, code: confirmation.code }),
+  });
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { isoDateInTimeZone } from "@/app/services/currency";
 import { useCallback, useEffect, useState } from "react";
 import {
   getReportKPIs,
@@ -26,8 +27,8 @@ function defaultRange() {
   const from = new Date();
   from.setDate(from.getDate() - 30);
   return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
+    from: isoDateInTimeZone(from),
+    to: isoDateInTimeZone(to),
   };
 }
 

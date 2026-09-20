@@ -8,6 +8,7 @@ import {
   getSubscription,
   createSubscription,
   cancelSubscription,
+  openBillingPortal,
 } from "@/app/api/subscriptions.api";
 import {
   BusinessSubscription,
@@ -28,6 +29,7 @@ export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,14 +56,41 @@ export default function SubscriptionPage() {
     setBusy(planId);
     setError("");
     try {
-      await createSubscription({ planId });
-      await load();
+      const { checkoutUrl } = await createSubscription({ planId });
+      // Hand over to Stripe Checkout; it returns here with ?checkout=success.
+      window.location.href = checkoutUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start subscription");
-    } finally {
       setBusy(null);
     }
   };
+
+  const handleManageBilling = async () => {
+    setBusy("portal");
+    setError("");
+    try {
+      const { url } = await openBillingPortal();
+      window.location.href = url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not open billing settings");
+      setBusy(null);
+    }
+  };
+
+  // Back from Stripe Checkout. The subscription row is written by Stripe's
+  // webhook, which can land a few seconds after the redirect, so poll briefly.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") !== "success") return;
+    setNotice("Payment method saved — activating your plan…");
+    let tries = 0;
+    const timer = window.setInterval(async () => {
+      tries += 1;
+      await load();
+      if (tries >= 6) window.clearInterval(timer);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [load]);
 
   const handleCancel = async () => {
     if (
@@ -94,6 +123,12 @@ export default function SubscriptionPage() {
             happen via Stripe Connect and are unaffected by this plan.
           </p>
         </div>
+
+        {notice && subscription?.status !== "ACTIVE" && subscription?.status !== "TRIALING" && (
+            <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300">
+              {notice}
+            </div>
+        )}
 
         {error && (
             <div className="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
@@ -132,7 +167,10 @@ export default function SubscriptionPage() {
                   </p>
               )}
               {subscription.status !== "CANCELED" && (
-                  <div className="mt-4">
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Button variant="outline" onClick={handleManageBilling} disabled={busy === "portal"}>
+                      {busy === "portal" ? "Opening…" : "Manage billing"}
+                    </Button>
                     <Button variant="outline" onClick={handleCancel} disabled={busy === "cancel"}>
                       {busy === "cancel" ? "Cancelling…" : "Cancel Subscription"}
                     </Button>

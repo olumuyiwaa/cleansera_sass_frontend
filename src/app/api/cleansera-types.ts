@@ -1,3 +1,4 @@
+import { getActiveCurrency } from "@/app/services/currency";
 // Types matching cleansera_sass's Prisma schema and API response shapes.
 // Kept separate from the original template's types.ts (still used by the
 // generic messages/calendar/notifications/support-tickets pages) to avoid
@@ -181,8 +182,8 @@ export type Business = {
     } | null;
 };
 
-export function formatMoney(cents: number, currency = "USD") {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+export function formatMoney(cents: number, currency: string = getActiveCurrency()) {
+    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(cents / 100);
 }
 
 export function cleanerDisplayName(c: Cleaner) {

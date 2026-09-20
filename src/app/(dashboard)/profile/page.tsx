@@ -3,13 +3,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/app/auth/useAuth";
 import { useRouter } from "next/navigation";
+import { Disable2FAModal } from "@/components/modals/twoFactorModal/Disable2FAModal";
 import {
     getMe,
     updateMe,
     changePassword,
     generate2FA,
     verifyEnable2FA,
-    disable2FA,
     type CurrentUserProfile,
 } from "@/app/api/profile.api";
 
@@ -30,7 +30,7 @@ function formatRole(role?: string | null) {
 }
 
 export default function ProfilePage() {
-    const { user, setUser } = useAuth();
+    const { user, setUser, logout } = useAuth();
     const router = useRouter();
 
     const [profile, setProfile] = useState<CurrentUserProfile | null>(null);
@@ -50,6 +50,7 @@ export default function ProfilePage() {
 
     // 2FA
     const [show2FASetup, setShow2FASetup] = useState(false);
+    const [showDisable2FA, setShowDisable2FA] = useState(false);
     const [otpauthUrl, setOtpauthUrl] = useState("");
     const [base32, setBase32] = useState("");
     const [totpCode, setTotpCode] = useState("");
@@ -148,19 +149,10 @@ export default function ProfilePage() {
         }
     }
 
-    async function handleDisable2FA() {
-        if (!confirm("Disable two-factor authentication?")) return;
-        setTwoFaBusy(true);
-        setError("");
-        try {
-            await disable2FA();
-            setSuccess("Two-factor authentication disabled.");
-            await fetchProfile();
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Failed to disable 2FA");
-        } finally {
-            setTwoFaBusy(false);
-        }
+    // Turning 2FA off asks for the password and a current code (the modal),
+    // and the backend ends all sessions afterwards, so send the user to sign in again.
+    function handleDisable2FA() {
+        setShowDisable2FA(true);
     }
 
     if (isLoading) {
@@ -301,6 +293,16 @@ export default function ProfilePage() {
                             </button>
                         )}
                     </div>
+
+                    {showDisable2FA && (
+                        <Disable2FAModal
+                            onClose={() => setShowDisable2FA(false)}
+                            onSuccess={() => {
+                                // The backend ends every session when 2FA is turned off.
+                                void logout();
+                            }}
+                        />
+                    )}
 
                     {show2FASetup && (
                         <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 dark:border-gray-800">

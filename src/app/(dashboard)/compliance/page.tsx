@@ -1,5 +1,6 @@
 "use client";
 
+import { isoDateInTimeZone } from "@/app/services/currency";
 import { useEffect, useState, useCallback } from "react";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
@@ -74,7 +75,7 @@ export default function CompliancePage() {
     const [auditForm, setAuditForm] = useState({
         title: "",
         type: "INTERNAL",
-        conductedAt: new Date().toISOString().slice(0, 10),
+        conductedAt: isoDateInTimeZone(new Date()),
         score: "",
         notes: "",
     });
@@ -175,7 +176,7 @@ export default function CompliancePage() {
                 notes: auditForm.notes || undefined,
             });
             setShowAuditModal(false);
-            setAuditForm({ title: "", type: "INTERNAL", conductedAt: new Date().toISOString().slice(0, 10), score: "", notes: "" });
+            setAuditForm({ title: "", type: "INTERNAL", conductedAt: isoDateInTimeZone(new Date()), score: "", notes: "" });
             await loadAudits();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to create audit");

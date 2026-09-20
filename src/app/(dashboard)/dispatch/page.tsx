@@ -1,5 +1,6 @@
 "use client";
 
+import { isoDateInTimeZone } from "@/app/services/currency";
 import { useEffect, useState, useCallback } from "react";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
@@ -26,7 +27,7 @@ export default function DispatchPage() {
 
   const [activeCleaners, setActiveCleaners] = useState<Cleaner[]>([]);
   const [routeCleanerId, setRouteCleanerId] = useState("");
-  const [routeDate, setRouteDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [routeDate, setRouteDate] = useState(() => isoDateInTimeZone(new Date()));
   const [route, setRoute] = useState<DayRoute | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState("");

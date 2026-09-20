@@ -1,5 +1,6 @@
 import { sessionService } from "../services/session.service";
 import { refreshAccessToken } from "./client";
+import { ApiError } from "@/app/api/errors";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
@@ -39,8 +40,10 @@ export async function authFetch(
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-        throw new Error(
-            result.message || "Request failed"
+        throw new ApiError(
+            result.message || "Request failed",
+            response.status,
+            result.errors
         );
     }
 

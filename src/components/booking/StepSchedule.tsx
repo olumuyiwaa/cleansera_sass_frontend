@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import type { Slot } from "@/app/api/widget.api";
 import { joinWaitlist } from "@/app/api/widget.api";
 import type { BookingFormState } from "./types";
+import { isoDateInTimeZone } from "@/app/services/currency";
 
 type Props = {
   state: BookingFormState;
@@ -14,6 +15,8 @@ type Props = {
   slotsError: string | null;
   primaryColor?: string;
   slug: string;
+  /** Business timezone (IANA). Days and times are shown in it, not the visitor's. */
+  timezone?: string;
 };
 
 export function StepSchedule({
@@ -24,17 +27,20 @@ export function StepSchedule({
   slotsError,
   primaryColor = "#3F6B52",
   slug,
+  timezone,
 }: Props) {
   // Build next 14 days for the date picker
+  // Calendar days start from "today" in the BUSINESS's timezone and are kept as
+  // noon-UTC anchors, so adding days cannot slip over a DST change and the
+  // YYYY-MM-DD sent to the API is the day that is displayed.
+  const todayIso = isoDateInTimeZone(new Date(), timezone);
+  const [ty, tm, td] = todayIso.split("-").map(Number);
   const days = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + i);
-    return d;
+    const d = new Date(Date.UTC(ty, tm - 1, td + i, 12));
+    return { date: d, iso: d.toISOString().slice(0, 10) };
   });
 
-  const selectDate = (d: Date) => {
-    const iso = d.toISOString().slice(0, 10);
+  const selectDate = (iso: string) => {
     update({ selectedDate: iso, scheduledStart: null });
   };
 
@@ -49,15 +55,14 @@ export function StepSchedule({
 
       {/* Date strip */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-        {days.map((d) => {
-          const iso = d.toISOString().slice(0, 10);
+        {days.map(({ date: d, iso }) => {
           const active = state.selectedDate === iso;
-          const isToday = iso === new Date().toISOString().slice(0, 10);
+          const isToday = iso === todayIso;
           return (
             <button
               key={iso}
               type="button"
-              onClick={() => selectDate(d)}
+              onClick={() => selectDate(iso)}
               className={`
                 flex flex-col items-center min-w-[64px] rounded-xl border px-3 py-2.5 transition
                 ${active ? "text-white border-transparent shadow-sm" : "border-gray-200 text-gray-700 hover:border-gray-300"}
@@ -65,15 +70,15 @@ export function StepSchedule({
               style={{ backgroundColor: active ? primaryColor : undefined }}
             >
               <span className="text-[10px] uppercase font-medium opacity-80">
-                {d.toLocaleDateString(undefined, { weekday: "short" })}
+                {d.toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
               </span>
               <span className="text-lg font-semibold leading-tight">
-                {d.getDate()}
+                {d.getUTCDate()}
               </span>
               <span className="text-[10px] opacity-80">
                 {isToday
                   ? "Today"
-                  : d.toLocaleDateString(undefined, { month: "short" })}
+                  : d.toLocaleDateString(undefined, { month: "short", timeZone: "UTC" })}
               </span>
             </button>
           );
@@ -114,6 +119,7 @@ export function StepSchedule({
             const label = new Date(slot.start).toLocaleTimeString(undefined, {
               hour: "numeric",
               minute: "2-digit",
+              timeZone: timezone,
             });
             return (
               <button

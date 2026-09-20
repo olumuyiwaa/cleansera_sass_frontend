@@ -64,8 +64,7 @@ export function StepAddress({
             primaryColor={primaryColor}
           />
           <Field
-            label="State / Region"
-            required
+            label="Province / region (optional)"
             value={state.state}
             onChange={(v) => update({ state: v, serviceAreaOk: null })}
             onBlur={handleBlur}
@@ -73,7 +72,8 @@ export function StepAddress({
           />
         </div>
         <Field
-          label="Postal / ZIP code"
+          label="Postal code"
+          required
           value={state.postalCode}
           onChange={(v) => update({ postalCode: v })}
           primaryColor={primaryColor}

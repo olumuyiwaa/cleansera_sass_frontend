@@ -7,12 +7,26 @@ export interface AuthTokens {
 
 export type User = CurrentUser;
 
+/** What the sign-in form has to do next. */
+export type LoginOutcome =
+    | { status: "signed_in" }
+    | { status: "two_factor_required" }
+    | {
+          status: "select_business";
+          affiliations: { businessId: string; businessName: string; subdomain: string; role: string }[];
+      };
+
 export interface AuthContextType {
     user: User | null;
     loading: boolean;
     isAuthenticated: boolean;
 
-    login: (payload: { email: string; password: string }) => Promise<void>;
+    login: (payload: {
+        email: string;
+        password: string;
+        twoFactorCode?: string;
+        businessId?: string;
+    }) => Promise<LoginOutcome>;
     logout: () => Promise<void>;
 
     setUser: React.Dispatch<React.SetStateAction<User | null>>;

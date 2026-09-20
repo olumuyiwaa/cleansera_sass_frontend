@@ -10,9 +10,12 @@ import { StepReview } from "./StepReview";
 import { useBookingState } from "./useBookingState";
 import type { BookingWizardProps } from "./types";
 import { formatMoney } from "./types";
+import { setActiveCurrency } from "@/app/services/currency";
 import OfflinePaymentPanel from "@/components/payment/OfflinePaymentPanel";
 
 export function BookingWizard(props: BookingWizardProps) {
+  // Show prices in this business's currency (idempotent, so safe during render).
+  setActiveCurrency(props.business.currency);
   const {
     state,
     update,
@@ -150,6 +153,7 @@ export function BookingWizard(props: BookingWizardProps) {
                 slotsError={slotsError}
                 primaryColor={primary}
                 slug={props.slug}
+                timezone={props.business.timezone}
               />
             )}
             {step === 4 && (

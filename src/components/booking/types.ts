@@ -1,3 +1,4 @@
+import { getActiveCurrency } from "@/app/services/currency";
 import type {WidgetService, WidgetBusiness, QuoteResponse, StorefrontPayment} from "@/app/api/widget.api";
 
 export type Frequency = "ONE_TIME" | "WEEKLY" | "BIWEEKLY" | "MONTHLY";
@@ -98,7 +99,7 @@ export const STEPS = [
 
 export type StepKey = (typeof STEPS)[number]["key"];
 
-export function formatMoney(cents: number, currency = "USD") {
+export function formatMoney(cents: number, currency: string = getActiveCurrency()) {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,
