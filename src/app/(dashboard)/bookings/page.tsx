@@ -25,6 +25,7 @@ import {
   updateBookingPayment,
 } from "@/app/api/bookings.api";
 import { createPaymentLink } from "@/app/api/bookings.api.paymentLink";
+import { issueInvoice, openInvoice } from "@/app/api/invoices.api";
 import {listCustomers, createCustomer, listCustomersForBooking} from "@/app/api/customers.api";
 import { listServices } from "@/app/api/services.api";
 import { Booking, BookingStatus, Customer, Service, formatMoney } from "@/app/api/cleansera-types";
@@ -53,6 +54,7 @@ export default function BookingsPage() {
   const [saving, setSaving] = useState(false);
 
   const [paymentLinkBusyId, setPaymentLinkBusyId] = useState<string | null>(null);
+  const [invoiceBusyId, setInvoiceBusyId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCustomerMode, setNewCustomerMode] = useState(false);
   const [actionBooking, setActionBooking] = useState<Booking | null>(null);
@@ -176,6 +178,19 @@ export default function BookingsPage() {
       setError(err instanceof Error ? err.message : "Failed to create payment link");
     } finally {
       setPaymentLinkBusyId(null);
+    }
+  };
+
+  const handleInvoice = async (id: string) => {
+    setError("");
+    setInvoiceBusyId(id);
+    try {
+      const invoice = await issueInvoice(id);
+      await openInvoice(invoice.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create the invoice");
+    } finally {
+      setInvoiceBusyId(null);
     }
   };
 
@@ -320,6 +335,15 @@ export default function BookingsPage() {
                           ...(b.paymentStatus !== "PAID" && b.status !== "CANCELLED"
                             ? [
                                 { label: "Mark payment received", onClick: () => setPayBooking(b) },
+                              ]
+                            : []),
+                          ...(b.status !== "CANCELLED"
+                            ? [
+                                {
+                                  label: invoiceBusyId === b.id ? "Preparing invoice…" : "Invoice",
+                                  disabled: invoiceBusyId === b.id,
+                                  onClick: () => handleInvoice(b.id),
+                                },
                               ]
                             : []),
                           ...(b.paymentStatus !== "PAID" && b.status !== "CANCELLED"

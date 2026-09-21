@@ -39,6 +39,7 @@ export default function BusinessSettingsPage() {
   const [saving, setSaving] = useState(false);
 
   const [nameForm, setNameForm] = useState({ name: "", timezone: "", customDomain: "" });
+  const [taxForm, setTaxForm] = useState({ legalName: "", kvkNumber: "", vatNumber: "", invoiceIban: "", vatRateBps: "2100" });
   const [brandForm, setBrandForm] = useState({ tagline: "", primaryColor: "", accentColor: "" });
 
   const load = useCallback(async () => {
@@ -50,6 +51,13 @@ export default function BusinessSettingsPage() {
       setBranding(br);
       setHours(h.length ? h : DAYS.map((_, i) => ({ dayOfWeek: i, openTime: "08:00", closeTime: "18:00", isClosed: i === 0 })));
       setNameForm({ name: b.name, timezone: b.timezone, customDomain: b.customDomain || "" });
+      setTaxForm({
+        legalName: b.legalName || "",
+        kvkNumber: b.kvkNumber || "",
+        vatNumber: b.vatNumber || "",
+        invoiceIban: b.invoiceIban || "",
+        vatRateBps: String(b.vatRateBps ?? 2100),
+      });
       setBrandForm({ tagline: br.tagline || "", primaryColor: br.primaryColor || "", accentColor: br.accentColor || "" });
       setAreas(await listServiceAreas());
     } catch (err) {
@@ -73,6 +81,27 @@ export default function BusinessSettingsPage() {
       setSaved("Business info saved");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveTax = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSaved("");
+    try {
+      await updateBusiness({
+        legalName: taxForm.legalName,
+        kvkNumber: taxForm.kvkNumber,
+        vatNumber: taxForm.vatNumber,
+        invoiceIban: taxForm.invoiceIban,
+        vatRateBps: Number(taxForm.vatRateBps),
+      });
+      setSaved("Invoicing details saved");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save invoicing details");
     } finally {
       setSaving(false);
     }
@@ -206,13 +235,52 @@ export default function BusinessSettingsPage() {
           </div>
           <div>
             <Label>Timezone</Label>
-            <Input value={nameForm.timezone} onChange={(e) => setNameForm({ ...nameForm, timezone: e.target.value })} placeholder="Africa/Lagos" required />
+            <Input value={nameForm.timezone} onChange={(e) => setNameForm({ ...nameForm, timezone: e.target.value })} placeholder="Europe/Amsterdam" required />
           </div>
           <div>
             <Label>Custom Domain (optional)</Label>
             <Input value={nameForm.customDomain} onChange={(e) => setNameForm({ ...nameForm, customDomain: e.target.value })} placeholder="book.yourbusiness.com" />
           </div>
           <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+        </form>
+      </section>
+
+      {/* Invoicing / BTW */}
+      <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Invoicing &amp; BTW</h2>
+        <p className="mb-4 max-w-md text-xs text-gray-500 dark:text-gray-400">
+          Required on every Dutch invoice. Your prices are shown to customers including BTW; invoices split out the BTW automatically.
+        </p>
+        <form onSubmit={saveTax} className="space-y-4 max-w-md">
+          <div>
+            <Label>Legal name</Label>
+            <Input value={taxForm.legalName} onChange={(e) => setTaxForm({ ...taxForm, legalName: e.target.value })} placeholder="Schoon Holding B.V." />
+          </div>
+          <div>
+            <Label>KvK number</Label>
+            <Input value={taxForm.kvkNumber} onChange={(e) => setTaxForm({ ...taxForm, kvkNumber: e.target.value })} placeholder="12345678" />
+          </div>
+          <div>
+            <Label>BTW-id</Label>
+            <Input value={taxForm.vatNumber} onChange={(e) => setTaxForm({ ...taxForm, vatNumber: e.target.value })} placeholder="NL123456789B01" />
+          </div>
+          <div>
+            <Label>IBAN (shown on invoices)</Label>
+            <Input value={taxForm.invoiceIban} onChange={(e) => setTaxForm({ ...taxForm, invoiceIban: e.target.value })} placeholder="NL91 ABNA 0417 1643 00" />
+          </div>
+          <div>
+            <Label>Standard BTW rate</Label>
+            <select
+              value={taxForm.vatRateBps}
+              onChange={(e) => setTaxForm({ ...taxForm, vatRateBps: e.target.value })}
+              className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700"
+            >
+              <option value="2100">21% (standard)</option>
+              <option value="900">9% (reduced)</option>
+              <option value="0">0%</option>
+            </select>
+          </div>
+          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save invoicing details"}</Button>
         </form>
       </section>
 

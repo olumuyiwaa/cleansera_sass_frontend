@@ -174,6 +174,12 @@ export type Business = {
     isActive: boolean;
     preferredPaymentCollection?: PreferredPaymentCollection;
     offlinePaymentInstructions?: string | null;
+    // Invoicing / BTW (prices are VAT-inclusive)
+    legalName?: string | null;
+    kvkNumber?: string | null;
+    vatNumber?: string | null;
+    invoiceIban?: string | null;
+    vatRateBps?: number;
     branding?: {
         logoKey: string | null;
         primaryColor: string | null;

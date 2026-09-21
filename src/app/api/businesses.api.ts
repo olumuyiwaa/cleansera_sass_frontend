@@ -91,6 +91,11 @@ export async function updateBusiness(patch: {
     customDomain?: string;
     preferredPaymentCollection?: PreferredPaymentCollection;
     offlinePaymentInstructions?: string | null;
+    legalName?: string | null;
+    kvkNumber?: string | null;
+    vatNumber?: string | null;
+    invoiceIban?: string | null;
+    vatRateBps?: number;
 }) {
     const result = await authFetch(`/businesses`, {
         method: "PUT",
