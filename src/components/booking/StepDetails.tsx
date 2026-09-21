@@ -1,6 +1,6 @@
 "use client";
 
-import type { BookingFormState } from "./types";
+import { formatMoney, type BookingFormState } from "./types";
 
 type Props = {
   state: BookingFormState;
@@ -146,9 +146,9 @@ export function StepDetails({
             {state.quote.giftCard.valid
               ? `Gift card applied: ${
                   state.quote.giftCard.appliedCents != null
-                    ? `$${(state.quote.giftCard.appliedCents / 100).toFixed(2)} off`
+                    ? `${formatMoney(state.quote.giftCard.appliedCents)} off`
                     : ""
-                } (balance: $${((state.quote.giftCard.balanceCents ?? 0) / 100).toFixed(2)})`
+                } (balance: ${formatMoney(state.quote.giftCard.balanceCents ?? 0)})`
               : `Gift card: ${state.quote.giftCard.reason || "invalid"}`}
           </p>
         )}

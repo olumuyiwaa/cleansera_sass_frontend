@@ -2,6 +2,8 @@
 import React from "react";
 import { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
+import { formatMoneyUnits } from "@/app/services/currency";
+import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -19,6 +21,7 @@ interface RevenueBarChartProps {
 }
 
 export default function RevenueBarChart({ data = [], byBusiness = [] }: RevenueBarChartProps) {
+  const currency = useActiveCurrency();
   const monthNames = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -53,10 +56,10 @@ export default function RevenueBarChart({ data = [], byBusiness = [] }: RevenueB
     dataLabels: { enabled: false },
     stroke: { show: true, width: 3, colors: ["transparent"] },
     xaxis: { categories: monthNames, axisBorder: { show: false }, axisTicks: { show: false } },
-    yaxis: { labels: { formatter: (val: number) => `$${val.toLocaleString()}` } },
+    yaxis: { labels: { formatter: (val: number) => formatMoneyUnits(val, currency, { whole: true }) } },
     grid: { strokeDashArray: 5, yaxis: { lines: { show: true } } },
     fill: { opacity: 1 },
-    tooltip: { y: { formatter: (val: number) => `$${val.toLocaleString()}` } },
+    tooltip: { y: { formatter: (val: number) => formatMoneyUnits(val, currency) } },
   };
 
   const series = [{ name: "Gross Revenue", data: fullYearData.map(d => d.grossRevenue) }];
@@ -101,7 +104,7 @@ export default function RevenueBarChart({ data = [], byBusiness = [] }: RevenueB
                         </td>
 
                         <td className="px-3 py-2 text-right font-semibold text-emerald-600">
-                          ${Math.round(f.totalRevenue).toLocaleString()}
+                          {formatMoneyUnits(Math.round(f.totalRevenue), currency, { whole: true })}
                         </td>
                       </tr>
                   ))}

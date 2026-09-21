@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { getStorefront } from "@/app/api/widget.api";
+import { setActiveCurrency } from "@/app/services/currency";
+import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 import Link from "next/link";
 import {
     requestPortalAccess,
@@ -43,6 +46,16 @@ export default function CustomerPortalPage() {
     const params = useParams();
     // Unified under /[subdomain]/portal — param is now "subdomain"
     const slug = (params?.subdomain as string) || (params?.slug as string) || "";
+    // Amounts were formatted with a hardcoded USD default. Use the business's own currency.
+    const currency = useActiveCurrency();
+    useEffect(() => {
+        if (!slug) return;
+        getStorefront(slug)
+            .then((s) => setActiveCurrency(s.business?.currency))
+            .catch(() => {
+                /* keep the default currency */
+            });
+    }, [slug]);
 
     const [step, setStep] = useState<Step>("phone");
     const [phone, setPhone] = useState("");
@@ -801,7 +814,7 @@ export default function CustomerPortalPage() {
                         ))}
                     </div>
                     <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Custom amount (USD)
+                        Custom amount ({currency})
                     </label>
                     <input
                         type="number"

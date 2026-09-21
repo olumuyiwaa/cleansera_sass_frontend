@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { formatMoneyUnits } from "@/app/services/currency";
 import {
   listSubscriptions,
   listPlans,
@@ -73,7 +74,7 @@ export default function SuperAdminSubscriptionsPage() {
               {p.name}
             </p>
             <p className="mt-1 text-lg font-medium">
-              ${(p.monthlyPriceCents / 100).toFixed(0)}
+              {formatMoneyUnits(p.monthlyPriceCents / 100, undefined, { whole: true })}
               <span className="text-xs font-normal text-gray-500">/mo</span>
             </p>
             <p className="mt-1 text-xs text-gray-500">

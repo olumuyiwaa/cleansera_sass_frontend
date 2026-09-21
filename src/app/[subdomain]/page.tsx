@@ -145,6 +145,7 @@ export default function BusinessSitePage({
           services={data.services}
           primaryColor={primaryColor}
           onBook={openBook}
+          currency={business.currency}
         />
         <SiteHowItWorks primaryColor={primaryColor} />
         {order.map((key) => optionalSections[key])}

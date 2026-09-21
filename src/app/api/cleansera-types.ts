@@ -174,6 +174,8 @@ export type Business = {
     isActive: boolean;
     preferredPaymentCollection?: PreferredPaymentCollection;
     offlinePaymentInstructions?: string | null;
+    /** ISO 4217 code the business charges in, e.g. "eur". */
+    currency?: string;
     // Invoicing / BTW (prices are VAT-inclusive)
     legalName?: string | null;
     kvkNumber?: string | null;

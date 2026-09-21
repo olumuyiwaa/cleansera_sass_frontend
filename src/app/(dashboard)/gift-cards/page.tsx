@@ -8,9 +8,12 @@ import {
   type GiftCard,
 } from "@/app/api/giftCards.api";
 import RowActionsMenu from "@/components/tables/RowActionsMenu";
+import { formatMoney } from "@/app/api/cleansera-types";
+import { currencySymbol } from "@/app/services/currency";
 
 function centsToDollars(cents: number) {
-  return `$${(cents / 100).toFixed(2)}`;
+  // (name kept to limit the diff) formats in the business currency, not always dollars
+  return formatMoney(cents);
 }
 
 export default function GiftCardsPage() {
@@ -105,7 +108,7 @@ export default function GiftCardsPage() {
           required
           value={form.valueDollars}
           onChange={(e) => setForm({ ...form, valueDollars: Number(e.target.value) })}
-          placeholder="Value ($)"
+          placeholder={`Value (${currencySymbol()})`}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
         />
         <input

@@ -9,6 +9,8 @@
  * matching /book-now/[slug] → /widget-embed/[slug].
  */
 
+import { getActiveCurrency } from "@/app/services/currency";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
 
@@ -191,7 +193,7 @@ export async function tipPortalBooking(
   return result.data as { url: string; sessionId: string };
 }
 
-export function formatMoney(cents: number, currency = "USD") {
+export function formatMoney(cents: number, currency: string = getActiveCurrency()) {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,

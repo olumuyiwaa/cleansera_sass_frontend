@@ -5,6 +5,7 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { getPricing, updatePricing, PolicyValueType } from "@/app/api/pricing.api";
+import { currencySymbol } from "@/app/services/currency";
 
 // cents <-> a plain dollar/major-unit string for the input fields, so the
 // business types "0.35" instead of "35" and never has to think in cents.
@@ -185,7 +186,7 @@ export default function PricingSettingsPage() {
         </p>
         <form onSubmit={saveRates} className="space-y-4 max-w-md">
           <div>
-            <Label>Rate per square foot ($)</Label>
+            <Label>Rate per square foot ({currencySymbol()})</Label>
             <Input
               type="number"
               step={0.01}
@@ -196,7 +197,7 @@ export default function PricingSettingsPage() {
             />
           </div>
           <div>
-            <Label>Rate per room ($)</Label>
+            <Label>Rate per room ({currencySymbol()})</Label>
             <Input
               type="number"
               step={0.01}

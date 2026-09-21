@@ -3,6 +3,7 @@
 import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import { SubscriptionBanner } from "@/components/common/SubscriptionBanner";
+import { DashboardCurrency } from "@/components/common/DashboardCurrency";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
 import React, { useEffect, useState } from "react";
@@ -97,7 +98,7 @@ export default function AdminLayout({
         {/* Page Content */}
         <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
           <SubscriptionBanner />
-          {children}
+          <DashboardCurrency>{children}</DashboardCurrency>
         </div>
       </div>
     </div>

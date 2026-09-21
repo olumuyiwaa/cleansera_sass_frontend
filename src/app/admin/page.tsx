@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getOverview, PlatformOverview } from "@/app/api/superAdmin.api";
+import { currencySymbol } from "@/app/services/currency";
 
 function Kpi({
   label,
@@ -72,7 +73,7 @@ export default function SuperAdminDashboardPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Businesses" value={kpis.totalBusinesses} hint={`${kpis.activeBusinesses} active`} />
-        <Kpi label="MRR" value={`$${kpis.mrrFormatted}`} hint="Active + trialing plans" />
+        <Kpi label="MRR" value={`${currencySymbol()}${kpis.mrrFormatted}`} hint="Active + trialing plans" />
         <Kpi label="Users" value={kpis.totalUsers} />
         <Kpi label="Open tickets" value={kpis.openTickets} />
         <Kpi label="Active cleaners" value={kpis.totalCleaners} />

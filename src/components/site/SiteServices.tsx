@@ -1,6 +1,7 @@
 "use client";
 
 import { Reveal } from "./Reveal";
+import { formatMoneyUnits } from "@/app/services/currency";
 import type { Service } from "@/app/api/cleansera-types";
 import type { WidgetService } from "@/app/api/widget.api";
 
@@ -9,12 +10,12 @@ type SiteServicesProps = {
   services: WidgetService[];
   primaryColor: string;
   onBook?: () => void;
+  /** ISO currency of the business (prices used to render with a hardcoded $). */
+  currency?: string;
 };
 
-function centsToDisplay(cents: number) {
-  return `$${(cents / 100).toLocaleString(undefined, {
-    maximumFractionDigits: 0,
-  })}`;
+function centsToDisplay(cents: number, currency?: string) {
+  return formatMoneyUnits(cents / 100, currency, { whole: true });
 }
 
 export function SiteServices({
@@ -22,6 +23,7 @@ export function SiteServices({
   services,
   primaryColor,
   onBook,
+  currency,
 }: SiteServicesProps) {
   if (!services.length) return null;
 
@@ -69,7 +71,7 @@ export function SiteServices({
                       {svc.name}
                     </h3>
                     <span className="shrink-0 rounded-full border border-[#E8E4DE] bg-white px-3 py-1 text-sm font-semibold text-[#5C5546]">
-                      from {centsToDisplay(svc.basePriceCents)}
+                      from {centsToDisplay(svc.basePriceCents, currency)}
                     </span>
                   </div>
                   {svc.description && (

@@ -10,12 +10,14 @@ import {
   updateServiceAddOn,
   deleteServiceAddOn,
 } from "@/app/api/services.api";
-import { PricingModel, Service, ServiceAddOn } from "@/app/api/cleansera-types";
+import { PricingModel, Service, ServiceAddOn, formatMoney } from "@/app/api/cleansera-types";
+import { currencySymbol } from "@/app/services/currency";
 
 const PRICING_MODELS: { value: PricingModel; label: string; hint: string }[] = [
   { value: "FLAT", label: "Flat rate", hint: "One price regardless of size" },
-  { value: "PER_SQFT", label: "Per square foot", hint: "Base price + $0.10 per sqft entered at booking" },
-  { value: "PER_ROOM", label: "Per room", hint: "Base price + $15 per room entered at booking" },
+  // The old hints quoted "$0.10 per sqft" / "$15 per room": wrong currency and not the rates actually configured under Pricing.
+  { value: "PER_SQFT", label: "Per square foot", hint: "Base price + your per-square-foot rate (set under Pricing) × size entered at booking" },
+  { value: "PER_ROOM", label: "Per room", hint: "Base price + your per-room rate (set under Pricing) × rooms entered at booking" },
   { value: "HOURLY", label: "Hourly", hint: "Base price is treated as the hourly rate" },
 ];
 
@@ -186,7 +188,7 @@ export default function ServicesPage() {
             type="number"
             min="0"
             step="0.01"
-            placeholder={form.pricingModel === "HOURLY" ? "Hourly rate ($)" : "Base price ($)"}
+            placeholder={form.pricingModel === "HOURLY" ? `Hourly rate (${currencySymbol()})` : `Base price (${currencySymbol()})`}
             value={form.basePrice}
             onChange={(e) => setForm({ ...form, basePrice: e.target.value })}
             className={inputCls}
@@ -255,7 +257,7 @@ export default function ServicesPage() {
                       <div key={a.id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-white/[0.03]">
                         <span>{a.name}</span>
                         <span className="flex items-center gap-3 text-gray-500">
-                          ${centsToDisplay(a.priceCents)} · +{a.extraMinutes}min
+                          {formatMoney(a.priceCents)} · +{a.extraMinutes}min
                           <button
                             type="button"
                             onClick={() => removeAddOn(s.id, a.id)}
@@ -281,7 +283,7 @@ export default function ServicesPage() {
                       type="number"
                       min="0"
                       step="0.01"
-                      placeholder="Price ($)"
+                      placeholder={`Price (${currencySymbol()})`}
                       value={addOnForm.price}
                       onChange={(e) => setAddOnForm({ ...addOnForm, price: e.target.value })}
                       className={`${inputCls} max-w-[120px]`}
