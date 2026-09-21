@@ -6,6 +6,23 @@ export async function listPlans(): Promise<SubscriptionPlan[]> {
   return (result.data ?? []) as SubscriptionPlan[];
 }
 
+export type SubscriptionAccess = {
+  allowed: boolean;
+  /** PLATFORM_TRIAL | TRIALING | ACTIVE | PAST_DUE | CANCELED | TRIAL_EXPIRED | ENFORCEMENT_OFF | UNKNOWN */
+  state: string;
+  /** false when the server is not enforcing subscriptions (e.g. development). */
+  enforced: boolean;
+  trialEndsAt?: string | null;
+  graceEndsAt?: string | null;
+  accessUntil?: string | null;
+};
+
+/** Whether this business may currently make changes, and why not. */
+export async function getSubscriptionAccess(): Promise<SubscriptionAccess> {
+  const result = await authFetch(`/subscriptions/access`, { method: "GET" });
+  return result.data as SubscriptionAccess;
+}
+
 export async function getSubscription(): Promise<BusinessSubscription | null> {
   const result = await authFetch(`/subscriptions`, { method: "GET" });
   return (result.data ?? null) as BusinessSubscription | null;

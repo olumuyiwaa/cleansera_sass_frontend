@@ -40,6 +40,16 @@ export async function authFetch(
     const result = await response.json();
 
     if (!response.ok || !result.success) {
+        // Tell the app shell (SubscriptionBanner) instead of every caller having
+        // to special-case these two account-level states.
+        const code = result?.errors?.code;
+        if (typeof window !== "undefined") {
+            if (response.status === 402 && code === "SUBSCRIPTION_REQUIRED") {
+                window.dispatchEvent(new CustomEvent("cleansera:subscription-required", { detail: { message: result.message } }));
+            } else if (response.status === 403 && code === "BUSINESS_SUSPENDED") {
+                window.dispatchEvent(new CustomEvent("cleansera:business-suspended", { detail: { message: result.message } }));
+            }
+        }
         throw new ApiError(
             result.message || "Request failed",
             response.status,
