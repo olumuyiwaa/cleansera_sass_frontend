@@ -18,6 +18,7 @@ import RowActionsMenu from "@/components/tables/RowActionsMenu";
 import {
     listDocuments,
     createDocument,
+    uploadDocumentFile,
     deleteDocument,
     listAudits,
     createAudit,
@@ -63,10 +64,10 @@ export default function CompliancePage() {
     const [showAuditModal, setShowAuditModal] = useState(false);
     const [saving, setSaving] = useState(false);
 
+    const [docFile, setDocFile] = useState<File | null>(null);
     const [docForm, setDocForm] = useState({
         type: "SDS" as ComplianceDocType,
         title: "",
-        storageKey: "",
         version: "",
         expiresAt: "",
         notes: "",
@@ -133,18 +134,23 @@ export default function CompliancePage() {
         setSaving(true);
         setError("");
         try {
-            // In production you would upload the file first via /storage and get a storageKey.
-            // For now we accept a storageKey string (or a placeholder).
+            if (!docFile) throw new Error("Choose a PDF or image to upload");
+            // Upload first; the API only accepts a storageKey it issued for this business
+            // (the old free-text key / "pending/…" placeholder is rejected).
+            const uploaded = await uploadDocumentFile(docFile);
             await createDocument({
                 type: docForm.type,
                 title: docForm.title,
-                storageKey: docForm.storageKey || `pending/${Date.now()}`,
+                storageKey: uploaded.storageKey,
+                mimeType: uploaded.mimeType,
+                fileSize: uploaded.fileSize,
                 version: docForm.version || undefined,
                 expiresAt: docForm.expiresAt || undefined,
                 notes: docForm.notes || undefined,
             });
             setShowDocModal(false);
-            setDocForm({ type: "SDS", title: "", storageKey: "", version: "", expiresAt: "", notes: "" });
+            setDocFile(null);
+            setDocForm({ type: "SDS", title: "", version: "", expiresAt: "", notes: "" });
             await loadDocs();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to create document");
@@ -484,15 +490,14 @@ export default function CompliancePage() {
                         <Input value={docForm.title} onChange={(e) => setDocForm({ ...docForm, title: e.target.value })} required placeholder="e.g. SDS – All-Purpose Cleaner" />
                     </div>
                     <div>
-                        <Label>Storage Key / File path</Label>
-                        <Input
-                            value={docForm.storageKey}
-                            onChange={(e) => setDocForm({ ...docForm, storageKey: e.target.value })}
-                            placeholder="Upload via Storage first, then paste key"
+                        <Label>File (PDF or image)</Label>
+                        <input
+                            type="file"
+                            accept="application/pdf,image/jpeg,image/png,image/webp"
+                            required
+                            onChange={(e) => setDocFile(e.target.files?.[0] ?? null)}
+                            className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm dark:text-gray-300 dark:file:bg-gray-800"
                         />
-                        <p className="mt-1 text-xs text-gray-400">
-                            Upload the PDF via the Storage module first, then paste the returned key here.
-                        </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>

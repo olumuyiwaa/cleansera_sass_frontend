@@ -55,6 +55,24 @@ export interface ComplianceAudit {
 
 // ─── Documents ────────────────────────────────────────────
 
+/** Presigned upload URL under this business's compliance prefix. The returned storageKey is the only key the API will accept for a document. */
+export async function getDocumentUploadUrl(contentType: string, filename: string): Promise<{ uploadUrl: string; storageKey: string }> {
+  const result = await authFetch(`${BASE}/documents/upload-url`, {
+    method: "POST",
+    body: JSON.stringify({ contentType, filename }),
+  });
+  return result.data;
+}
+
+/** Uploads the file straight to object storage and returns its storageKey. */
+export async function uploadDocumentFile(file: File): Promise<{ storageKey: string; mimeType: string; fileSize: number }> {
+  const mimeType = file.type || "";
+  const { uploadUrl, storageKey } = await getDocumentUploadUrl(mimeType, file.name);
+  const put = await fetch(uploadUrl, { method: "PUT", headers: { "Content-Type": mimeType }, body: file });
+  if (!put.ok) throw new Error("Upload failed. Please try again.");
+  return { storageKey, mimeType, fileSize: file.size };
+}
+
 export async function listDocuments(params?: {
   type?: ComplianceDocType;
   expiringSoon?: boolean;
