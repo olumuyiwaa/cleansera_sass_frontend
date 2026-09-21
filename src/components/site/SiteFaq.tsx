@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Reveal } from "./Reveal";
 import type { WidgetFaqItem } from "@/app/api/widget.api";
+import { safeJsonLd } from "@/lib/jsonLd";
 
 type SiteFaqProps = {
   items: WidgetFaqItem[] | null | undefined;
@@ -29,8 +30,8 @@ export function SiteFaq({ items, primaryColor }: SiteFaqProps) {
     <section id="faq" className="scroll-mt-24 border-t border-[#E8E4DE] bg-[#F6F2ED] py-16 sm:py-20">
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger -- static JSON we build ourselves, not user HTML
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        // FAQ text is tenant-supplied: safeJsonLd escapes "<" so it cannot close the script tag.
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(structuredData) }}
       />
       <div className="site-container">
         <Reveal>
