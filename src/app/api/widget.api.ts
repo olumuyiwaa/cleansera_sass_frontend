@@ -155,6 +155,13 @@ export type QuoteResponse = {
     balanceCents?: number;
     appliedCents?: number;
   } | null;
+  /** Prices are VAT (BTW) inclusive; this says how much of priceCents is BTW. */
+  tax?: {
+    pricesIncludeVat: boolean;
+    vatRateBps: number;
+    vatCents: number;
+    netCents: number;
+  };
 };
 
 export type Slot = {
@@ -190,6 +197,8 @@ export type SubmitBookingPayload = {
   sqft?: number;
   frequency?: string;
   notes?: string;
+  /** Cloudflare Turnstile token; required by the API when TURNSTILE_SECRET_KEY is set. */
+  captchaToken?: string;
 };
 
 export type JoinWaitlistPayload = {
@@ -200,6 +209,7 @@ export type JoinWaitlistPayload = {
   contactEmail?: string;
   contactPhone?: string;
   notes?: string;
+  captchaToken?: string;
 };
 
 // ─── API functions ──────────────────────────────────────────────

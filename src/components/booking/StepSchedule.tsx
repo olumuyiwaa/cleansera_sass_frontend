@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Slot } from "@/app/api/widget.api";
 import { joinWaitlist } from "@/app/api/widget.api";
+import { Turnstile, TURNSTILE_SITE_KEY } from "./Turnstile";
 import type { BookingFormState } from "./types";
 import { isoDateInTimeZone } from "@/app/services/currency";
 
@@ -177,6 +178,8 @@ function WaitlistJoin({
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
 
   if (done) {
     return <p className="text-sm font-medium text-green-700">You&apos;re on the waitlist — we&apos;ll be in touch!</p>;
@@ -209,12 +212,15 @@ function WaitlistJoin({
         desiredEnd: dayEnd.toISOString(),
         contactEmail: isEmail ? contact : undefined,
         contactPhone: isEmail ? undefined : contact,
+        captchaToken: captchaToken || undefined,
       });
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't join the waitlist — please try again");
     } finally {
       setSubmitting(false);
+      setCaptchaToken(null);
+      setCaptchaNonce((n) => n + 1);
     }
   };
 
@@ -227,9 +233,10 @@ function WaitlistJoin({
         placeholder="Email or phone number"
         className="h-10 rounded-lg border border-gray-300 px-3 text-sm w-full sm:w-56"
       />
+      <Turnstile onToken={setCaptchaToken} resetKey={captchaNonce} />
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || (Boolean(TURNSTILE_SITE_KEY) && !captchaToken)}
         className="h-10 rounded-lg px-4 text-sm font-medium text-white disabled:opacity-60"
         style={{ backgroundColor: primaryColor }}
       >

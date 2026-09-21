@@ -9,6 +9,8 @@ import {
   type Slot,
   type WidgetService,
 } from "@/app/api/widget.api";
+import { redirectToCheckout } from "@/lib/checkoutRedirect";
+import { TURNSTILE_SITE_KEY } from "./Turnstile";
 import {
   BookingFormState,
   Frequency,
@@ -31,6 +33,9 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
   const [slotsError, setSlotsError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Turnstile tokens are single-use: after every attempt the challenge is re-rendered (nonce) and the token cleared.
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
   const [bookingResult, setBookingResult] = useState<{
     id: string;
     scheduledStart: string;
@@ -208,6 +213,10 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
   // ─── Submit ───────────────────────────────────────────────────
   const confirmBooking = async () => {
     if (!state.serviceId || !state.scheduledStart) return;
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setSubmitError("Please complete the verification challenge first.");
+      return;
+    }
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -232,10 +241,11 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
         sqft: state.sqft || undefined,
         frequency: state.frequency,
         notes: state.notes.trim() || undefined,
+        captchaToken: captchaToken || undefined,
       });
-      // Card deposit → Stripe Checkout
+      // Card deposit → Stripe Checkout (breaks out of the embed iframe when needed)
       if (result.deposit?.url) {
-        window.location.href = result.deposit.url;
+        redirectToCheckout(result.deposit.url);
         return;
       }
 
@@ -249,6 +259,8 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
       setSubmitError(e instanceof Error ? e.message : "Booking failed");
     } finally {
       setSubmitting(false);
+      setCaptchaToken(null);
+      setCaptchaNonce((n) => n + 1);
     }
   };
 
@@ -269,6 +281,9 @@ export function useBookingState({ slug, services }: BookingWizardProps) {
     refreshQuote,
     submitting,
     submitError,
+    captchaToken,
+    setCaptchaToken,
+    captchaNonce,
     confirmBooking,
     bookingResult,
     setFrequency: (f: Frequency) => update({ frequency: f }),

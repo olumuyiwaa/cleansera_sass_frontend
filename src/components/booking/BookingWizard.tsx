@@ -31,6 +31,9 @@ export function BookingWizard(props: BookingWizardProps) {
     submitting,
     submitError,
     confirmBooking,
+    captchaToken,
+    setCaptchaToken,
+    captchaNonce,
     bookingResult,
   } = useBookingState(props);
 
@@ -172,6 +175,9 @@ export function BookingWizard(props: BookingWizardProps) {
                 primaryColor={primary}
                 submitting={submitting}
                 submitError={submitError}
+                captchaToken={captchaToken}
+                captchaNonce={captchaNonce}
+                onCaptchaToken={setCaptchaToken}
                 onConfirm={confirmBooking}
               />
             )}

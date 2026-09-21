@@ -45,16 +45,43 @@
         container.__cleanseraIframe = iframe;
     }
 
-    window.addEventListener("message", function (event) {
-        var data = event.data;
-        if (!data || data.source !== "cleansera-widget" || !data.height) return;
+    // Only Stripe-hosted payment pages may be opened on behalf of the widget.
+    function isAllowedCheckoutUrl(raw) {
+        try {
+            var u = new URL(raw);
+            return u.protocol === "https:" && (u.hostname === "stripe.com" || /\.stripe\.com$/.test(u.hostname));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function findIframe(source) {
         var containers = document.querySelectorAll("[data-business]");
         for (var i = 0; i < containers.length; i++) {
             var iframe = containers[i].__cleanseraIframe;
-            if (iframe && iframe.contentWindow === event.source) {
-                iframe.style.height = data.height + "px";
-            }
+            if (iframe && iframe.contentWindow === source) return iframe;
         }
+        return null;
+    }
+
+    window.addEventListener("message", function (event) {
+        var data = event.data;
+        if (!data || data.source !== "cleansera-widget") return;
+        // Only accept messages from OUR widget origin AND from one of our iframes.
+        if (event.origin !== WIDGET_ORIGIN) return;
+        var iframe = findIframe(event.source);
+        if (!iframe) return;
+
+        if (data.type === "redirect") {
+            // Stripe Checkout cannot be shown inside an iframe: navigate the whole tab.
+            if (typeof data.url === "string" && isAllowedCheckoutUrl(data.url)) {
+                event.source.postMessage({ source: "cleansera-embed", type: "redirect-ack" }, WIDGET_ORIGIN);
+                window.location.assign(data.url);
+            }
+            return;
+        }
+
+        if (data.height) iframe.style.height = data.height + "px";
     });
 
     function init() {

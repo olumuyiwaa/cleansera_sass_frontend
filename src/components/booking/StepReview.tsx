@@ -3,6 +3,7 @@
 import type { WidgetService } from "@/app/api/widget.api";
 import type { BookingFormState } from "./types";
 import { formatMoney, frequencyLabel } from "./types";
+import { Turnstile, TURNSTILE_SITE_KEY } from "./Turnstile";
 
 type Props = {
   state: BookingFormState;
@@ -10,6 +11,9 @@ type Props = {
   primaryColor?: string;
   submitting: boolean;
   submitError: string | null;
+  captchaToken?: string | null;
+  captchaNonce?: number;
+  onCaptchaToken?: (token: string | null) => void;
   onConfirm: () => void;
 };
 
@@ -19,9 +23,14 @@ export function StepReview({
   primaryColor = "#3F6B52",
   submitting,
   submitError,
+  captchaToken = null,
+  captchaNonce = 0,
+  onCaptchaToken = () => {},
   onConfirm,
 }: Props) {
   const price = state.quote?.priceCents;
+  const tax = state.quote?.tax;
+  const needsCaptcha = Boolean(TURNSTILE_SITE_KEY) && !captchaToken;
 
   return (
     <div className="space-y-6">
@@ -83,6 +92,12 @@ export function StepReview({
             {price != null ? formatMoney(price) : "—"}
           </dd>
         </div>
+        {tax && tax.pricesIncludeVat && (
+          <div className="flex justify-between px-4 pb-3 bg-gray-50 text-xs text-gray-500">
+            <span>Incl. {(tax.vatRateBps / 100).toString().replace(".", ",")}% BTW</span>
+            <span>{formatMoney(tax.vatCents)}</span>
+          </div>
+        )}
       </dl>
 
       <p className="text-xs text-gray-500 leading-relaxed">
@@ -94,9 +109,11 @@ export function StepReview({
         <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">{submitError}</div>
       )}
 
+      <Turnstile onToken={onCaptchaToken} resetKey={captchaNonce} />
+
       <button
         type="button"
-        disabled={submitting || price == null}
+        disabled={submitting || price == null || needsCaptcha}
         onClick={onConfirm}
         className="w-full rounded-xl py-3.5 text-base font-semibold text-white shadow-sm disabled:opacity-60 transition"
         style={{ backgroundColor: primaryColor }}
