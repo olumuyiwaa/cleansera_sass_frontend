@@ -62,7 +62,7 @@ export default function ForBusinesses() {
   const [demoStatus, setDemoStatus] = useState("idle"); // idle | loading | success | error
   const [demoError, setDemoError] = useState("");
 
-  const handleDemoSubmit = async (e) => {
+  const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (demoStatus === "loading") return;
     setDemoStatus("loading");
@@ -80,7 +80,7 @@ export default function ForBusinesses() {
       setDemoStatus("success");
     } catch (err) {
       setDemoStatus("error");
-      setDemoError(err.message || "Something went wrong — please try again.");
+      setDemoError("Something went wrong — please try again.");
     }
   };
 

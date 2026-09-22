@@ -43,7 +43,7 @@ export default function Support() {
   const [supportStatus, setSupportStatus] = useState("idle"); // idle | loading | success | error
   const [supportError, setSupportError] = useState("");
 
-  const handleSupportSubmit = async (e) => {
+  const handleSupportSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (supportStatus === "loading") return;
     setSupportStatus("loading");
@@ -66,7 +66,7 @@ export default function Support() {
       setSupportStatus("success");
     } catch (err) {
       setSupportStatus("error");
-      setSupportError(err.message || "Something went wrong — please try again.");
+      setSupportError("Something went wrong — please try again.");
     }
   };
 
