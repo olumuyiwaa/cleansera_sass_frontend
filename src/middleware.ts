@@ -52,6 +52,13 @@ const RESERVED_SUBDOMAINS = new Set([
   "assets",
   "mail",
   "support",
+  "about",
+  "pricing",
+  "how-it-works",
+  "for-businesses",
+  "for-cleaners",
+  "privacy",
+  "terms",
 ]);
 
 const BYPASS_PREFIXES = ["/_next", "/favicon.ico", "/robots.txt", "/sitemap.xml", "/api/"];
@@ -124,6 +131,8 @@ export async function middleware(req: NextRequest) {
     // Bare root domain (cleansera.nl) is the marketing site's job, not
     // this app's. Let it fall through if this deployment also serves it,
     // otherwise this 404s — either is fine, just don't treat it as a tenant.
+    return NextResponse.next();
+  } else if (host === ROOT_DOMAIN || host === `www.${ROOT_DOMAIN}`) {
     return NextResponse.next();
   } else {
     // Anything else is a candidate custom domain (acme-cleaning.nl).

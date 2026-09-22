@@ -1,0 +1,186 @@
+/* Marketing-only tokens and utilities.
+   Import from (marketing)/layout.tsx so dashboard pages are unaffected.
+   Tailwind v4: prefer @theme if your frontend uses it; these CSS variables
+   and utility classes work alongside either v3 or v4. */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+.marketing-root {
+    --font-display: "Plus Jakarta Sans", sans-serif;
+    --font-body: "Manrope", sans-serif;
+    --site-bg: #f6f2ed;
+    --site-ivory: #fbfaf7;
+    --site-sand: #efe6dc;
+    --site-ink: #171b1a;
+    --site-muted: #5f6664;
+    --site-line: rgba(23, 27, 26, 0.08);
+    --site-mint: #deebdf;
+    --site-olive: #73877a;
+
+    /* Tailwind-like color aliases used by Header/Footer classNames */
+    --color-paper: #fbfbf8;
+    --color-ink: #16231c;
+
+    background: var(--site-bg);
+    color: var(--site-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.marketing-root .font-display {
+    font-family: var(--font-display), sans-serif;
+}
+
+.marketing-root .font-body {
+    font-family: var(--font-body), sans-serif;
+}
+
+.marketing-root .text-ink {
+    color: var(--color-ink);
+}
+.marketing-root .bg-ink {
+    background-color: var(--color-ink);
+}
+.marketing-root .text-paper {
+    color: var(--color-paper);
+}
+.marketing-root .bg-paper {
+    background-color: var(--color-paper);
+}
+.marketing-root .bg-paper\/85 {
+    background-color: color-mix(in srgb, var(--color-paper) 85%, transparent);
+}
+.marketing-root .bg-paper\/80 {
+    background-color: color-mix(in srgb, var(--color-paper) 80%, transparent);
+}
+
+/* Sage scale (from website tailwind.config) */
+.marketing-root .bg-sage-50 {
+    background-color: #f1f6f3;
+}
+.marketing-root .bg-sage-600 {
+    background-color: #3f6b52;
+}
+.marketing-root .bg-sage-700\/85 {
+    background-color: color-mix(in srgb, #325342 85%, transparent);
+}
+.marketing-root .text-sage-700 {
+    color: #325342;
+}
+.marketing-root .hover\:bg-sage-800:hover {
+    background-color: #263f32;
+}
+.marketing-root .hover\:text-sage-700:hover {
+    color: #325342;
+}
+
+/* Stone (marketing palette) */
+.marketing-root .bg-stone-50 {
+    background-color: #faf9f6;
+}
+.marketing-root .border-stone-200 {
+    border-color: #e2ded3;
+}
+.marketing-root .text-stone-400 {
+    color: #9c9483;
+}
+.marketing-root .text-stone-500 {
+    color: #79715f;
+}
+.marketing-root .text-stone-600 {
+    color: #5c5546;
+}
+.marketing-root .text-stone-700 {
+    color: #453f34;
+}
+.marketing-root .hover\:text-ink:hover {
+    color: var(--color-ink);
+}
+
+.marketing-root main {
+    overflow-x: hidden;
+}
+
+.container-page {
+    width: min(100% - 32px, 1200px);
+    margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+    .container-page {
+        width: min(100% - 56px, 1200px);
+    }
+}
+
+@keyframes floatSlow {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes pulseSoft {
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-up {
+    animation: fadeUp 0.8s ease-out both;
+}
+.animate-float-slow {
+    animation: floatSlow 7s ease-in-out infinite;
+}
+.animate-pulse-soft {
+    animation: pulseSoft 4.2s ease-in-out infinite;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+            opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+            transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marketing-root *,
+    .marketing-root *::before,
+    .marketing-root *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
