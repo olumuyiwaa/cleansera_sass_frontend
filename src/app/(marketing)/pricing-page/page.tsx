@@ -93,7 +93,14 @@ function CheckIcon() {
   );
 }
 
-function FAQItem({ question, answer, open, onToggle }) {
+type FAQItemProps = {
+  question: string;
+  answer: string;
+  open: boolean;
+  onToggle: () => void;
+};
+
+function FAQItem({ question, answer, open, onToggle }: FAQItemProps) {
   return (
       <div className={`faq-item ${open ? "faq-open" : ""}`}>
         <button type="button" className="faq-question" onClick={onToggle} aria-expanded={open}>

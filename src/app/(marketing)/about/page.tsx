@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import Reveal from "@/components/marketing/Reveal"
-
 const VALUES = [
   {
     title: "Ownership",
@@ -170,7 +169,13 @@ function ReviewIcon() {
   );
 }
 
-function FAQItem({ question, answer, open, onToggle }) {
+type FAQItemProps = {
+  question: string;
+  answer: string;
+  open: boolean;
+  onToggle: () => void;
+};
+function FAQItem({ question, answer, open, onToggle }: FAQItemProps) {
   return (
     <div className={`faq-item ${open ? "faq-open" : ""}`}>
       <button type="button" className="faq-question" onClick={onToggle} aria-expanded={open}>

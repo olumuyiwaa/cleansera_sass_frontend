@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import {useState } from "react";
+import Reveal from "@/components/marketing/Reveal"
 
 const COMPARE_ROWS = [
   { label: "Booking site", cleansera: "Your own branded booking experience", marketplace: "Shared listing inside a crowded marketplace" },
@@ -36,38 +37,6 @@ const PLAN_HIGHLIGHTS = [
   { name: "Pro", detail: "For established teams that want deeper automation, custom workflows, and premium support." },
 ];
 
-function Reveal({ children, delay = 0, className = "" }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return undefined;
-
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.12 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-      <div
-          ref={ref}
-          className={`reveal ${visible ? "reveal-visible" : ""} ${className}`.trim()}
-          style={{ transitionDelay: `${delay}ms` }}
-      >
-        {children}
-      </div>
-  );
-}
 
 function ArrowIcon() {
   return (
