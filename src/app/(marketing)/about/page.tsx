@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import Reveal from "@/components/marketing/Reveal"
 
 const VALUES = [

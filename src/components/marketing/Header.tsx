@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { label: "For businesses", href: "/for-businesses" },
   { label: "For cleaners", href: "/for-cleaners" },
   { label: "How it works", href: "/how-it-works" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Pricing", href: "/pricing-page" },
 ] as const;
 
 export default function MarketingHeader() {
@@ -63,7 +63,7 @@ export default function MarketingHeader() {
         </nav>
 
         <div className="hidden shrink-0 items-center gap-3 md:flex">
-          <a href={`${APP_URL}/auth/sign-in`} className="text-sm font-medium text-stone-600 hover:text-ink">
+          <a href={`/signin`} className="text-sm font-medium text-stone-600 hover:text-ink">
             Sign in
           </a>
           <Link
@@ -104,7 +104,7 @@ export default function MarketingHeader() {
                 {item.label}
               </Link>
             ))}
-            <a href={`${APP_URL}/auth/sign-in`} className="py-2.5 text-sm font-medium text-stone-700">
+            <a href={`/signin`} className="py-2.5 text-sm font-medium text-stone-700">
               Sign in
             </a>
             <Link
