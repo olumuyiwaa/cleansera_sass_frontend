@@ -157,7 +157,16 @@ export default function StripeConnectOptionalCard({
             className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           >
             <option value="BOTH">Card (when available) + offline</option>
-            <option value="ONLINE_CARD">Prefer card online</option>
+            {/*
+              Selecting "card only" before Stripe is actually chargeable
+              leaves customers with no way to pay at all — the backend
+              rejects this too (belt and braces), but catching it here means
+              the option simply isn't offered rather than saving and then
+              showing an error.
+            */}
+            <option value="ONLINE_CARD" disabled={!onlineReady}>
+              Prefer card online{onlineReady ? "" : " (connect Stripe first)"}
+            </option>
             <option value="MANUAL_OFFLINE">Offline only (cash / bank transfer)</option>
           </select>
         </div>
