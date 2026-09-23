@@ -177,6 +177,7 @@ export function BookingWizard(props: BookingWizardProps) {
                 submitError={submitError}
                 captchaToken={captchaToken}
                 captchaNonce={captchaNonce}
+                cancellationPolicy={props.cancellationPolicy}
                 onCaptchaToken={setCaptchaToken}
                 onConfirm={confirmBooking}
               />

@@ -1,5 +1,11 @@
 import { getActiveCurrency } from "@/app/services/currency";
-import type {WidgetService, WidgetBusiness, QuoteResponse, StorefrontPayment} from "@/app/api/widget.api";
+import type {
+  WidgetService,
+  WidgetBusiness,
+  QuoteResponse,
+  StorefrontPayment,
+  StorefrontCancellationPolicy,
+} from "@/app/api/widget.api";
 
 export type Frequency = "ONE_TIME" | "WEEKLY" | "BIWEEKLY" | "MONTHLY";
 
@@ -46,6 +52,7 @@ export type BookingWizardProps = {
   business: WidgetBusiness;
   services: WidgetService[];
   payment?: StorefrontPayment | null;
+  cancellationPolicy?: StorefrontCancellationPolicy | null;
   /**
    * Render for the compact modal context (BookingWidgetModal) instead of a
    * full page (book-now/[slug]): no duplicate business header (the modal
@@ -119,4 +126,31 @@ export function frequencyLabel(f: Frequency) {
     default:
       return "One-time";
   }
+}
+
+/**
+ * Renders this business's real cancellation policy — never a hardcoded
+ * window. `null`/missing windowHours means the business hasn't configured
+ * one, which cancellationPolicy.js on the backend treats as "free
+ * cancellation any time"; this must say the same thing, since it's the
+ * customer's only preview of what cancelling will actually cost them.
+ */
+export function cancellationPolicyLabel(
+  policy: StorefrontCancellationPolicy | null | undefined
+): string {
+  if (!policy || policy.windowHours == null) {
+    return "You can cancel or reschedule free of charge at any time from your customer portal.";
+  }
+  const hours = policy.windowHours;
+  const window =
+    hours % 24 === 0 && hours >= 24
+      ? `${hours / 24} day${hours === 24 ? "" : "s"}`
+      : `${hours} hour${hours === 1 ? "" : "s"}`;
+  const feeText =
+    policy.feeType === "PERCENT"
+      ? `a ${policy.feeValue ?? 0}% fee`
+      : policy.feeType === "AMOUNT" && policy.feeValue != null
+        ? `a ${formatMoney(policy.feeValue)} fee`
+        : "a cancellation fee";
+  return `You can cancel or reschedule free of charge up to ${window} before the appointment. Cancelling later may incur ${feeText}.`;
 }

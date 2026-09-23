@@ -1,8 +1,8 @@
 "use client";
 
-import type { WidgetService } from "@/app/api/widget.api";
+import type { WidgetService, StorefrontCancellationPolicy } from "@/app/api/widget.api";
 import type { BookingFormState } from "./types";
-import { formatMoney, frequencyLabel } from "./types";
+import { formatMoney, frequencyLabel, cancellationPolicyLabel } from "./types";
 import { Turnstile, TURNSTILE_SITE_KEY } from "./Turnstile";
 
 type Props = {
@@ -13,6 +13,7 @@ type Props = {
   submitError: string | null;
   captchaToken?: string | null;
   captchaNonce?: number;
+  cancellationPolicy?: StorefrontCancellationPolicy | null;
   onCaptchaToken?: (token: string | null) => void;
   onConfirm: () => void;
 };
@@ -25,6 +26,7 @@ export function StepReview({
   submitError,
   captchaToken = null,
   captchaNonce = 0,
+  cancellationPolicy = null,
   onCaptchaToken = () => {},
   onConfirm,
 }: Props) {
@@ -101,8 +103,7 @@ export function StepReview({
       </dl>
 
       <p className="text-xs text-gray-500 leading-relaxed">
-        By booking you agree to the service terms. You can cancel or reschedule free of charge
-        up to 12 hours before the appointment from your customer portal.
+        By booking you agree to the service terms. {cancellationPolicyLabel(cancellationPolicy)}
       </p>
 
       {submitError && (

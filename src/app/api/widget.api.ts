@@ -113,11 +113,24 @@ export type StorefrontPayment = {
   offlinePaymentInstructions: string | null;
 };
 
+/**
+ * windowHours null means free cancellation any time (a business that's never
+ * configured a policy) — not "no data yet". Mirrors
+ * cancellationPolicy.js's own default on the backend, so the widget's copy
+ * can never drift from what a cancellation will actually cost the customer.
+ */
+export type StorefrontCancellationPolicy = {
+  windowHours: number | null;
+  feeType: "PERCENT" | "AMOUNT" | null;
+  feeValue: number | null;
+};
+
 export type StorefrontResponse = {
   business: WidgetBusiness;
   services: WidgetService[];
   onboardingComplete?: boolean;
   payment?: StorefrontPayment;
+  cancellationPolicy?: StorefrontCancellationPolicy;
 };
 
 export type QuoteRequest = {

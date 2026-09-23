@@ -2,7 +2,12 @@
 
 import { useEffect } from "react";
 import { BookingWizard } from "@/components/booking/BookingWizard";
-import type {StorefrontPayment, WidgetBusiness, WidgetService} from "@/app/api/widget.api";
+import type {
+  StorefrontPayment,
+  StorefrontCancellationPolicy,
+  WidgetBusiness,
+  WidgetService,
+} from "@/app/api/widget.api";
 
 type BookingWidgetModalProps = {
   open: boolean;
@@ -11,6 +16,7 @@ type BookingWidgetModalProps = {
   business: WidgetBusiness;
   services: WidgetService[];
   payment?: StorefrontPayment | null;
+  cancellationPolicy?: StorefrontCancellationPolicy | null;
   businessName?: string;
   primaryColor?: string;
 };
@@ -31,6 +37,7 @@ export function BookingWidgetModal({
                                      business,
                                      services,
                                      payment,
+                                     cancellationPolicy,
                                      businessName,
                                      primaryColor = "#3F6B52",
                                    }: BookingWidgetModalProps) {
@@ -101,6 +108,7 @@ export function BookingWidgetModal({
                 business={business}
                 services={services}
                 payment={payment}
+                cancellationPolicy={cancellationPolicy}
                 compact
             />
           </div>

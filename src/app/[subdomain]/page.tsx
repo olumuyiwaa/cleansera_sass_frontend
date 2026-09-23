@@ -173,6 +173,7 @@ export default function BusinessSitePage({
         businessName={name}
         primaryColor={primaryColor}
         payment={data.payment}
+        cancellationPolicy={data.cancellationPolicy}
       />
     </div>
   );
