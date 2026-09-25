@@ -169,5 +169,133 @@
       "saving": "Saving…",
       "markAsPaid": "Mark as paid"
     }
+  },
+  "Portal": {
+    "header": {
+      "badge": "Customer portal",
+      "title": "My cleanings",
+      "site": "Site",
+      "bookAgain": "Book again",
+      "book": "Book",
+      "signOut": "Sign out"
+    },
+    "marketing": {
+      "selfService": "Self-service",
+      "heading": "Manage your cleanings in one place",
+      "description": "View upcoming visits, reschedule or cancel, leave a review, and tip your cleaner — securely, with a one-time code. No password to remember.",
+      "feature1": "See schedule and cleaner details",
+      "feature2": "Reschedule when plans change",
+      "feature3": "Review and tip after the job"
+    },
+    "phoneStep": {
+      "heading": "Sign in with your phone",
+      "description": "Use the number from your booking. We'll text or email a one-time code — no password needed.",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+1 555 000 0000",
+      "sending": "Sending…",
+      "sendCode": "Send access code"
+    },
+    "codeStep": {
+      "heading": "Enter your code",
+      "sentTo": "Sent to",
+      "codeLabel": "6-digit code",
+      "verifying": "Verifying…",
+      "continue": "Continue",
+      "useDifferentPhone": "Use a different phone"
+    },
+    "welcome": "Welcome back, {name}",
+    "stats": {
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "total": "Total"
+    },
+    "filters": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "all": "All",
+      "refreshing": "Refreshing…"
+    },
+    "empty": {
+      "noBookings": "No bookings in this view",
+      "scheduleWhenReady": "Schedule a cleaning whenever you're ready.",
+      "bookACleaning": "Book a cleaning"
+    },
+    "card": {
+      "defaultServiceName": "Cleaning",
+      "details": "Details",
+      "reschedule": "Reschedule",
+      "cancel": "Cancel",
+      "review": "Review",
+      "tip": "Tip"
+    },
+    "footer": "Powered by CleanSera · Secure customer portal",
+    "status": {
+      "requested": "Requested",
+      "confirmed": "Confirmed",
+      "assigned": "Assigned",
+      "inProgress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "detailModal": {
+      "title": "Booking details",
+      "service": "Service",
+      "when": "When",
+      "address": "Address",
+      "status": "Status",
+      "price": "Price",
+      "tip": "Tip",
+      "cleaner": "Cleaner",
+      "yourReview": "Your review",
+      "close": "Close"
+    },
+    "rescheduleModal": {
+      "title": "Reschedule",
+      "description": "Choose a new date and time. We'll check availability for that slot.",
+      "save": "Save new time"
+    },
+    "reviewModal": {
+      "title": "Rate your cleaning",
+      "starsAriaLabel": "{n} stars",
+      "commentPlaceholder": "Optional comment — what went well?",
+      "submit": "Submit review"
+    },
+    "tipModal": {
+      "title": "Leave a tip",
+      "description": "100% goes to the business / cleaner. You'll pay securely via Stripe.",
+      "customAmount": "Custom amount ({currency})",
+      "tipButton": "Tip {amount}"
+    },
+    "confirmCancel": "Cancel this booking? A cancellation fee may apply if it's close to the scheduled time, based on the business policy.",
+    "pleaseWait": "Please wait…",
+    "modalCancel": "Cancel",
+    "closeAria": "Close",
+    "errors": {
+      "failedToLoadBookings": "Failed to load bookings",
+      "failedToSendCode": "Failed to send code",
+      "invalidCode": "Invalid code",
+      "cancelFailed": "Cancel failed",
+      "rescheduleFailed": "Reschedule failed",
+      "reviewFailed": "Review failed",
+      "tipFailed": "Tip failed",
+      "couldNotStartTipCheckout": "Could not start tip checkout"
+    },
+    "success": {
+      "codeSent": "If we found your account, a code was sent by SMS or email.",
+      "bookingCancelled": "Booking cancelled.",
+      "bookingRescheduled": "Booking rescheduled.",
+      "reviewThanks": "Thanks for your review!"
+    },
+    "legacy": {
+      "subtitle": "View, reschedule, cancel, review, or tip",
+      "hi": "Hi,",
+      "loading": "Loading…",
+      "noBookingsYet": "No bookings yet.",
+      "leaveReview": "Leave review",
+      "save": "Save",
+      "submit": "Submit",
+      "starsOption": "{n, plural, one {# star} other {# stars}}",
+      "confirmCancel": "Cancel this booking? A fee may apply per business policy."
+    }
   }
 }

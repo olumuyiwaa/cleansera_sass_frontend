@@ -8,6 +8,8 @@
  */
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import {
   requestPortalAccess,
   verifyPortalAccess,
@@ -27,6 +29,8 @@ const TOKEN_KEY = "cleansera_portal_token";
 const CUSTOMER_KEY = "cleansera_portal_customer";
 
 export default function CustomerPortalHostPage() {
+  const t = useTranslations("Portal");
+  const tStatus = useTranslations("Portal.status");
   const [step, setStep] = useState<"phone" | "code" | "bookings">("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -66,7 +70,7 @@ export default function CustomerPortalHostPage() {
       try {
         setBookings(await listPortalBookings(null, token));
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load bookings");
+        setError(e instanceof Error ? e.message : t("errors.failedToLoadBookings"));
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(CUSTOMER_KEY);
         setStep("phone");
@@ -74,7 +78,7 @@ export default function CustomerPortalHostPage() {
         setLoading(false);
       }
     })();
-  }, [step, token]);
+  }, [step, token, t]);
 
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,10 +87,10 @@ export default function CustomerPortalHostPage() {
     setMsg("");
     try {
       await requestPortalAccess(null, phone);
-      setMsg("If we found your account, a code was sent by SMS/email.");
+      setMsg(t("success.codeSent"));
       setStep("code");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send code");
+      setError(err instanceof Error ? err.message : t("errors.failedToSendCode"));
     } finally {
       setLoading(false);
     }
@@ -104,7 +108,7 @@ export default function CustomerPortalHostPage() {
       setCustomer(data.customer);
       setStep("bookings");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid code");
+      setError(err instanceof Error ? err.message : t("errors.invalidCode"));
     } finally {
       setLoading(false);
     }
@@ -120,13 +124,13 @@ export default function CustomerPortalHostPage() {
   };
 
   const handleCancel = async (id: string) => {
-    if (!token || !confirm("Cancel this booking? A fee may apply per business policy.")) return;
+    if (!token || !confirm(t("legacy.confirmCancel"))) return;
     setLoading(true);
     try {
       await cancelPortalBooking(null, token, id);
       setBookings(await listPortalBookings(null, token));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cancel failed");
+      setError(err instanceof Error ? err.message : t("errors.cancelFailed"));
     } finally {
       setLoading(false);
     }
@@ -145,7 +149,7 @@ export default function CustomerPortalHostPage() {
       setRescheduleId(null);
       setBookings(await listPortalBookings(null, token));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Reschedule failed");
+      setError(err instanceof Error ? err.message : t("errors.rescheduleFailed"));
     } finally {
       setLoading(false);
     }
@@ -159,7 +163,7 @@ export default function CustomerPortalHostPage() {
       setReviewId(null);
       setBookings(await listPortalBookings(null, token));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Review failed");
+      setError(err instanceof Error ? err.message : t("errors.reviewFailed"));
     } finally {
       setLoading(false);
     }
@@ -180,7 +184,7 @@ export default function CustomerPortalHostPage() {
       );
       if (data.url) window.location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Tip failed");
+      setError(err instanceof Error ? err.message : t("errors.tipFailed"));
     } finally {
       setLoading(false);
     }
@@ -188,10 +192,13 @@ export default function CustomerPortalHostPage() {
 
   return (
       <div className="mx-auto min-h-screen max-w-lg bg-gray-50 px-4 py-10">
+        <div className="mb-3 flex justify-end">
+          <LanguageSwitcher />
+        </div>
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">My cleanings</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">{t("header.title")}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            View, reschedule, cancel, review, or tip
+            {t("legacy.subtitle")}
           </p>
         </div>
 
@@ -212,7 +219,7 @@ export default function CustomerPortalHostPage() {
                 className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
             >
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Phone number
+                {t("phoneStep.phoneLabel")}
               </label>
               <input
                   className="mb-4 h-11 w-full rounded-lg border border-gray-300 px-3 text-sm"
@@ -226,7 +233,7 @@ export default function CustomerPortalHostPage() {
                   disabled={loading}
                   className="h-11 w-full rounded-lg bg-emerald-700 text-sm font-medium text-white disabled:opacity-60"
               >
-                {loading ? "Sending…" : "Send access code"}
+                {loading ? t("phoneStep.sending") : t("phoneStep.sendCode")}
               </button>
             </form>
         )}
@@ -237,7 +244,7 @@ export default function CustomerPortalHostPage() {
                 className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
             >
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                6-digit code
+                {t("codeStep.codeLabel")}
               </label>
               <input
                   className="mb-4 h-11 w-full rounded-lg border border-gray-300 px-3 text-sm tracking-widest"
@@ -250,14 +257,14 @@ export default function CustomerPortalHostPage() {
                   disabled={loading}
                   className="h-11 w-full rounded-lg bg-emerald-700 text-sm font-medium text-white disabled:opacity-60"
               >
-                {loading ? "Verifying…" : "Continue"}
+                {loading ? t("codeStep.verifying") : t("codeStep.continue")}
               </button>
               <button
                   type="button"
                   onClick={() => setStep("phone")}
                   className="mt-3 w-full text-sm text-gray-500"
               >
-                Use a different phone
+                {t("codeStep.useDifferentPhone")}
               </button>
             </form>
         )}
@@ -266,14 +273,14 @@ export default function CustomerPortalHostPage() {
             <div>
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  Hi, <span className="font-medium">{customer.firstName}</span>
+                  {t("legacy.hi")} <span className="font-medium">{customer.firstName}</span>
                 </p>
                 <button onClick={logout} className="text-sm text-gray-500">
-                  Sign out
+                  {t("header.signOut")}
                 </button>
               </div>
 
-              {loading && <p className="text-sm text-gray-500">Loading…</p>}
+              {loading && <p className="text-sm text-gray-500">{t("legacy.loading")}</p>}
 
               <div className="space-y-3">
                 {bookings.map((b) => (
@@ -284,7 +291,7 @@ export default function CustomerPortalHostPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="font-medium text-gray-900">
-                            {b.service?.name || "Cleaning"}
+                            {b.service?.name || t("card.defaultServiceName")}
                           </p>
                           <p className="text-sm text-gray-500">
                             {new Date(b.scheduledStart).toLocaleString()}
@@ -298,7 +305,7 @@ export default function CustomerPortalHostPage() {
                                 b.status
                             )}`}
                         >
-                    {statusLabel(b.status)}
+                    {statusLabel(b.status, tStatus)}
                   </span>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
@@ -311,13 +318,13 @@ export default function CustomerPortalHostPage() {
                                   }}
                                   className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium"
                               >
-                                Reschedule
+                                {t("card.reschedule")}
                               </button>
                               <button
                                   onClick={() => handleCancel(b.id)}
                                   className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600"
                               >
-                                Cancel
+                                {t("card.cancel")}
                               </button>
                             </>
                         )}
@@ -330,7 +337,7 @@ export default function CustomerPortalHostPage() {
                                 }}
                                 className="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-medium text-emerald-700"
                             >
-                              Leave review
+                              {t("legacy.leaveReview")}
                             </button>
                         )}
                         {b.status === "COMPLETED" && !b.tipAmountCents && (
@@ -341,21 +348,21 @@ export default function CustomerPortalHostPage() {
                                 }}
                                 className="rounded-lg border border-amber-200 px-3 py-1.5 text-xs font-medium text-amber-800"
                             >
-                              Tip
+                              {t("card.tip")}
                             </button>
                         )}
                       </div>
                     </div>
                 ))}
                 {!loading && bookings.length === 0 && (
-                    <p className="text-center text-sm text-gray-500">No bookings yet.</p>
+                    <p className="text-center text-sm text-gray-500">{t("legacy.noBookingsYet")}</p>
                 )}
               </div>
 
               {rescheduleId && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                     <div className="w-full max-w-sm rounded-xl bg-white p-5">
-                      <h3 className="mb-3 font-semibold">Reschedule</h3>
+                      <h3 className="mb-3 font-semibold">{t("rescheduleModal.title")}</h3>
                       <input
                           type="datetime-local"
                           className="mb-4 h-11 w-full rounded-lg border border-gray-300 px-3 text-sm"
@@ -367,14 +374,14 @@ export default function CustomerPortalHostPage() {
                             onClick={() => setRescheduleId(null)}
                             className="px-3 py-2 text-sm text-gray-500"
                         >
-                          Close
+                          {t("detailModal.close")}
                         </button>
                         <button
                             onClick={handleReschedule}
                             disabled={loading || !rescheduleStart}
                             className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
                         >
-                          Save
+                          {t("legacy.save")}
                         </button>
                       </div>
                     </div>
@@ -384,7 +391,7 @@ export default function CustomerPortalHostPage() {
               {reviewId && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                     <div className="w-full max-w-sm rounded-xl bg-white p-5">
-                      <h3 className="mb-3 font-semibold">Rate your cleaning</h3>
+                      <h3 className="mb-3 font-semibold">{t("reviewModal.title")}</h3>
                       <select
                           className="mb-3 h-11 w-full rounded-lg border border-gray-300 px-3 text-sm"
                           value={rating}
@@ -392,14 +399,14 @@ export default function CustomerPortalHostPage() {
                       >
                         {[5, 4, 3, 2, 1].map((n) => (
                             <option key={n} value={n}>
-                              {n} star{n > 1 ? "s" : ""}
+                              {t("legacy.starsOption", { n })}
                             </option>
                         ))}
                       </select>
                       <textarea
                           className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                           rows={3}
-                          placeholder="Optional comment"
+                          placeholder={t("reviewModal.commentPlaceholder")}
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
                       />
@@ -408,14 +415,14 @@ export default function CustomerPortalHostPage() {
                             onClick={() => setReviewId(null)}
                             className="px-3 py-2 text-sm text-gray-500"
                         >
-                          Close
+                          {t("detailModal.close")}
                         </button>
                         <button
                             onClick={handleReview}
                             disabled={loading}
                             className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
                         >
-                          Submit
+                          {t("legacy.submit")}
                         </button>
                       </div>
                     </div>
@@ -425,7 +432,7 @@ export default function CustomerPortalHostPage() {
               {tipId && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                     <div className="w-full max-w-sm rounded-xl bg-white p-5">
-                      <h3 className="mb-3 font-semibold">Leave a tip</h3>
+                      <h3 className="mb-3 font-semibold">{t("tipModal.title")}</h3>
                       <div className="mb-3 flex gap-2">
                         {[300, 500, 1000, 2000].map((c) => (
                             <button
@@ -447,14 +454,14 @@ export default function CustomerPortalHostPage() {
                             onClick={() => setTipId(null)}
                             className="px-3 py-2 text-sm text-gray-500"
                         >
-                          Close
+                          {t("detailModal.close")}
                         </button>
                         <button
                             onClick={handleTip}
                             disabled={loading}
                             className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
                         >
-                          Tip {formatMoney(tipCents)}
+                          {t("tipModal.tipButton", { amount: formatMoney(tipCents) })}
                         </button>
                       </div>
                     </div>

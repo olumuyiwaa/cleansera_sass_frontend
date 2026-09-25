@@ -200,16 +200,22 @@ export function formatMoney(cents: number, currency: string = getActiveCurrency(
   }).format(cents / 100);
 }
 
-export function statusLabel(status: string) {
-  const map: Record<string, string> = {
-    REQUESTED: "Requested",
-    CONFIRMED: "Confirmed",
-    ASSIGNED: "Assigned",
-    IN_PROGRESS: "In progress",
-    COMPLETED: "Completed",
-    CANCELLED: "Cancelled",
+/**
+ * `t` must be scoped to the `Portal.status` namespace
+ * (e.g. `useTranslations("Portal.status")`) — same pattern as
+ * frequencyLabel/cancellationPolicyLabel in components/booking/types.ts.
+ */
+export function statusLabel(status: string, t: (key: string) => string) {
+  const keys: Record<string, string> = {
+    REQUESTED: "requested",
+    CONFIRMED: "confirmed",
+    ASSIGNED: "assigned",
+    IN_PROGRESS: "inProgress",
+    COMPLETED: "completed",
+    CANCELLED: "cancelled",
   };
-  return map[status] || status;
+  const key = keys[status];
+  return key ? t(key) : status;
 }
 
 export function statusColor(status: string) {

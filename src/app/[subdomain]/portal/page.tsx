@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { getStorefront } from "@/app/api/widget.api";
 import { setActiveCurrency } from "@/app/services/currency";
 import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 import Link from "next/link";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import {
     requestPortalAccess,
     verifyPortalAccess,
@@ -32,22 +34,27 @@ function cleanerName(b: PortalBooking) {
     return `${a.firstName} ${a.lastName}`.trim();
 }
 
-function formatWhen(iso: string) {
-    return new Date(iso).toLocaleString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-    });
-}
-
 export default function CustomerPortalPage() {
     const params = useParams();
     // Unified under /[subdomain]/portal — param is now "subdomain"
     const slug = (params?.subdomain as string) || (params?.slug as string) || "";
     // Amounts were formatted with a hardcoded USD default. Use the business's own currency.
     const currency = useActiveCurrency();
+    const locale = useLocale();
+    const t = useTranslations("Portal");
+    const tStatus = useTranslations("Portal.status");
+
+    const formatWhen = useCallback(
+        (iso: string) =>
+            new Date(iso).toLocaleString(locale, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+            }),
+        [locale]
+    );
     useEffect(() => {
         if (!slug) return;
         getStorefront(slug)
@@ -78,8 +85,8 @@ export default function CustomerPortalPage() {
     const [tipCents, setTipCents] = useState(500);
 
     const loadBookings = useCallback(
-        async (t: string) => {
-            const list = await listPortalBookings(slug, t);
+        async (tok: string) => {
+            const list = await listPortalBookings(slug, tok);
             setBookings(list);
         },
         [slug]
@@ -111,7 +118,7 @@ export default function CustomerPortalPage() {
                 await loadBookings(token);
             } catch (e) {
                 if (!cancelled) {
-                    setError(e instanceof Error ? e.message : "Failed to load bookings");
+                    setError(e instanceof Error ? e.message : t("errors.failedToLoadBookings"));
                     localStorage.removeItem(tokenKey(slug));
                     localStorage.removeItem(customerKey(slug));
                     setToken(null);
@@ -125,7 +132,7 @@ export default function CustomerPortalPage() {
         return () => {
             cancelled = true;
         };
-    }, [step, token, slug, loadBookings]);
+    }, [step, token, slug, loadBookings, t]);
 
     const filtered = useMemo(() => {
         const now = Date.now();
@@ -159,10 +166,10 @@ export default function CustomerPortalPage() {
         setMsg("");
         try {
             await requestPortalAccess(slug, phone.trim());
-            setMsg("If we found your account, a code was sent by SMS or email.");
+            setMsg(t("success.codeSent"));
             setStep("code");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to send code");
+            setError(err instanceof Error ? err.message : t("errors.failedToSendCode"));
         } finally {
             setLoading(false);
         }
@@ -180,7 +187,7 @@ export default function CustomerPortalPage() {
             setCustomer(data.customer);
             setStep("bookings");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Invalid code");
+            setError(err instanceof Error ? err.message : t("errors.invalidCode"));
         } finally {
             setLoading(false);
         }
@@ -197,11 +204,7 @@ export default function CustomerPortalPage() {
 
     const handleCancel = async (id: string) => {
         if (!token) return;
-        if (
-            !confirm(
-                "Cancel this booking? A cancellation fee may apply if it's close to the scheduled time, based on the business policy."
-            )
-        ) {
+        if (!confirm(t("confirmCancel"))) {
             return;
         }
         setLoading(true);
@@ -210,9 +213,9 @@ export default function CustomerPortalPage() {
             await cancelPortalBooking(slug, token, id, "Cancelled by customer");
             await loadBookings(token);
             setDetail(null);
-            setMsg("Booking cancelled.");
+            setMsg(t("success.bookingCancelled"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Cancel failed");
+            setError(err instanceof Error ? err.message : t("errors.cancelFailed"));
         } finally {
             setLoading(false);
         }
@@ -231,9 +234,9 @@ export default function CustomerPortalPage() {
             );
             setRescheduleId(null);
             await loadBookings(token);
-            setMsg("Booking rescheduled.");
+            setMsg(t("success.bookingRescheduled"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Reschedule failed");
+            setError(err instanceof Error ? err.message : t("errors.rescheduleFailed"));
         } finally {
             setLoading(false);
         }
@@ -248,9 +251,9 @@ export default function CustomerPortalPage() {
             setReviewId(null);
             setComment("");
             await loadBookings(token);
-            setMsg("Thanks for your review!");
+            setMsg(t("success.reviewThanks"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Review failed");
+            setError(err instanceof Error ? err.message : t("errors.reviewFailed"));
         } finally {
             setLoading(false);
         }
@@ -275,9 +278,9 @@ export default function CustomerPortalPage() {
                 window.location.href = data.url;
                 return;
             }
-            setError("Could not start tip checkout");
+            setError(t("errors.couldNotStartTipCheckout"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Tip failed");
+            setError(err instanceof Error ? err.message : t("errors.tipFailed"));
         } finally {
             setLoading(false);
         }
@@ -307,10 +310,10 @@ export default function CustomerPortalPage() {
                         </div>
                         <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
-                                Customer portal
+                                {t("header.badge")}
                             </p>
                             <h1 className="text-base font-semibold tracking-tight text-gray-900 sm:text-lg">
-                                My cleanings
+                                {t("header.title")}
                             </h1>
                         </div>
                     </div>
@@ -320,19 +323,20 @@ export default function CustomerPortalPage() {
                 {customer.firstName} {customer.lastName}
               </span>
                         )}
+                        <LanguageSwitcher />
                         <Link
                             href={`/${encodeURIComponent(slug)}`}
                             className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
                         >
-                            Site
+                            {t("header.site")}
                         </Link>
                         <Link
                             href={`/book-now/${encodeURIComponent(slug)}`}
                             className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700"
                         >
                             <PlusIcon className="h-4 w-4" />
-                            <span className="hidden sm:inline">Book again</span>
-                            <span className="sm:hidden">Book</span>
+                            <span className="hidden sm:inline">{t("header.bookAgain")}</span>
+                            <span className="sm:hidden">{t("header.book")}</span>
                         </Link>
                         {customer && (
                             <button
@@ -340,7 +344,7 @@ export default function CustomerPortalPage() {
                                 onClick={logout}
                                 className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
                             >
-                                Sign out
+                                {t("header.signOut")}
                             </button>
                         )}
                     </div>
@@ -392,21 +396,19 @@ export default function CustomerPortalPage() {
                         {/* Marketing panel — desktop only */}
                         <div className="hidden lg:block">
                             <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-emerald-700">
-                                Self-service
+                                {t("marketing.selfService")}
                             </p>
                             <h2 className="text-3xl font-semibold tracking-tight text-gray-900 xl:text-4xl">
-                                Manage your cleanings in one place
+                                {t("marketing.heading")}
                             </h2>
                             <p className="mt-4 max-w-md text-base leading-relaxed text-gray-600">
-                                View upcoming visits, reschedule or cancel, leave a review, and tip
-                                your cleaner — securely, with a one-time code. No password to
-                                remember.
+                                {t("marketing.description")}
                             </p>
                             <ul className="mt-8 space-y-3 text-sm text-gray-600">
                                 {[
-                                    "See schedule and cleaner details",
-                                    "Reschedule when plans change",
-                                    "Review and tip after the job",
+                                    t("marketing.feature1"),
+                                    t("marketing.feature2"),
+                                    t("marketing.feature3"),
                                 ].map((item) => (
                                     <li key={item} className="flex items-center gap-3">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
@@ -426,21 +428,20 @@ export default function CustomerPortalPage() {
                                 >
                                     <div className="mb-6 text-center lg:text-left">
                                         <h2 className="text-xl font-semibold text-gray-900">
-                                            Sign in with your phone
+                                            {t("phoneStep.heading")}
                                         </h2>
                                         <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                                            Use the number from your booking. We&apos;ll text or email a
-                                            one-time code — no password needed.
+                                            {t("phoneStep.description")}
                                         </p>
                                     </div>
                                     <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                                        Phone number
+                                        {t("phoneStep.phoneLabel")}
                                     </label>
                                     <input
                                         className="mb-5 h-12 w-full rounded-2xl border border-gray-200 bg-gray-50/80 px-4 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
-                                        placeholder="+1 555 000 0000"
+                                        placeholder={t("phoneStep.phonePlaceholder")}
                                         autoComplete="tel"
                                         required
                                     />
@@ -449,7 +450,7 @@ export default function CustomerPortalPage() {
                                         disabled={loading || !phone.trim()}
                                         className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
                                     >
-                                        {loading ? "Sending…" : "Send access code"}
+                                        {loading ? t("phoneStep.sending") : t("phoneStep.sendCode")}
                                     </button>
                                 </form>
                             )}
@@ -461,15 +462,15 @@ export default function CustomerPortalPage() {
                                 >
                                     <div className="mb-6 text-center lg:text-left">
                                         <h2 className="text-xl font-semibold text-gray-900">
-                                            Enter your code
+                                            {t("codeStep.heading")}
                                         </h2>
                                         <p className="mt-2 text-sm text-gray-500">
-                                            Sent to{" "}
+                                            {t("codeStep.sentTo")}{" "}
                                             <span className="font-medium text-gray-800">{phone}</span>
                                         </p>
                                     </div>
                                     <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                                        6-digit code
+                                        {t("codeStep.codeLabel")}
                                     </label>
                                     <input
                                         className="mb-5 h-14 w-full rounded-2xl border border-gray-200 bg-gray-50/80 px-4 text-center text-2xl font-semibold tracking-[0.5em] outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
@@ -487,7 +488,7 @@ export default function CustomerPortalPage() {
                                         disabled={loading || code.length < 6}
                                         className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
                                     >
-                                        {loading ? "Verifying…" : "Continue"}
+                                        {loading ? t("codeStep.verifying") : t("codeStep.continue")}
                                     </button>
                                     <button
                                         type="button"
@@ -497,7 +498,7 @@ export default function CustomerPortalPage() {
                                         }}
                                         className="mt-4 w-full text-sm text-gray-500 transition hover:text-gray-800"
                                     >
-                                        Use a different phone
+                                        {t("codeStep.useDifferentPhone")}
                                     </button>
                                 </form>
                             )}
@@ -512,14 +513,14 @@ export default function CustomerPortalPage() {
                         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                             <div>
                                 <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
-                                    Welcome back, {customer.firstName}
+                                    {t("welcome", { name: customer.firstName })}
                                 </h2>
                                 <p className="mt-1 text-sm text-gray-500">{customer.phone}</p>
                             </div>
                             <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                                <StatCard label="Upcoming" value={stats.upcoming} accent />
-                                <StatCard label="Completed" value={stats.completed} />
-                                <StatCard label="Total" value={stats.total} />
+                                <StatCard label={t("stats.upcoming")} value={stats.upcoming} accent />
+                                <StatCard label={t("stats.completed")} value={stats.completed} />
+                                <StatCard label={t("stats.total")} value={stats.total} />
                             </div>
                         </div>
 
@@ -528,9 +529,9 @@ export default function CustomerPortalPage() {
                             <div className="inline-flex rounded-2xl bg-white p-1 shadow-sm ring-1 ring-gray-200/80">
                                 {(
                                     [
-                                        ["upcoming", "Upcoming"],
-                                        ["past", "Past"],
-                                        ["all", "All"],
+                                        ["upcoming", t("filters.upcoming")],
+                                        ["past", t("filters.past")],
+                                        ["all", t("filters.all")],
                                     ] as const
                                 ).map(([key, label]) => (
                                     <button
@@ -548,7 +549,7 @@ export default function CustomerPortalPage() {
                                 ))}
                             </div>
                             {loading && (
-                                <p className="text-sm text-gray-400">Refreshing…</p>
+                                <p className="text-sm text-gray-400">{t("filters.refreshing")}</p>
                             )}
                         </div>
 
@@ -568,17 +569,17 @@ export default function CustomerPortalPage() {
                                     <CalendarIcon className="h-7 w-7" />
                                 </div>
                                 <p className="text-base font-medium text-gray-900">
-                                    No bookings in this view
+                                    {t("empty.noBookings")}
                                 </p>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Schedule a cleaning whenever you&apos;re ready.
+                                    {t("empty.scheduleWhenReady")}
                                 </p>
                                 <Link
                                     href={`/book-now/${encodeURIComponent(slug)}`}
                                     className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
                                 >
                                     <PlusIcon className="h-4 w-4" />
-                                    Book a cleaning
+                                    {t("empty.bookACleaning")}
                                 </Link>
                             </div>
                         ) : (
@@ -591,7 +592,7 @@ export default function CustomerPortalPage() {
                                         <div className="mb-3 flex items-start justify-between gap-3">
                                             <div className="min-w-0">
                                                 <h3 className="truncate text-base font-semibold text-gray-900">
-                                                    {b.service?.name || "Cleaning"}
+                                                    {b.service?.name || t("card.defaultServiceName")}
                                                 </h3>
                                                 <p className="mt-1 text-sm text-gray-500">
                                                     {formatWhen(b.scheduledStart)}
@@ -602,7 +603,7 @@ export default function CustomerPortalPage() {
                                                     b.status
                                                 )}`}
                                             >
-                        {statusLabel(b.status)}
+                        {statusLabel(b.status, tStatus)}
                       </span>
                                         </div>
 
@@ -630,7 +631,7 @@ export default function CustomerPortalPage() {
                                                 </p>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
-                                                <ActionBtn onClick={() => setDetail(b)}>Details</ActionBtn>
+                                                <ActionBtn onClick={() => setDetail(b)}>{t("card.details")}</ActionBtn>
                                                 {canModify(b) && (
                                                     <>
                                                         <ActionBtn
@@ -639,13 +640,13 @@ export default function CustomerPortalPage() {
                                                                 setRescheduleStart("");
                                                             }}
                                                         >
-                                                            Reschedule
+                                                            {t("card.reschedule")}
                                                         </ActionBtn>
                                                         <ActionBtn
                                                             danger
                                                             onClick={() => handleCancel(b.id)}
                                                         >
-                                                            Cancel
+                                                            {t("card.cancel")}
                                                         </ActionBtn>
                                                     </>
                                                 )}
@@ -658,7 +659,7 @@ export default function CustomerPortalPage() {
                                                             setComment("");
                                                         }}
                                                     >
-                                                        Review
+                                                        {t("card.review")}
                                                     </ActionBtn>
                                                 )}
                                                 {b.status === "COMPLETED" && !b.tipAmountCents && (
@@ -668,7 +669,7 @@ export default function CustomerPortalPage() {
                                                             setTipCents(500);
                                                         }}
                                                     >
-                                                        Tip
+                                                        {t("card.tip")}
                                                     </ActionBtn>
                                                 )}
                                             </div>
@@ -683,38 +684,38 @@ export default function CustomerPortalPage() {
 
             {/* Footer */}
             <footer className="mx-auto max-w-6xl px-4 pb-10 pt-4 text-center text-xs text-gray-400 sm:px-6 lg:px-8">
-                Powered by CleanSera · Secure customer portal
+                {t("footer")}
             </footer>
 
             {/* ── Modals ── */}
             {detail && (
-                <Modal onClose={() => setDetail(null)} title="Booking details" wide>
+                <Modal onClose={() => setDetail(null)} title={t("detailModal.title")} wide>
                     <dl className="grid gap-4 sm:grid-cols-2">
-                        <DetailRow label="Service" value={detail.service?.name || "—"} />
-                        <DetailRow label="When" value={formatWhen(detail.scheduledStart)} />
+                        <DetailRow label={t("detailModal.service")} value={detail.service?.name || "—"} />
+                        <DetailRow label={t("detailModal.when")} value={formatWhen(detail.scheduledStart)} />
                         <DetailRow
-                            label="Address"
+                            label={t("detailModal.address")}
                             value={[detail.addressLine1, detail.city, detail.state]
                                 .filter(Boolean)
                                 .join(", ")}
                         />
-                        <DetailRow label="Status" value={statusLabel(detail.status)} />
+                        <DetailRow label={t("detailModal.status")} value={statusLabel(detail.status, tStatus)} />
                         <DetailRow
-                            label="Price"
+                            label={t("detailModal.price")}
                             value={formatMoney(detail.quotedPriceCents)}
                         />
                         {detail.tipAmountCents != null && detail.tipAmountCents > 0 && (
                             <DetailRow
-                                label="Tip"
+                                label={t("detailModal.tip")}
                                 value={formatMoney(detail.tipAmountCents)}
                             />
                         )}
                         {cleanerName(detail) && (
-                            <DetailRow label="Cleaner" value={cleanerName(detail)!} />
+                            <DetailRow label={t("detailModal.cleaner")} value={cleanerName(detail)!} />
                         )}
                         {detail.review && (
                             <DetailRow
-                                label="Your review"
+                                label={t("detailModal.yourReview")}
                                 value={`${detail.review.rating}/5${
                                     detail.review.comment ? ` — ${detail.review.comment}` : ""
                                 }`}
@@ -727,17 +728,16 @@ export default function CustomerPortalPage() {
                             onClick={() => setDetail(null)}
                             className="rounded-xl bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
                         >
-                            Close
+                            {t("detailModal.close")}
                         </button>
                     </div>
                 </Modal>
             )}
 
             {rescheduleId && (
-                <Modal onClose={() => setRescheduleId(null)} title="Reschedule">
+                <Modal onClose={() => setRescheduleId(null)} title={t("rescheduleModal.title")}>
                     <p className="mb-4 text-sm text-gray-600">
-                        Choose a new date and time. We&apos;ll check availability for that
-                        slot.
+                        {t("rescheduleModal.description")}
                     </p>
                     <input
                         type="datetime-local"
@@ -748,7 +748,7 @@ export default function CustomerPortalPage() {
                     <ModalActions
                         onClose={() => setRescheduleId(null)}
                         onConfirm={handleReschedule}
-                        confirmLabel="Save new time"
+                        confirmLabel={t("rescheduleModal.save")}
                         disabled={loading || !rescheduleStart}
                         loading={loading}
                     />
@@ -756,7 +756,7 @@ export default function CustomerPortalPage() {
             )}
 
             {reviewId && (
-                <Modal onClose={() => setReviewId(null)} title="Rate your cleaning">
+                <Modal onClose={() => setReviewId(null)} title={t("reviewModal.title")}>
                     <div className="mb-4 flex justify-center gap-1">
                         {[1, 2, 3, 4, 5].map((n) => (
                             <button
@@ -768,7 +768,7 @@ export default function CustomerPortalPage() {
                                         ? "text-amber-400 scale-110"
                                         : "text-gray-200 hover:text-amber-200"
                                 }`}
-                                aria-label={`${n} stars`}
+                                aria-label={t("reviewModal.starsAriaLabel", { n })}
                             >
                                 ★
                             </button>
@@ -777,14 +777,14 @@ export default function CustomerPortalPage() {
                     <textarea
                         className="mb-5 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
                         rows={3}
-                        placeholder="Optional comment — what went well?"
+                        placeholder={t("reviewModal.commentPlaceholder")}
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                     />
                     <ModalActions
                         onClose={() => setReviewId(null)}
                         onConfirm={handleReview}
-                        confirmLabel="Submit review"
+                        confirmLabel={t("reviewModal.submit")}
                         disabled={loading}
                         loading={loading}
                     />
@@ -792,10 +792,9 @@ export default function CustomerPortalPage() {
             )}
 
             {tipId && (
-                <Modal onClose={() => setTipId(null)} title="Leave a tip">
+                <Modal onClose={() => setTipId(null)} title={t("tipModal.title")}>
                     <p className="mb-4 text-sm text-gray-600">
-                        100% goes to the business / cleaner. You&apos;ll pay securely via
-                        Stripe.
+                        {t("tipModal.description")}
                     </p>
                     <div className="mb-4 grid grid-cols-4 gap-2">
                         {[300, 500, 1000, 2000].map((c) => (
@@ -814,7 +813,7 @@ export default function CustomerPortalPage() {
                         ))}
                     </div>
                     <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Custom amount ({currency})
+                        {t("tipModal.customAmount", { currency })}
                     </label>
                     <input
                         type="number"
@@ -829,7 +828,7 @@ export default function CustomerPortalPage() {
                     <ModalActions
                         onClose={() => setTipId(null)}
                         onConfirm={handleTip}
-                        confirmLabel={`Tip ${formatMoney(tipCents)}`}
+                        confirmLabel={t("tipModal.tipButton", { amount: formatMoney(tipCents) })}
                         disabled={loading || tipCents < 50}
                         loading={loading}
                     />
@@ -933,6 +932,7 @@ function Modal({
     onClose: () => void;
     wide?: boolean;
 }) {
+    const t = useTranslations("Portal");
     return (
         <div
             className="fixed inset-0 z-50 flex items-end justify-center bg-gray-900/40 p-4 backdrop-blur-sm sm:items-center"
@@ -950,7 +950,7 @@ function Modal({
                         type="button"
                         onClick={onClose}
                         className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                        aria-label="Close"
+                        aria-label={t("closeAria")}
                     >
                         ✕
                     </button>
@@ -974,6 +974,7 @@ function ModalActions({
     disabled?: boolean;
     loading?: boolean;
 }) {
+    const t = useTranslations("Portal");
     return (
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
@@ -981,7 +982,7 @@ function ModalActions({
                 onClick={onClose}
                 className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-800"
             >
-                Cancel
+                {t("modalCancel")}
             </button>
             <button
                 type="button"
@@ -989,7 +990,7 @@ function ModalActions({
                 disabled={disabled}
                 className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
             >
-                {loading ? "Please wait…" : confirmLabel}
+                {loading ? t("pleaseWait") : confirmLabel}
             </button>
         </div>
     );

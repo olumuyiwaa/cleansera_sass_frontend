@@ -169,5 +169,133 @@
       "saving": "Bezig met opslaan…",
       "markAsPaid": "Markeer als betaald"
     }
+  },
+  "Portal": {
+    "header": {
+      "badge": "Klantportaal",
+      "title": "Mijn schoonmaakbeurten",
+      "site": "Website",
+      "bookAgain": "Opnieuw boeken",
+      "book": "Boeken",
+      "signOut": "Uitloggen"
+    },
+    "marketing": {
+      "selfService": "Zelfbediening",
+      "heading": "Beheer al uw schoonmaakbeurten op één plek",
+      "description": "Bekijk aankomende afspraken, verzet of annuleer, laat een beoordeling achter en geef uw schoonmaker een fooi — veilig, met een eenmalige code. Geen wachtwoord nodig.",
+      "feature1": "Bekijk planning en schoonmakergegevens",
+      "feature2": "Verzet wanneer plannen veranderen",
+      "feature3": "Beoordeel en geef een fooi na de klus"
+    },
+    "phoneStep": {
+      "heading": "Log in met uw telefoonnummer",
+      "description": "Gebruik het nummer van uw boeking. We sturen een eenmalige code per sms of e-mail — geen wachtwoord nodig.",
+      "phoneLabel": "Telefoonnummer",
+      "phonePlaceholder": "+31 6 12345678",
+      "sending": "Bezig met versturen…",
+      "sendCode": "Toegangscode versturen"
+    },
+    "codeStep": {
+      "heading": "Voer uw code in",
+      "sentTo": "Verzonden naar",
+      "codeLabel": "6-cijferige code",
+      "verifying": "Bezig met verifiëren…",
+      "continue": "Doorgaan",
+      "useDifferentPhone": "Ander telefoonnummer gebruiken"
+    },
+    "welcome": "Welkom terug, {name}",
+    "stats": {
+      "upcoming": "Aankomend",
+      "completed": "Voltooid",
+      "total": "Totaal"
+    },
+    "filters": {
+      "upcoming": "Aankomend",
+      "past": "Verleden",
+      "all": "Alles",
+      "refreshing": "Bijwerken…"
+    },
+    "empty": {
+      "noBookings": "Geen boekingen in deze weergave",
+      "scheduleWhenReady": "Plan een schoonmaakbeurt zodra u zover bent.",
+      "bookACleaning": "Boek een schoonmaak"
+    },
+    "card": {
+      "defaultServiceName": "Schoonmaak",
+      "details": "Details",
+      "reschedule": "Verzetten",
+      "cancel": "Annuleren",
+      "review": "Beoordelen",
+      "tip": "Fooi"
+    },
+    "footer": "Mogelijk gemaakt door CleanSera · Beveiligd klantportaal",
+    "status": {
+      "requested": "Aangevraagd",
+      "confirmed": "Bevestigd",
+      "assigned": "Toegewezen",
+      "inProgress": "Bezig",
+      "completed": "Voltooid",
+      "cancelled": "Geannuleerd"
+    },
+    "detailModal": {
+      "title": "Boekingsgegevens",
+      "service": "Dienst",
+      "when": "Wanneer",
+      "address": "Adres",
+      "status": "Status",
+      "price": "Prijs",
+      "tip": "Fooi",
+      "cleaner": "Schoonmaker",
+      "yourReview": "Uw beoordeling",
+      "close": "Sluiten"
+    },
+    "rescheduleModal": {
+      "title": "Verzetten",
+      "description": "Kies een nieuwe datum en tijd. We controleren de beschikbaarheid.",
+      "save": "Nieuwe tijd opslaan"
+    },
+    "reviewModal": {
+      "title": "Beoordeel uw schoonmaak",
+      "starsAriaLabel": "{n} sterren",
+      "commentPlaceholder": "Optionele opmerking — wat ging er goed?",
+      "submit": "Beoordeling versturen"
+    },
+    "tipModal": {
+      "title": "Geef een fooi",
+      "description": "100% gaat naar het bedrijf / de schoonmaker. U betaalt veilig via Stripe.",
+      "customAmount": "Aangepast bedrag ({currency})",
+      "tipButton": "Fooi geven van {amount}"
+    },
+    "confirmCancel": "Deze boeking annuleren? Er kan een annuleringsvergoeding gelden als de afspraak dichtbij is, afhankelijk van het beleid van het bedrijf.",
+    "pleaseWait": "Even geduld…",
+    "modalCancel": "Annuleren",
+    "closeAria": "Sluiten",
+    "errors": {
+      "failedToLoadBookings": "Boekingen laden is mislukt",
+      "failedToSendCode": "Code versturen is mislukt",
+      "invalidCode": "Ongeldige code",
+      "cancelFailed": "Annuleren is mislukt",
+      "rescheduleFailed": "Verzetten is mislukt",
+      "reviewFailed": "Beoordeling versturen is mislukt",
+      "tipFailed": "Fooi geven is mislukt",
+      "couldNotStartTipCheckout": "Kon de fooi-betaling niet starten"
+    },
+    "success": {
+      "codeSent": "Als we uw account hebben gevonden, is er een code verstuurd per sms of e-mail.",
+      "bookingCancelled": "Boeking geannuleerd.",
+      "bookingRescheduled": "Boeking verzet.",
+      "reviewThanks": "Bedankt voor uw beoordeling!"
+    },
+    "legacy": {
+      "subtitle": "Bekijk, verzet, annuleer, beoordeel of geef een fooi",
+      "hi": "Hallo,",
+      "loading": "Laden…",
+      "noBookingsYet": "Nog geen boekingen.",
+      "leaveReview": "Beoordeling achterlaten",
+      "save": "Opslaan",
+      "submit": "Versturen",
+      "starsOption": "{n, plural, one {# ster} other {# sterren}}",
+      "confirmCancel": "Deze boeking annuleren? Er kan een vergoeding gelden volgens het beleid van het bedrijf."
+    }
   }
 }
