@@ -1,0 +1,173 @@
+{
+  "Booking": {
+    "steps": {
+      "navAriaLabel": "Booking progress",
+      "service": "Service",
+      "address": "Address",
+      "schedule": "Schedule",
+      "details": "Your details",
+      "review": "Confirm"
+    },
+    "service": {
+      "heading": "Choose your clean",
+      "subheading": "Select a service and how often you'd like us to come.",
+      "fromPrice": "from {price}",
+      "estimatedMinutes": "~{count, plural, one {# minute} other {# minutes}}",
+      "howOften": "How often?",
+      "saveWeekly": "save 10%",
+      "saveBiweekly": "save 5%",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "approxSqft": "Approx. sqft",
+      "sqftPlaceholder": "e.g. 1200",
+      "addOns": "Add-ons",
+      "extraMinutes": "(+{count, plural, one {# minute} other {# minutes}})"
+    },
+    "frequency": {
+      "weekly": "Weekly",
+      "biweekly": "Every 2 weeks",
+      "monthly": "Monthly",
+      "oneTime": "One-time"
+    },
+    "cancellationPolicy": {
+      "freeAnytime": "You can cancel or reschedule free of charge at any time from your customer portal.",
+      "windowDays": "{count, plural, one {# day} other {# days}}",
+      "windowHours": "{count, plural, one {# hour} other {# hours}}",
+      "feePercent": "a {value}% fee",
+      "feeAmount": "a {value} fee",
+      "feeGeneric": "a cancellation fee",
+      "policyWithFee": "You can cancel or reschedule free of charge up to {window} before the appointment. Cancelling later may incur {feeText}.",
+      "badgeFreeAnytime": "Free cancellation anytime",
+      "badgeWithWindow": "Free cancellation up to {window} before"
+    },
+    "address": {
+      "heading": "Where should we clean?",
+      "subheading": "We'll check that your address is in our service area.",
+      "streetAddress": "Street address",
+      "streetAddressPlaceholder": "123 Main St",
+      "addressLine2": "Apt / Suite / Unit",
+      "optional": "Optional",
+      "city": "City",
+      "provinceOptional": "Province / region (optional)",
+      "postalCode": "Postal code",
+      "advancedCoordinates": "Advanced: coordinates (optional)",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "inServiceArea": "Great news — we service this area.",
+      "outsideServiceArea": "This address is outside our current service area.",
+      "outsideServiceAreaHint": "You can still leave your details on the next steps and we'll reach out if we expand.",
+      "streetAddressRequired": "Please enter a street address."
+    },
+    "schedule": {
+      "heading": "Pick a date & time",
+      "subheading": "Only times with available cleaners are shown.",
+      "today": "Today",
+      "selectDatePrompt": "Select a date to see available times.",
+      "loadingTimes": "Loading available times…",
+      "noTimesAvailable": "No available times on this day. Please try another date.",
+      "waitlist": {
+        "joined": "You're on the waitlist — we'll be in touch!",
+        "notifyMe": "Notify me if a slot opens up",
+        "joinError": "Couldn't join the waitlist — please try again",
+        "contactPlaceholder": "Email or phone number",
+        "joining": "Joining…",
+        "joinWaitlist": "Join waitlist"
+      }
+    },
+    "details": {
+      "heading": "Your details",
+      "subheading": "We'll use these to confirm your booking and send updates.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 555 000 0000",
+      "email": "Email",
+      "emailPlaceholder": "Optional — for receipts & reminders",
+      "specialInstructions": "Special instructions",
+      "specialInstructionsPlaceholder": "Gate code, pets, parking, focus areas…",
+      "couponCode": "Coupon code",
+      "couponCodePlaceholder": "SAVE10",
+      "apply": "Apply",
+      "couponApplied": "Coupon applied",
+      "couponInvalid": "Coupon: {reason}",
+      "invalidReasonFallback": "invalid",
+      "giftCardCode": "Gift card code",
+      "giftCardCodePlaceholder": "GC-XXXXXXXX",
+      "giftCardApplied": "Gift card applied: {applied} (balance: {balance})",
+      "giftCardOff": "{amount} off",
+      "giftCardInvalid": "Gift card: {reason}"
+    },
+    "review": {
+      "heading": "Review & confirm",
+      "subheading": "Double-check the details below, then book your clean.",
+      "service": "Service",
+      "frequency": "Frequency",
+      "home": "Home",
+      "homeSummary": "{beds} bed · {baths} bath{sqft, plural, =0 {} other { · # sqft}}",
+      "addOns": "Add-ons",
+      "address": "Address",
+      "when": "When",
+      "contact": "Contact",
+      "notes": "Notes",
+      "total": "Total",
+      "inclVat": "Incl. {rate}% BTW",
+      "agreeToTerms": "By booking you agree to the service terms.",
+      "booking": "Booking…",
+      "confirmBookingWithPrice": "Confirm booking · {price}",
+      "confirmBooking": "Confirm booking"
+    },
+    "summary": {
+      "heading": "Booking summary",
+      "service": "Service",
+      "frequency": "Frequency",
+      "homeSize": "Home size",
+      "homeSizeSummary": "{beds} bed · {baths} bath{sqft, plural, =0 {} other { · # sqft}}",
+      "addOns": "Add-ons",
+      "address": "Address",
+      "when": "When",
+      "estDuration": "Est. duration",
+      "estMinutes": "~{count, plural, one {# minute} other {# minutes}}",
+      "total": "Total",
+      "recurringDiscountApplied": "Recurring discount applied",
+      "trustBackgroundChecked": "Background-checked cleaners",
+      "trustInstantConfirmation": "Instant confirmation"
+    },
+    "wizard": {
+      "bookedHeading": "You're booked!",
+      "confirmationSentPhoneAndEmail": "We've sent a confirmation to {phone} and {email}.",
+      "confirmationSentPhone": "We've sent a confirmation to {phone}.",
+      "when": "When:",
+      "total": "Total:",
+      "ref": "Ref: {id}",
+      "manageFromPortal": "Manage or reschedule anytime from your customer portal.",
+      "bookACleaning": "Book a cleaning",
+      "back": "Back",
+      "continue": "Continue",
+      "editDetails": "← Edit details"
+    },
+    "offlinePayment": {
+      "heading": "Payment",
+      "description": "This business collects payment offline (cash or bank transfer). You do not need to pay by card online.",
+      "noInstructionsFallback": "The business will confirm payment details with you after booking."
+    }
+  },
+  "Dashboard": {
+    "markPaymentReceived": {
+      "failedToMark": "Failed to mark payment received",
+      "heading": "Mark payment received",
+      "description": "Record cash, bank transfer, or external invoice. Amount due:",
+      "method": "Method",
+      "methodBankTransfer": "Bank transfer",
+      "methodCash": "Cash",
+      "methodInvoice": "Invoice (external)",
+      "methodOther": "Other",
+      "reference": "Reference (optional)",
+      "referencePlaceholder": "Transaction ID or receipt number",
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g. Paid on site",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "markAsPaid": "Mark as paid"
+    }
+  }
+}

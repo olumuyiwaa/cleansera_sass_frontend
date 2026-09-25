@@ -1,39 +1,43 @@
 "use client";
 
-import type { WidgetService } from "@/app/api/widget.api";
+import { useLocale, useTranslations } from "next-intl";
+import type { WidgetService, StorefrontCancellationPolicy } from "@/app/api/widget.api";
 import type { BookingFormState } from "./types";
-import { formatMoney, frequencyLabel } from "./types";
+import { formatMoney, frequencyLabel, cancellationBadgeLabel } from "./types";
 
 type Props = {
   state: BookingFormState;
   service: WidgetService | null;
   primaryColor?: string;
+  cancellationPolicy?: StorefrontCancellationPolicy | null;
 };
 
-export function StickySummary({ state, service, primaryColor = "#3F6B52" }: Props) {
+export function StickySummary({ state, service, primaryColor = "#3F6B52", cancellationPolicy = null }: Props) {
+  const t = useTranslations("Booking.summary");
+  const tFreq = useTranslations("Booking.frequency");
+  const tPolicy = useTranslations("Booking.cancellationPolicy");
+  const locale = useLocale();
   const price = state.quote?.priceCents;
   const minutes = state.quote?.estimatedMinutes ?? service?.estimatedMinutes;
 
   return (
     <aside className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:sticky lg:top-6">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-        Booking summary
+        {t("heading")}
       </h3>
 
       <div className="mt-4 space-y-3 text-sm">
-        <Row label="Service" value={service?.name ?? "—"} />
-        <Row label="Frequency" value={frequencyLabel(state.frequency)} />
+        <Row label={t("service")} value={service?.name ?? "—"} />
+        <Row label={t("frequency")} value={frequencyLabel(state.frequency, tFreq)} />
         {(state.rooms > 0 || state.bathrooms > 0) && (
           <Row
-            label="Home size"
-            value={`${state.rooms} bed · ${state.bathrooms} bath${
-              state.sqft ? ` · ${state.sqft} sqft` : ""
-            }`}
+            label={t("homeSize")}
+            value={t("homeSizeSummary", { beds: state.rooms, baths: state.bathrooms, sqft: state.sqft || 0 })}
           />
         )}
         {state.addOnIds.length > 0 && service && (
           <Row
-            label="Add-ons"
+            label={t("addOns")}
             value={service.addOns
               .filter((a) => state.addOnIds.includes(a.id))
               .map((a) => a.name)
@@ -42,7 +46,7 @@ export function StickySummary({ state, service, primaryColor = "#3F6B52" }: Prop
         )}
         {state.addressLine1 && (
           <Row
-            label="Address"
+            label={t("address")}
             value={[state.addressLine1, state.city, state.state]
               .filter(Boolean)
               .join(", ")}
@@ -50,8 +54,8 @@ export function StickySummary({ state, service, primaryColor = "#3F6B52" }: Prop
         )}
         {state.scheduledStart && (
           <Row
-            label="When"
-            value={new Date(state.scheduledStart).toLocaleString(undefined, {
+            label={t("when")}
+            value={new Date(state.scheduledStart).toLocaleString(locale, {
               weekday: "short",
               month: "short",
               day: "numeric",
@@ -60,12 +64,12 @@ export function StickySummary({ state, service, primaryColor = "#3F6B52" }: Prop
             })}
           />
         )}
-        {minutes != null && <Row label="Est. duration" value={`~${minutes} min`} />}
+        {minutes != null && <Row label={t("estDuration")} value={t("estMinutes", { count: minutes })} />}
       </div>
 
       <div className="mt-5 border-t border-gray-100 pt-4">
         <div className="flex items-baseline justify-between">
-          <span className="text-sm text-gray-600">Total</span>
+          <span className="text-sm text-gray-600">{t("total")}</span>
           <div className="text-right">
             {state.quoteLoading ? (
               <span className="text-lg font-semibold text-gray-400">…</span>
@@ -78,7 +82,7 @@ export function StickySummary({ state, service, primaryColor = "#3F6B52" }: Prop
             )}
             {state.frequency !== "ONE_TIME" && price != null && (
               <p className="text-xs text-emerald-600 mt-0.5">
-                Recurring discount applied
+                {t("recurringDiscountApplied")}
               </p>
             )}
           </div>
@@ -92,13 +96,13 @@ export function StickySummary({ state, service, primaryColor = "#3F6B52" }: Prop
 
       <ul className="mt-5 space-y-2 text-xs text-gray-500">
         <li className="flex items-start gap-2">
-          <CheckIcon /> Background-checked cleaners
+          <CheckIcon /> {t("trustBackgroundChecked")}
         </li>
         <li className="flex items-start gap-2">
-          <CheckIcon /> Free cancellation (12h+)
+          <CheckIcon /> {cancellationBadgeLabel(cancellationPolicy, tPolicy)}
         </li>
         <li className="flex items-start gap-2">
-          <CheckIcon /> Instant confirmation
+          <CheckIcon /> {t("trustInstantConfirmation")}
         </li>
       </ul>
     </aside>

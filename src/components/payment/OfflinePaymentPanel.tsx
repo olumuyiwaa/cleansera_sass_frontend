@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   instructions?: string | null;
@@ -12,14 +13,14 @@ type Props = {
 };
 
 export default function OfflinePaymentPanel({ instructions, className = "" }: Props) {
+  const t = useTranslations("Booking.offlinePayment");
   return (
     <div
       className={`rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-white/[0.03] ${className}`}
     >
-      <p className="text-sm font-medium text-gray-900 dark:text-white">Payment</p>
+      <p className="text-sm font-medium text-gray-900 dark:text-white">{t("heading")}</p>
       <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        This business collects payment offline (cash or bank transfer). You do not need to pay by
-        card online.
+        {t("description")}
       </p>
       {instructions ? (
         <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-white p-3 text-sm text-gray-800 dark:bg-gray-900 dark:text-gray-200">
@@ -27,7 +28,7 @@ export default function OfflinePaymentPanel({ instructions, className = "" }: Pr
         </pre>
       ) : (
         <p className="mt-2 text-xs text-gray-500">
-          The business will confirm payment details with you after booking.
+          {t("noInstructionsFallback")}
         </p>
       )}
     </div>

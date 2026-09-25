@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { STEPS } from "./types";
 
 type Props = {
@@ -8,8 +9,9 @@ type Props = {
 };
 
 export function ProgressBar({ current, primaryColor = "#3F6B52" }: Props) {
+  const t = useTranslations("Booking.steps");
   return (
-    <nav aria-label="Booking progress" className="mb-8">
+    <nav aria-label={t("navAriaLabel")} className="mb-8">
       <ol className="flex items-center gap-1 sm:gap-2">
         {STEPS.map((s, idx) => {
           const done = s.id < current;
@@ -44,7 +46,7 @@ export function ProgressBar({ current, primaryColor = "#3F6B52" }: Props) {
                     active ? "text-gray-900" : "text-gray-500"
                   }`}
                 >
-                  {s.label}
+                  {t(s.key)}
                 </span>
               </div>
               {idx < STEPS.length - 1 && (

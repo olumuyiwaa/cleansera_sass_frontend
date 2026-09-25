@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { WidgetService } from "@/app/api/widget.api";
 import type { BookingFormState, Frequency } from "./types";
 import { formatMoney, frequencyLabel } from "./types";
@@ -21,6 +22,8 @@ export function StepService({
   update,
   primaryColor = "#3F6B52",
 }: Props) {
+  const t = useTranslations("Booking.service");
+  const tFreq = useTranslations("Booking.frequency");
   const toggleAddOn = (id: string) => {
     const next = state.addOnIds.includes(id)
       ? state.addOnIds.filter((x) => x !== id)
@@ -31,10 +34,8 @@ export function StepService({
   return (
     <div className="space-y-8">
       <header>
-        <h2 className="text-xl font-semibold text-gray-900">Choose your clean</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Select a service and how often you’d like us to come.
-        </p>
+        <h2 className="text-xl font-semibold text-gray-900">{t("heading")}</h2>
+        <p className="mt-1 text-sm text-gray-500">{t("subheading")}</p>
       </header>
 
       {/* Services */}
@@ -58,13 +59,13 @@ export function StepService({
               <div className="flex items-start justify-between gap-2">
                 <span className="font-semibold text-gray-900">{svc.name}</span>
                 <span className="text-sm font-medium" style={{ color: primaryColor }}>
-                  from {formatMoney(svc.basePriceCents)}
+                  {t("fromPrice", { price: formatMoney(svc.basePriceCents) })}
                 </span>
               </div>
               {svc.description && (
                 <p className="mt-1 text-sm text-gray-500 line-clamp-2">{svc.description}</p>
               )}
-              <p className="mt-2 text-xs text-gray-400">~{svc.estimatedMinutes} min</p>
+              <p className="mt-2 text-xs text-gray-400">{t("estimatedMinutes", { count: svc.estimatedMinutes })}</p>
             </button>
           );
         })}
@@ -72,7 +73,7 @@ export function StepService({
 
       {/* Frequency */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-2">How often?</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">{t("howOften")}</h3>
         <div className="flex flex-wrap gap-2">
           {FREQUENCIES.map((f) => {
             const active = state.frequency === f;
@@ -87,12 +88,12 @@ export function StepService({
                 `}
                 style={{ backgroundColor: active ? primaryColor : undefined }}
               >
-                {frequencyLabel(f)}
+                {frequencyLabel(f, tFreq)}
                 {f === "WEEKLY" && (
-                  <span className="ml-1 text-xs opacity-90">· save 10%</span>
+                  <span className="ml-1 text-xs opacity-90">· {t("saveWeekly")}</span>
                 )}
                 {f === "BIWEEKLY" && (
-                  <span className="ml-1 text-xs opacity-90">· save 5%</span>
+                  <span className="ml-1 text-xs opacity-90">· {t("saveBiweekly")}</span>
                 )}
               </button>
             );
@@ -107,14 +108,14 @@ export function StepService({
           selectedService.pricingModel === "FLAT") && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <NumberField
-              label="Bedrooms"
+              label={t("bedrooms")}
               value={state.rooms}
               min={0}
               max={12}
               onChange={(v) => update({ rooms: v })}
             />
             <NumberField
-              label="Bathrooms"
+              label={t("bathrooms")}
               value={state.bathrooms}
               min={0}
               max={10}
@@ -123,7 +124,7 @@ export function StepService({
             {selectedService.pricingModel === "PER_SQFT" && (
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Approx. sqft
+                  {t("approxSqft")}
                 </label>
                 <input
                   type="number"
@@ -133,7 +134,7 @@ export function StepService({
                   onChange={(e) => update({ sqft: Number(e.target.value) || 0 })}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-offset-0"
                   style={{ ["--tw-ring-color" as string]: primaryColor }}
-                  placeholder="e.g. 1200"
+                  placeholder={t("sqftPlaceholder")}
                 />
               </div>
             )}
@@ -143,7 +144,7 @@ export function StepService({
       {/* Add-ons */}
       {selectedService && selectedService.addOns.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Add-ons</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">{t("addOns")}</h3>
           <div className="space-y-2">
             {selectedService.addOns.map((addon) => {
               const checked = state.addOnIds.includes(addon.id);
@@ -173,7 +174,7 @@ export function StepService({
                     +{formatMoney(addon.priceCents)}
                     {addon.extraMinutes > 0 && (
                       <span className="text-xs text-gray-400 ml-1">
-                        (+{addon.extraMinutes} min)
+                        {t("extraMinutes", { count: addon.extraMinutes })}
                       </span>
                     )}
                   </span>

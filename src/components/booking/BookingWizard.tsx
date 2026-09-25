@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { ProgressBar } from "./ProgressBar";
 import { StickySummary } from "./StickySummary";
 import { StepService } from "./StepService";
@@ -12,10 +13,13 @@ import type { BookingWizardProps } from "./types";
 import { formatMoney } from "./types";
 import { setActiveCurrency } from "@/app/services/currency";
 import OfflinePaymentPanel from "@/components/payment/OfflinePaymentPanel";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
 export function BookingWizard(props: BookingWizardProps) {
   // Show prices in this business's currency (idempotent, so safe during render).
   setActiveCurrency(props.business.currency);
+  const t = useTranslations("Booking.wizard");
+  const locale = useLocale();
   const {
     state,
     update,
@@ -59,16 +63,17 @@ export function BookingWizard(props: BookingWizardProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="mt-6 text-2xl font-bold text-gray-900">You’re booked!</h1>
+        <h1 className="mt-6 text-2xl font-bold text-gray-900">{t("bookedHeading")}</h1>
         <p className="mt-2 text-gray-600">
-          We’ve sent a confirmation to {state.phone}
-          {state.email ? ` and ${state.email}` : ""}.
+          {state.email
+            ? t("confirmationSentPhoneAndEmail", { phone: state.phone, email: state.email })
+            : t("confirmationSentPhone", { phone: state.phone })}
         </p>
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 text-left text-sm space-y-2">
           <p>
-            <span className="text-gray-500">When: </span>
+            <span className="text-gray-500">{t("when")} </span>
             <strong>
-              {new Date(bookingResult.scheduledStart).toLocaleString(undefined, {
+              {new Date(bookingResult.scheduledStart).toLocaleString(locale, {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
@@ -78,7 +83,7 @@ export function BookingWizard(props: BookingWizardProps) {
             </strong>
           </p>
           <p>
-            <span className="text-gray-500">Total: </span>
+            <span className="text-gray-500">{t("total")} </span>
             <strong style={{ color: primary }}>
               {formatMoney(bookingResult.quotedPriceCents)}
             </strong>
@@ -90,10 +95,10 @@ export function BookingWizard(props: BookingWizardProps) {
                 />
             </div>
         )}
-          <p className="text-xs text-gray-400">Ref: {bookingResult.id.slice(0, 8).toUpperCase()}</p>
+          <p className="text-xs text-gray-400">{t("ref", { id: bookingResult.id.slice(0, 8).toUpperCase() })}</p>
         </div>
         <p className="mt-6 text-sm text-gray-500">
-          Manage or reschedule anytime from your customer portal.
+          {t("manageFromPortal")}
         </p>
       </div>
     );
@@ -105,19 +110,27 @@ export function BookingWizard(props: BookingWizardProps) {
           the business name, and duplicating it wastes vertical space in a
           panel that's already height-constrained. */}
       {!compact && (
-        <div className="mb-6 flex items-center gap-3">
-          {props.business.branding?.logoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={props.business.branding.logoUrl}
-              alt=""
-              className="h-10 w-10 rounded-lg object-cover"
-            />
-          )}
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">{props.business.name}</h1>
-            <p className="text-sm text-gray-500">Book a cleaning</p>
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {props.business.branding?.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={props.business.branding.logoUrl}
+                alt=""
+                className="h-10 w-10 rounded-lg object-cover"
+              />
+            )}
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">{props.business.name}</h1>
+              <p className="text-sm text-gray-500">{t("bookACleaning")}</p>
+            </div>
           </div>
+          <LanguageSwitcher />
+        </div>
+      )}
+      {compact && (
+        <div className="mb-3 flex justify-end">
+          <LanguageSwitcher />
         </div>
       )}
 
@@ -192,7 +205,7 @@ export function BookingWizard(props: BookingWizardProps) {
                   disabled={step === 1}
                   className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
                 >
-                  Back
+                  {t("back")}
                 </button>
                 <button
                   type="button"
@@ -201,7 +214,7 @@ export function BookingWizard(props: BookingWizardProps) {
                   className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition"
                   style={{ backgroundColor: primary }}
                 >
-                  Continue
+                  {t("continue")}
                 </button>
               </div>
             )}
@@ -212,7 +225,7 @@ export function BookingWizard(props: BookingWizardProps) {
                   onClick={goBack}
                   className="text-sm font-medium text-gray-600 hover:text-gray-900"
                 >
-                  ← Edit details
+                  {t("editDetails")}
                 </button>
               </div>
             )}
@@ -224,7 +237,12 @@ export function BookingWizard(props: BookingWizardProps) {
             (max-w-lg), so this would never show anyway; skip rendering it. */}
         {!compact && (
           <div className="hidden lg:block">
-            <StickySummary state={state} service={selectedService} primaryColor={primary} />
+            <StickySummary
+              state={state}
+              service={selectedService}
+              primaryColor={primary}
+              cancellationPolicy={props.cancellationPolicy}
+            />
           </div>
         )}
       </div>
@@ -248,7 +266,7 @@ export function BookingWizard(props: BookingWizardProps) {
         >
           <div className={compact ? "flex items-center justify-between gap-3" : "flex items-center justify-between gap-3 max-w-5xl mx-auto"}>
             <div>
-              <p className="text-xs text-gray-500">Total</p>
+              <p className="text-xs text-gray-500">{t("total")}</p>
               <p className="text-lg font-bold" style={{ color: primary }}>
                 {state.quoteLoading
                   ? "…"
@@ -264,7 +282,7 @@ export function BookingWizard(props: BookingWizardProps) {
               className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
               style={{ backgroundColor: primary }}
             >
-              Continue
+              {t("continue")}
             </button>
           </div>
         </div>

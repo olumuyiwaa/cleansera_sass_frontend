@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import type { WidgetService, StorefrontCancellationPolicy } from "@/app/api/widget.api";
 import type { BookingFormState } from "./types";
 import { formatMoney, frequencyLabel, cancellationPolicyLabel } from "./types";
@@ -30,6 +31,10 @@ export function StepReview({
   onCaptchaToken = () => {},
   onConfirm,
 }: Props) {
+  const t = useTranslations("Booking.review");
+  const tFreq = useTranslations("Booking.frequency");
+  const tPolicy = useTranslations("Booking.cancellationPolicy");
+  const locale = useLocale();
   const price = state.quote?.priceCents;
   const tax = state.quote?.tax;
   const needsCaptcha = Boolean(TURNSTILE_SITE_KEY) && !captchaToken;
@@ -37,24 +42,20 @@ export function StepReview({
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="text-xl font-semibold text-gray-900">Review & confirm</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Double-check the details below, then book your clean.
-        </p>
+        <h2 className="text-xl font-semibold text-gray-900">{t("heading")}</h2>
+        <p className="mt-1 text-sm text-gray-500">{t("subheading")}</p>
       </header>
 
       <dl className="rounded-2xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
-        <ReviewRow label="Service" value={service?.name ?? "—"} />
-        <ReviewRow label="Frequency" value={frequencyLabel(state.frequency)} />
+        <ReviewRow label={t("service")} value={service?.name ?? "—"} />
+        <ReviewRow label={t("frequency")} value={frequencyLabel(state.frequency, tFreq)} />
         <ReviewRow
-          label="Home"
-          value={`${state.rooms} bed · ${state.bathrooms} bath${
-            state.sqft ? ` · ${state.sqft} sqft` : ""
-          }`}
+          label={t("home")}
+          value={t("homeSummary", { beds: state.rooms, baths: state.bathrooms, sqft: state.sqft || 0 })}
         />
         {state.addOnIds.length > 0 && service && (
           <ReviewRow
-            label="Add-ons"
+            label={t("addOns")}
             value={service.addOns
               .filter((a) => state.addOnIds.includes(a.id))
               .map((a) => a.name)
@@ -62,16 +63,16 @@ export function StepReview({
           />
         )}
         <ReviewRow
-          label="Address"
+          label={t("address")}
           value={[state.addressLine1, state.addressLine2, state.city, state.state, state.postalCode]
             .filter(Boolean)
             .join(", ")}
         />
         <ReviewRow
-          label="When"
+          label={t("when")}
           value={
             state.scheduledStart
-              ? new Date(state.scheduledStart).toLocaleString(undefined, {
+              ? new Date(state.scheduledStart).toLocaleString(locale, {
                   weekday: "long",
                   month: "long",
                   day: "numeric",
@@ -82,28 +83,32 @@ export function StepReview({
           }
         />
         <ReviewRow
-          label="Contact"
+          label={t("contact")}
           value={`${state.firstName} ${state.lastName} · ${state.phone}${
             state.email ? ` · ${state.email}` : ""
           }`}
         />
-        {state.notes && <ReviewRow label="Notes" value={state.notes} />}
+        {state.notes && <ReviewRow label={t("notes")} value={state.notes} />}
         <div className="flex justify-between items-center px-4 py-4 bg-gray-50">
-          <dt className="text-sm font-semibold text-gray-700">Total</dt>
+          <dt className="text-sm font-semibold text-gray-700">{t("total")}</dt>
           <dd className="text-xl font-bold" style={{ color: primaryColor }}>
             {price != null ? formatMoney(price) : "—"}
           </dd>
         </div>
         {tax && tax.pricesIncludeVat && (
           <div className="flex justify-between px-4 pb-3 bg-gray-50 text-xs text-gray-500">
-            <span>Incl. {(tax.vatRateBps / 100).toString().replace(".", ",")}% BTW</span>
+            <span>
+              {t("inclVat", {
+                rate: new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(tax.vatRateBps / 100),
+              })}
+            </span>
             <span>{formatMoney(tax.vatCents)}</span>
           </div>
         )}
       </dl>
 
       <p className="text-xs text-gray-500 leading-relaxed">
-        By booking you agree to the service terms. {cancellationPolicyLabel(cancellationPolicy)}
+        {t("agreeToTerms")} {cancellationPolicyLabel(cancellationPolicy, tPolicy)}
       </p>
 
       {submitError && (
@@ -120,10 +125,10 @@ export function StepReview({
         style={{ backgroundColor: primaryColor }}
       >
         {submitting
-          ? "Booking…"
+          ? t("booking")
           : price != null
-            ? `Confirm booking · ${formatMoney(price)}`
-            : "Confirm booking"}
+            ? t("confirmBookingWithPrice", { price: formatMoney(price) })
+            : t("confirmBooking")}
       </button>
     </div>
   );

@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -30,6 +31,7 @@ export default function MarkPaymentReceivedModal({
   onSuccess,
   onError,
 }: Props) {
+  const t = useTranslations("Dashboard.markPaymentReceived");
   const [method, setMethod] = useState<ManualPaymentMethod>("BANK_TRANSFER");
   const [reference, setReference] = useState("");
   const [note, setNote] = useState("");
@@ -52,7 +54,7 @@ export default function MarkPaymentReceivedModal({
       setNote("");
       setMethod("BANK_TRANSFER");
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Failed to mark payment received");
+      onError(err instanceof Error ? err.message : t("failedToMark"));
     } finally {
       setSaving(false);
     }
@@ -61,50 +63,50 @@ export default function MarkPaymentReceivedModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md p-6">
       <h2 className="mb-1 text-lg font-semibold text-gray-800 dark:text-white/90">
-        Mark payment received
+        {t("heading")}
       </h2>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Record cash, bank transfer, or external invoice. Amount due:{" "}
+        {t("description")}{" "}
         <strong>{formatMoney(booking.quotedPriceCents)}</strong>
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label>Method</Label>
+          <Label>{t("method")}</Label>
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value as ManualPaymentMethod)}
             className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           >
-            <option value="BANK_TRANSFER">Bank transfer</option>
-            <option value="CASH">Cash</option>
-            <option value="INVOICE">Invoice (external)</option>
-            <option value="OTHER">Other</option>
+            <option value="BANK_TRANSFER">{t("methodBankTransfer")}</option>
+            <option value="CASH">{t("methodCash")}</option>
+            <option value="INVOICE">{t("methodInvoice")}</option>
+            <option value="OTHER">{t("methodOther")}</option>
           </select>
         </div>
         <div>
-          <Label>Reference (optional)</Label>
+          <Label>{t("reference")}</Label>
           <Input
             value={reference}
             onChange={(e) => setReference(e.target.value)}
-            placeholder="Transaction ID or receipt number"
+            placeholder={t("referencePlaceholder")}
           />
         </div>
         <div>
-          <Label>Note (optional)</Label>
+          <Label>{t("note")}</Label>
           <textarea
             rows={2}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-            placeholder="e.g. Paid on site"
+            placeholder={t("notePlaceholder")}
           />
         </div>
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button type="submit" disabled={saving}>
-            {saving ? "Saving…" : "Mark as paid"}
+            {saving ? t("saving") : t("markAsPaid")}
           </Button>
         </div>
       </form>

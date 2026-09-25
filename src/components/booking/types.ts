@@ -115,18 +115,27 @@ export function formatMoney(cents: number, currency: string = getActiveCurrency(
   }).format(cents / 100);
 }
 
-export function frequencyLabel(f: Frequency) {
+export function frequencyLabel(f: Frequency, t: (key: string) => string) {
   switch (f) {
     case "WEEKLY":
-      return "Weekly";
+      return t("weekly");
     case "BIWEEKLY":
-      return "Every 2 weeks";
+      return t("biweekly");
     case "MONTHLY":
-      return "Monthly";
+      return t("monthly");
     default:
-      return "One-time";
+      return t("oneTime");
   }
 }
+
+/**
+ * Matches next-intl's actual translator call signature (values are
+ * string | number | Date, not arbitrary unknown) — declared here rather
+ * than importing next-intl's own type so cancellationPolicyLabel and
+ * cancellationBadgeLabel stay plain functions callable with any
+ * next-intl-produced `t`, scoped or not.
+ */
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string;
 
 /**
  * Renders this business's real cancellation policy — never a hardcoded
@@ -134,23 +143,54 @@ export function frequencyLabel(f: Frequency) {
  * one, which cancellationPolicy.js on the backend treats as "free
  * cancellation any time"; this must say the same thing, since it's the
  * customer's only preview of what cancelling will actually cost them.
+ *
+ * `t` must be a next-intl translator scoped to the `Booking.cancellationPolicy`
+ * namespace (e.g. `useTranslations("Booking.cancellationPolicy")`) — this
+ * stays a plain function rather than a hook itself so it can be called from
+ * anywhere a scoped `t` is already in scope, same as frequencyLabel above.
  */
 export function cancellationPolicyLabel(
-  policy: StorefrontCancellationPolicy | null | undefined
+  policy: StorefrontCancellationPolicy | null | undefined,
+  t: Translator
 ): string {
   if (!policy || policy.windowHours == null) {
-    return "You can cancel or reschedule free of charge at any time from your customer portal.";
+    return t("freeAnytime");
   }
   const hours = policy.windowHours;
   const window =
     hours % 24 === 0 && hours >= 24
-      ? `${hours / 24} day${hours === 24 ? "" : "s"}`
-      : `${hours} hour${hours === 1 ? "" : "s"}`;
+      ? t("windowDays", { count: hours / 24 })
+      : t("windowHours", { count: hours });
   const feeText =
     policy.feeType === "PERCENT"
-      ? `a ${policy.feeValue ?? 0}% fee`
+      ? t("feePercent", { value: policy.feeValue ?? 0 })
       : policy.feeType === "AMOUNT" && policy.feeValue != null
-        ? `a ${formatMoney(policy.feeValue)} fee`
-        : "a cancellation fee";
-  return `You can cancel or reschedule free of charge up to ${window} before the appointment. Cancelling later may incur ${feeText}.`;
+        ? t("feeAmount", { value: formatMoney(policy.feeValue) })
+        : t("feeGeneric");
+  return t("policyWithFee", { window, feeText });
+}
+
+/**
+ * Short trust-badge version of the same policy cancellationPolicyLabel
+ * renders in full sentence form on the review step — for the summary
+ * sidebar's compact bullet list, not the legal-copy paragraph. Same
+ * null-window-means-free-anytime rule, same reason it must never be a
+ * hardcoded default: StickySummary had its own independent "Free
+ * cancellation (12h+)" hardcoded string that cancellationPolicyLabel's
+ * introduction (see StepReview.tsx) never touched, because it's a
+ * separate component reading the same policy data.
+ */
+export function cancellationBadgeLabel(
+  policy: StorefrontCancellationPolicy | null | undefined,
+  t: Translator
+): string {
+  if (!policy || policy.windowHours == null) {
+    return t("badgeFreeAnytime");
+  }
+  const hours = policy.windowHours;
+  const window =
+    hours % 24 === 0 && hours >= 24
+      ? t("windowDays", { count: hours / 24 })
+      : t("windowHours", { count: hours });
+  return t("badgeWithWindow", { window });
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import type { Slot } from "@/app/api/widget.api";
 import { joinWaitlist } from "@/app/api/widget.api";
 import { Turnstile, TURNSTILE_SITE_KEY } from "./Turnstile";
@@ -30,6 +31,13 @@ export function StepSchedule({
   slug,
   timezone,
 }: Props) {
+  const t = useTranslations("Booking.schedule");
+  // Locale for date/time formatting — explicit rather than the browser's own
+  // (the `undefined` locale argument default), so a customer who switches
+  // the widget to NL sees "wo" (woensdag) and "14:00" consistently, not a
+  // mix of translated UI text next to English weekday abbreviations from
+  // whatever their OS happens to be set to.
+  const locale = useLocale();
   // Build next 14 days for the date picker
   // Calendar days start from "today" in the BUSINESS's timezone and are kept as
   // noon-UTC anchors, so adding days cannot slip over a DST change and the
@@ -48,10 +56,8 @@ export function StepSchedule({
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="text-xl font-semibold text-gray-900">Pick a date & time</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Only times with available cleaners are shown.
-        </p>
+        <h2 className="text-xl font-semibold text-gray-900">{t("heading")}</h2>
+        <p className="mt-1 text-sm text-gray-500">{t("subheading")}</p>
       </header>
 
       {/* Date strip */}
@@ -71,15 +77,15 @@ export function StepSchedule({
               style={{ backgroundColor: active ? primaryColor : undefined }}
             >
               <span className="text-[10px] uppercase font-medium opacity-80">
-                {d.toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
+                {d.toLocaleDateString(locale, { weekday: "short", timeZone: "UTC" })}
               </span>
               <span className="text-lg font-semibold leading-tight">
                 {d.getUTCDate()}
               </span>
               <span className="text-[10px] opacity-80">
                 {isToday
-                  ? "Today"
-                  : d.toLocaleDateString(undefined, { month: "short", timeZone: "UTC" })}
+                  ? t("today")
+                  : d.toLocaleDateString(locale, { month: "short", timeZone: "UTC" })}
               </span>
             </button>
           );
@@ -88,12 +94,12 @@ export function StepSchedule({
 
       {/* Time slots */}
       {!state.selectedDate && (
-        <p className="text-sm text-gray-500">Select a date to see available times.</p>
+        <p className="text-sm text-gray-500">{t("selectDatePrompt")}</p>
       )}
 
       {state.selectedDate && slotsLoading && (
         <div className="flex items-center gap-2 text-sm text-gray-500 py-8 justify-center">
-          <Spinner /> Loading available times…
+          <Spinner /> {t("loadingTimes")}
         </div>
       )}
 
@@ -103,7 +109,7 @@ export function StepSchedule({
 
       {state.selectedDate && !slotsLoading && !slotsError && slots.length === 0 && (
         <div className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-6 text-center space-y-3">
-          <p>No available times on this day. Please try another date.</p>
+          <p>{t("noTimesAvailable")}</p>
           <WaitlistJoin
             slug={slug}
             serviceId={state.serviceId}
@@ -117,7 +123,7 @@ export function StepSchedule({
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {slots.map((slot) => {
             const active = state.scheduledStart === slot.start;
-            const label = new Date(slot.start).toLocaleTimeString(undefined, {
+            const label = new Date(slot.start).toLocaleTimeString(locale, {
               hour: "numeric",
               minute: "2-digit",
               timeZone: timezone,
@@ -173,6 +179,7 @@ function WaitlistJoin({
   selectedDate: string;
   primaryColor: string;
 }) {
+  const t = useTranslations("Booking.schedule.waitlist");
   const [open, setOpen] = useState(false);
   const [contact, setContact] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -182,7 +189,7 @@ function WaitlistJoin({
   const [captchaNonce, setCaptchaNonce] = useState(0);
 
   if (done) {
-    return <p className="text-sm font-medium text-green-700">You&apos;re on the waitlist — we&apos;ll be in touch!</p>;
+    return <p className="text-sm font-medium text-green-700">{t("joined")}</p>;
   }
 
   if (!open) {
@@ -193,7 +200,7 @@ function WaitlistJoin({
         className="text-sm font-medium underline"
         style={{ color: primaryColor }}
       >
-        Notify me if a slot opens up
+        {t("notifyMe")}
       </button>
     );
   }
@@ -216,7 +223,7 @@ function WaitlistJoin({
       });
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't join the waitlist — please try again");
+      setError(err instanceof Error ? err.message : t("joinError"));
     } finally {
       setSubmitting(false);
       setCaptchaToken(null);
@@ -230,7 +237,7 @@ function WaitlistJoin({
         required
         value={contact}
         onChange={(e) => setContact(e.target.value)}
-        placeholder="Email or phone number"
+        placeholder={t("contactPlaceholder")}
         className="h-10 rounded-lg border border-gray-300 px-3 text-sm w-full sm:w-56"
       />
       <Turnstile onToken={setCaptchaToken} resetKey={captchaNonce} />
@@ -240,7 +247,7 @@ function WaitlistJoin({
         className="h-10 rounded-lg px-4 text-sm font-medium text-white disabled:opacity-60"
         style={{ backgroundColor: primaryColor }}
       >
-        {submitting ? "Joining…" : "Join waitlist"}
+        {submitting ? t("joining") : t("joinWaitlist")}
       </button>
       {error && <p className="text-xs text-red-600 basis-full">{error}</p>}
     </form>

@@ -1,0 +1,173 @@
+{
+  "Booking": {
+    "steps": {
+      "navAriaLabel": "Boekingsvoortgang",
+      "service": "Dienst",
+      "address": "Adres",
+      "schedule": "Planning",
+      "details": "Uw gegevens",
+      "review": "Bevestigen"
+    },
+    "service": {
+      "heading": "Kies uw schoonmaak",
+      "subheading": "Selecteer een dienst en hoe vaak u ons wilt laten komen.",
+      "fromPrice": "vanaf {price}",
+      "estimatedMinutes": "~{count, plural, one {# minuut} other {# minuten}}",
+      "howOften": "Hoe vaak?",
+      "saveWeekly": "10% korting",
+      "saveBiweekly": "5% korting",
+      "bedrooms": "Slaapkamers",
+      "bathrooms": "Badkamers",
+      "approxSqft": "Oppervlakte (m²)",
+      "sqftPlaceholder": "bijv. 110",
+      "addOns": "Extra's",
+      "extraMinutes": "(+{count, plural, one {# minuut} other {# minuten}})"
+    },
+    "frequency": {
+      "weekly": "Wekelijks",
+      "biweekly": "Elke 2 weken",
+      "monthly": "Maandelijks",
+      "oneTime": "Eenmalig"
+    },
+    "cancellationPolicy": {
+      "freeAnytime": "U kunt op elk moment kosteloos annuleren of verzetten via uw klantportaal.",
+      "windowDays": "{count, plural, one {# dag} other {# dagen}}",
+      "windowHours": "{count, plural, one {# uur} other {# uur}}",
+      "feePercent": "een vergoeding van {value}%",
+      "feeAmount": "een vergoeding van {value}",
+      "feeGeneric": "een annuleringsvergoeding",
+      "policyWithFee": "U kunt tot {window} voor de afspraak kosteloos annuleren of verzetten. Bij latere annulering kan {feeText} in rekening worden gebracht.",
+      "badgeFreeAnytime": "Altijd gratis annuleren",
+      "badgeWithWindow": "Gratis annuleren tot {window} van tevoren"
+    },
+    "address": {
+      "heading": "Waar mogen we schoonmaken?",
+      "subheading": "We controleren of uw adres in ons servicegebied valt.",
+      "streetAddress": "Straatnaam en huisnummer",
+      "streetAddressPlaceholder": "Hoofdstraat 123",
+      "addressLine2": "Appartement / toevoeging",
+      "optional": "Optioneel",
+      "city": "Plaats",
+      "provinceOptional": "Provincie (optioneel)",
+      "postalCode": "Postcode",
+      "advancedCoordinates": "Geavanceerd: coördinaten (optioneel)",
+      "latitude": "Breedtegraad",
+      "longitude": "Lengtegraad",
+      "inServiceArea": "Goed nieuws — wij zijn actief in dit gebied.",
+      "outsideServiceArea": "Dit adres valt buiten ons huidige servicegebied.",
+      "outsideServiceAreaHint": "U kunt bij de volgende stappen toch uw gegevens achterlaten — we nemen contact op zodra we uitbreiden.",
+      "streetAddressRequired": "Vul een straatnaam en huisnummer in."
+    },
+    "schedule": {
+      "heading": "Kies een datum en tijd",
+      "subheading": "Alleen tijden met beschikbare schoonmakers worden getoond.",
+      "today": "Vandaag",
+      "selectDatePrompt": "Selecteer een datum om beschikbare tijden te zien.",
+      "loadingTimes": "Beschikbare tijden laden…",
+      "noTimesAvailable": "Geen beschikbare tijden op deze dag. Probeer een andere datum.",
+      "waitlist": {
+        "joined": "U staat op de wachtlijst — we nemen contact op!",
+        "notifyMe": "Laat het me weten als er een plek vrijkomt",
+        "joinError": "Aanmelden voor de wachtlijst is niet gelukt — probeer het opnieuw",
+        "contactPlaceholder": "E-mailadres of telefoonnummer",
+        "joining": "Bezig met aanmelden…",
+        "joinWaitlist": "Aanmelden voor wachtlijst"
+      }
+    },
+    "details": {
+      "heading": "Uw gegevens",
+      "subheading": "Hiermee bevestigen we uw boeking en sturen we updates.",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "phone": "Telefoon",
+      "phonePlaceholder": "+31 6 12345678",
+      "email": "E-mail",
+      "emailPlaceholder": "Optioneel — voor bonnen & herinneringen",
+      "specialInstructions": "Bijzondere instructies",
+      "specialInstructionsPlaceholder": "Deurcode, huisdieren, parkeren, aandachtspunten…",
+      "couponCode": "Kortingscode",
+      "couponCodePlaceholder": "BESPAAR10",
+      "apply": "Toepassen",
+      "couponApplied": "Kortingscode toegepast",
+      "couponInvalid": "Kortingscode: {reason}",
+      "invalidReasonFallback": "ongeldig",
+      "giftCardCode": "Cadeaubon code",
+      "giftCardCodePlaceholder": "GC-XXXXXXXX",
+      "giftCardApplied": "Cadeaubon toegepast: {applied} (saldo: {balance})",
+      "giftCardOff": "{amount} korting",
+      "giftCardInvalid": "Cadeaubon: {reason}"
+    },
+    "review": {
+      "heading": "Controleren & bevestigen",
+      "subheading": "Controleer onderstaande gegevens en boek uw schoonmaak.",
+      "service": "Dienst",
+      "frequency": "Frequentie",
+      "home": "Woning",
+      "homeSummary": "{beds} slpk · {baths} badk{sqft, plural, =0 {} other { · # m²}}",
+      "addOns": "Extra's",
+      "address": "Adres",
+      "when": "Wanneer",
+      "contact": "Contact",
+      "notes": "Notities",
+      "total": "Totaal",
+      "inclVat": "Incl. {rate}% BTW",
+      "agreeToTerms": "Door te boeken gaat u akkoord met de servicevoorwaarden.",
+      "booking": "Bezig met boeken…",
+      "confirmBookingWithPrice": "Boeking bevestigen · {price}",
+      "confirmBooking": "Boeking bevestigen"
+    },
+    "summary": {
+      "heading": "Boekingsoverzicht",
+      "service": "Dienst",
+      "frequency": "Frequentie",
+      "homeSize": "Woninggrootte",
+      "homeSizeSummary": "{beds} slpk · {baths} badk{sqft, plural, =0 {} other { · # m²}}",
+      "addOns": "Extra's",
+      "address": "Adres",
+      "when": "Wanneer",
+      "estDuration": "Geschatte duur",
+      "estMinutes": "~{count, plural, one {# minuut} other {# minuten}}",
+      "total": "Totaal",
+      "recurringDiscountApplied": "Korting voor terugkerende afspraak toegepast",
+      "trustBackgroundChecked": "Gescreende schoonmakers",
+      "trustInstantConfirmation": "Directe bevestiging"
+    },
+    "wizard": {
+      "bookedHeading": "U bent geboekt!",
+      "confirmationSentPhoneAndEmail": "We hebben een bevestiging gestuurd naar {phone} en {email}.",
+      "confirmationSentPhone": "We hebben een bevestiging gestuurd naar {phone}.",
+      "when": "Wanneer:",
+      "total": "Totaal:",
+      "ref": "Referentie: {id}",
+      "manageFromPortal": "Beheer of verzet uw afspraak op elk moment via uw klantportaal.",
+      "bookACleaning": "Boek een schoonmaak",
+      "back": "Terug",
+      "continue": "Doorgaan",
+      "editDetails": "← Gegevens wijzigen"
+    },
+    "offlinePayment": {
+      "heading": "Betaling",
+      "description": "Dit bedrijf int betalingen offline (contant of per bankoverschrijving). U hoeft niet online met kaart te betalen.",
+      "noInstructionsFallback": "Het bedrijf neemt na de boeking contact met u op over de betaling."
+    }
+  },
+  "Dashboard": {
+    "markPaymentReceived": {
+      "failedToMark": "Betaling markeren als ontvangen is mislukt",
+      "heading": "Betaling ontvangen markeren",
+      "description": "Registreer contant, bankoverschrijving of externe factuur. Verschuldigd bedrag:",
+      "method": "Methode",
+      "methodBankTransfer": "Bankoverschrijving",
+      "methodCash": "Contant",
+      "methodInvoice": "Factuur (extern)",
+      "methodOther": "Anders",
+      "reference": "Referentie (optioneel)",
+      "referencePlaceholder": "Transactie-ID of bonnummer",
+      "note": "Notitie (optioneel)",
+      "notePlaceholder": "bijv. Ter plekke betaald",
+      "cancel": "Annuleren",
+      "saving": "Bezig met opslaan…",
+      "markAsPaid": "Markeer als betaald"
+    }
+  }
+}
