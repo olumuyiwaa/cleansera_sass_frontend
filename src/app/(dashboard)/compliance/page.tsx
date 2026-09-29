@@ -227,10 +227,10 @@ export default function CompliancePage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {tab === "documents" && (
-                        <Button onClick={() => setShowDocModal(true)}>Add Document</Button>
+                        <Button onClick={() => setShowDocModal(true)}>{t("addDocument")}</Button>
                     )}
                     {tab === "audits" && (
-                        <Button onClick={() => setShowAuditModal(true)}>New Audit</Button>
+                        <Button onClick={() => setShowAuditModal(true)}>{t("newAudit")}</Button>
                     )}
                 </div>
             </div>
@@ -293,11 +293,11 @@ export default function CompliancePage() {
                         <Table>
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Title</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("titleField")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Version</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Expires</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Actions</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("version")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("expires")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("actions")}</TableCell>
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -308,7 +308,7 @@ export default function CompliancePage() {
                                 )}
                                 {!loading && docs.length === 0 && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>No documents yet</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{t("emptyDocuments")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading &&
@@ -365,12 +365,12 @@ export default function CompliancePage() {
                         <Table>
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Title</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("titleField")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Date</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Score</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Actions</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("actions")}</TableCell>
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -489,7 +489,7 @@ export default function CompliancePage() {
                         </select>
                     </div>
                     <div>
-                        <Label>Title</Label>
+                        <Label>{t("titleField")}</Label>
                         <Input value={docForm.title} onChange={(e) => setDocForm({ ...docForm, title: e.target.value })} required placeholder="e.g. SDS – All-Purpose Cleaner" />
                     </div>
                     <div>
@@ -504,11 +504,11 @@ export default function CompliancePage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label>Version</Label>
+                            <Label>{t("version")}</Label>
                             <Input value={docForm.version} onChange={(e) => setDocForm({ ...docForm, version: e.target.value })} placeholder="2025-03" />
                         </div>
                         <div>
-                            <Label>Expires</Label>
+                            <Label>{t("expires")}</Label>
                             <Input type="date" value={docForm.expiresAt} onChange={(e) => setDocForm({ ...docForm, expiresAt: e.target.value })} />
                         </div>
                     </div>
@@ -528,7 +528,7 @@ export default function CompliancePage() {
                 <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">New Compliance Audit</h2>
                 <form onSubmit={handleCreateAudit} className="space-y-4">
                     <div>
-                        <Label>Title</Label>
+                        <Label>{t("titleField")}</Label>
                         <Input value={auditForm.title} onChange={(e) => setAuditForm({ ...auditForm, title: e.target.value })} required placeholder="Q1 Internal SDS Review" />
                     </div>
                     <div>

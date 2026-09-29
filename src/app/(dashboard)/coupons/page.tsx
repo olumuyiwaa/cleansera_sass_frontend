@@ -140,12 +140,12 @@ export default function CouponsPage() {
               <table className="min-w-full text-left text-sm">
                 <thead className="bg-gray-50 dark:bg-white/[0.03]">
                 <tr>
-                  <th className="px-4 py-3">Code</th>
+                  <th className="px-4 py-3">{t("code")}</th>
                   <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Value</th>
-                  <th className="px-4 py-3">Active</th>
-                  <th className="px-4 py-3">Redeemed</th>
-                  <th className="px-4 py-3">Expires</th>
+                  <th className="px-4 py-3">{t("value")}</th>
+                  <th className="px-4 py-3">{t("active")}</th>
+                  <th className="px-4 py-3">{t("redeemed")}</th>
+                  <th className="px-4 py-3">{t("expires")}</th>
                   <th className="px-4 py-3" />
                 </tr>
                 </thead>

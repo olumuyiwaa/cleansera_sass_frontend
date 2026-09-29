@@ -492,14 +492,29 @@
       "period": "Period",
       "export": "Export",
       "rates": "Rates",
-      "payouts": "Payouts"
+      "payouts": "Payouts",
+      "pendingPayroll": "Pending payroll",
+      "payoutsAwaiting": "Payouts awaiting settlement",
+      "createdNotPaid": "Created but not yet marked paid",
+      "paidToDate": "Paid to date",
+      "cleaner": "Cleaner",
+      "pending": "Pending",
+      "actions": "Actions",
+      "emptyCleaners": "No active cleaners yet"
     },
     "compliance": {
       "title": "Compliance",
       "vog": "VOG",
       "documents": "Documents",
       "upload": "Upload document",
-      "empty": "No items yet"
+      "empty": "No items yet",
+      "addDocument": "Add document",
+      "newAudit": "New audit",
+      "titleField": "Title",
+      "version": "Version",
+      "expires": "Expires",
+      "actions": "Actions",
+      "emptyDocuments": "No documents yet"
     },
     "team": {
       "title": "Team",
@@ -567,11 +582,23 @@
     },
     "coupons": {
       "title": "Coupons",
-      "empty": "No coupons yet"
+      "empty": "No coupons yet",
+      "value": "Value",
+      "active": "Active",
+      "redeemed": "Redeemed",
+      "expires": "Expires",
+      "code": "Code",
+      "new": "New coupon"
     },
     "giftCards": {
       "title": "Gift cards",
-      "empty": "No gift cards yet"
+      "empty": "No gift cards yet",
+      "recipient": "Recipient",
+      "balance": "Balance",
+      "initialValue": "Initial value",
+      "active": "Active",
+      "expires": "Expires",
+      "new": "New gift card"
     },
     "inventory": {
       "title": "Inventory",
@@ -610,7 +637,15 @@
     },
     "recurringSchedules": {
       "title": "Recurring schedules",
-      "empty": "No schedules yet"
+      "empty": "No schedules yet",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "customer": "Customer",
+      "service": "Service",
+      "cadence": "Cadence",
+      "nextRun": "Next run",
+      "status": "Status",
+      "new": "New schedule"
     },
     "reviews": {
       "title": "Reviews",
@@ -637,7 +672,14 @@
       "empty": "Waitlist is empty"
     },
     "website": {
-      "title": "Website"
+      "title": "Website",
+      "aboutSection": "About section",
+      "titleField": "Title",
+      "testimonials": "Testimonials",
+      "socialLinks": "Social links",
+      "sections": "Sections",
+      "gallery": "Gallery",
+      "save": "Save"
     }
   },
   "Portal": {

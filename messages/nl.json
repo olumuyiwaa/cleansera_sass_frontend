@@ -492,14 +492,29 @@
       "period": "Periode",
       "export": "Exporteren",
       "rates": "Tarieven",
-      "payouts": "Uitbetalingen"
+      "payouts": "Uitbetalingen",
+      "pendingPayroll": "Openstaande loonadministratie",
+      "payoutsAwaiting": "Uitbetalingen in afwachting van afwikkeling",
+      "createdNotPaid": "Aangemaakt maar nog niet als betaald gemarkeerd",
+      "paidToDate": "Tot nu toe betaald",
+      "cleaner": "Schoonmaker",
+      "pending": "In behandeling",
+      "actions": "Acties",
+      "emptyCleaners": "Nog geen actieve schoonmakers"
     },
     "compliance": {
       "title": "Compliance",
       "vog": "VOG",
       "documents": "Documenten",
       "upload": "Document uploaden",
-      "empty": "Nog geen items"
+      "empty": "Nog geen items",
+      "addDocument": "Document toevoegen",
+      "newAudit": "Nieuwe audit",
+      "titleField": "Titel",
+      "version": "Versie",
+      "expires": "Verloopt",
+      "actions": "Acties",
+      "emptyDocuments": "Nog geen documenten"
     },
     "team": {
       "title": "Team",
@@ -567,11 +582,23 @@
     },
     "coupons": {
       "title": "Kortingscodes",
-      "empty": "Nog geen kortingscodes"
+      "empty": "Nog geen kortingscodes",
+      "value": "Waarde",
+      "active": "Actief",
+      "redeemed": "Ingewisseld",
+      "expires": "Verloopt",
+      "code": "Code",
+      "new": "Nieuwe kortingscode"
     },
     "giftCards": {
       "title": "Cadeaubonnen",
-      "empty": "Nog geen cadeaubonnen"
+      "empty": "Nog geen cadeaubonnen",
+      "recipient": "Ontvanger",
+      "balance": "Saldo",
+      "initialValue": "Beginwaarde",
+      "active": "Actief",
+      "expires": "Verloopt",
+      "new": "Nieuwe cadeaubon"
     },
     "inventory": {
       "title": "Voorraad",
@@ -610,7 +637,15 @@
     },
     "recurringSchedules": {
       "title": "Terugkerende planning",
-      "empty": "Nog geen planningen"
+      "empty": "Nog geen planningen",
+      "weekly": "Wekelijks",
+      "monthly": "Maandelijks",
+      "customer": "Klant",
+      "service": "Dienst",
+      "cadence": "Frequentie",
+      "nextRun": "Volgende run",
+      "status": "Status",
+      "new": "Nieuwe planning"
     },
     "reviews": {
       "title": "Beoordelingen",
@@ -637,7 +672,14 @@
       "empty": "Wachtlijst is leeg"
     },
     "website": {
-      "title": "Website"
+      "title": "Website",
+      "aboutSection": "Over-sectie",
+      "titleField": "Titel",
+      "testimonials": "Ervaringen",
+      "socialLinks": "Sociale links",
+      "sections": "Secties",
+      "gallery": "Galerij",
+      "save": "Opslaan"
     }
   },
   "Portal": {

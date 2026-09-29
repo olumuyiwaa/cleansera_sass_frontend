@@ -293,10 +293,10 @@ export default function WebsitePage() {
 
         {/* About */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">About section</h2>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("aboutSection")}</h2>
           <div className="space-y-4">
             <div>
-              <Label>Title</Label>
+              <Label>{t("titleField")}</Label>
               <Input value={aboutTitle} onChange={(e) => setAboutTitle(e.target.value)} placeholder="e.g. Locally owned, fully insured" />
             </div>
             <div>
@@ -309,7 +309,7 @@ export default function WebsitePage() {
         {/* Testimonials */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Testimonials</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("testimonials")}</h2>
             <Button variant="outline" type="button" onClick={() => setTestimonials([...testimonials, { name: "", quote: "" }])}>
               Add testimonial
             </Button>
@@ -379,7 +379,7 @@ export default function WebsitePage() {
 
         {/* Social links */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Social links</h2>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("socialLinks")}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {SOCIAL_PLATFORMS.map((platform) => (
               <div key={platform}>
@@ -396,7 +396,7 @@ export default function WebsitePage() {
 
         {/* Sections visibility + order */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
-          <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Sections</h2>
+          <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("sections")}</h2>
           <p className="mb-4 text-xs text-gray-400">
             Show, hide, and order the optional sections. A section with no content stays hidden even
             when turned on.
@@ -438,7 +438,7 @@ export default function WebsitePage() {
         {/* Gallery — after order since it's the longest visually */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Gallery</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("gallery")}</h2>
             <input
               ref={galleryInputRef}
               type="file"

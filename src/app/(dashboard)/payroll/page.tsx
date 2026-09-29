@@ -194,7 +194,7 @@ export default function PayrollPage() {
       {summary && (
         <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Pending payroll</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("pendingPayroll")}</p>
             <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
               {formatMoney(summary.pendingEarningsCents)}
             </p>
@@ -203,14 +203,14 @@ export default function PayrollPage() {
             </p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Payouts awaiting settlement</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("payoutsAwaiting")}</p>
             <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
               {formatMoney(summary.pendingPayoutsCents)}
             </p>
-            <p className="mt-1 text-xs text-gray-400">Created but not yet marked paid</p>
+            <p className="mt-1 text-xs text-gray-400">{t("createdNotPaid")}</p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Paid to date</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("paidToDate")}</p>
             <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
               {formatMoney(summary.lifetimePaidCents)}
             </p>
@@ -241,10 +241,10 @@ export default function PayrollPage() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                 <TableRow>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Cleaner</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Rate</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Pending</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Actions</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("pending")}</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("actions")}</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -255,7 +255,7 @@ export default function PayrollPage() {
                 )}
                 {!loading && cleaners.length === 0 && (
                   <TableRow>
-                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>No active cleaners yet</TableCell>
+                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{t("emptyCleaners")}</TableCell>
                   </TableRow>
                 )}
                 {!loading &&
@@ -299,7 +299,7 @@ export default function PayrollPage() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                 <TableRow>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Cleaner</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Job</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Amount</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Earned</TableCell>
@@ -354,11 +354,11 @@ export default function PayrollPage() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                 <TableRow>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Cleaner</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Period</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Total</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Actions</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("actions")}</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">

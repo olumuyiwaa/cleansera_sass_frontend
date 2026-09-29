@@ -174,9 +174,9 @@ export default function RecurringSchedulesPage() {
                         }
                         className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                     >
-                        <option value="WEEKLY">Weekly</option>
+                        <option value="WEEKLY">{t("weekly")}</option>
                         <option value="BIWEEKLY">Every 2 weeks</option>
-                        <option value="MONTHLY">Monthly</option>
+                        <option value="MONTHLY">{t("monthly")}</option>
                     </select>
                     <select
                         value={form.dayOfWeek}
@@ -213,11 +213,11 @@ export default function RecurringSchedulesPage() {
                 <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50 text-gray-500 dark:bg-white/5">
                         <tr>
-                            <th className="p-3">Customer</th>
-                            <th className="p-3">Service</th>
-                            <th className="p-3">Cadence</th>
-                            <th className="p-3">Next run</th>
-                            <th className="p-3">Status</th>
+                            <th className="p-3">{t("customer")}</th>
+                            <th className="p-3">{t("service")}</th>
+                            <th className="p-3">{t("cadence")}</th>
+                            <th className="p-3">{t("nextRun")}</th>
+                            <th className="p-3">{t("status")}</th>
                             <th className="p-3"></th>
                         </tr>
                     </thead>

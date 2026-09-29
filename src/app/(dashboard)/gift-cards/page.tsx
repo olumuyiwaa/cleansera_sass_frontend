@@ -163,11 +163,11 @@ export default function GiftCardsPage() {
             <thead className="bg-gray-50 dark:bg-white/[0.03]">
               <tr>
                 <th className="px-4 py-3">Code</th>
-                <th className="px-4 py-3">Recipient</th>
-                <th className="px-4 py-3">Balance</th>
-                <th className="px-4 py-3">Initial Value</th>
-                <th className="px-4 py-3">Active</th>
-                <th className="px-4 py-3">Expires</th>
+                <th className="px-4 py-3">{t("recipient")}</th>
+                <th className="px-4 py-3">{t("balance")}</th>
+                <th className="px-4 py-3">{t("initialValue")}</th>
+                <th className="px-4 py-3">{t("active")}</th>
+                <th className="px-4 py-3">{t("expires")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
