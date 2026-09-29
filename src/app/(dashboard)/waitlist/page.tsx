@@ -87,11 +87,11 @@ export default function WaitlistPage() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-white/[0.03]">
               <tr>
-                <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3">Service</th>
-                <th className="px-4 py-3">Desired window</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Joined</th>
+                <th className="px-4 py-3">{t("contact")}</th>
+                <th className="px-4 py-3">{t("service")}</th>
+                <th className="px-4 py-3">{t("desiredWindow")}</th>
+                <th className="px-4 py-3">{t("status")}</th>
+                <th className="px-4 py-3">{t("joined")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>

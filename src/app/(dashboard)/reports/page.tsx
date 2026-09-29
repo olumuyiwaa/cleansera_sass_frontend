@@ -92,7 +92,7 @@ export default function ReportsPage() {
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <Label>From</Label>
+            <Label>{t("from")}</Label>
             <Input type="date" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} />
           </div>
           <div>
@@ -123,11 +123,11 @@ export default function ReportsPage() {
 
       <div className="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">
         <div className="border-b border-gray-100 px-5 py-3 dark:border-gray-800">
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-white/90">Revenue by day</h2>
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-white/90">{t("revenueByDay")}</h2>
         </div>
         <div className="max-h-64 overflow-y-auto px-5 py-3">
           {revenue.length === 0 ? (
-            <p className="text-sm text-gray-500">No completed jobs in this range.</p>
+            <p className="text-sm text-gray-500">{t("noCompletedInRange")}</p>
           ) : (
             <ul className="space-y-2">
               {revenue.map((d) => (
@@ -143,16 +143,16 @@ export default function ReportsPage() {
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">
         <div className="border-b border-gray-100 px-5 py-3 dark:border-gray-800">
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-white/90">Cleaner performance</h2>
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-white/90">{t("cleanerPerformance")}</h2>
         </div>
         <div className="max-w-full overflow-x-auto">
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Cleaner</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Jobs</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Completed</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Check-ins</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("cleaner")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("jobs")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("completed")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("checkIns")}</TableCell>
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("revenue")}</TableCell>
               </TableRow>
             </TableHeader>

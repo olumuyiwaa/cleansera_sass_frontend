@@ -156,7 +156,7 @@ export default function PricingSettingsPage() {
     }
   };
 
-  if (loading) return <div className="p-6 text-sm text-gray-500">Loading…</div>;
+  if (loading) return <div className="p-6 text-sm text-gray-500">{tc("loading")}</div>;
 
   return (
     <div className="p-4 md:p-6 space-y-8">
@@ -246,15 +246,15 @@ export default function PricingSettingsPage() {
         <p className="mb-4 text-xs text-gray-400">Collected from the customer at booking time, before scheduling.</p>
         <form onSubmit={saveDeposit} className="space-y-4 max-w-md">
           <div>
-            <Label>Deposit type</Label>
+            <Label>{t("depositType")}</Label>
             <select
               className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               value={deposit.type}
               onChange={(e) => setDeposit({ ...deposit, type: e.target.value as PolicyValueType | "" })}
             >
-              <option value="">No deposit required</option>
-              <option value="PERCENT">Percent of job total</option>
-              <option value="AMOUNT">Fixed amount</option>
+              <option value="">{t("noDeposit")}</option>
+              <option value="PERCENT">{t("percentOfJob")}</option>
+              <option value="AMOUNT">{t("fixedAmount")}</option>
             </select>
           </div>
           {deposit.type && (
@@ -282,7 +282,7 @@ export default function PricingSettingsPage() {
         </p>
         <form onSubmit={saveCancellation} className="space-y-4 max-w-md">
           <div>
-            <Label>Free-cancellation window (hours before the job)</Label>
+            <Label>{t("freeCancelWindow")}</Label>
             <Input
               type="number"
               min="0"
@@ -292,15 +292,15 @@ export default function PricingSettingsPage() {
             />
           </div>
           <div>
-            <Label>Cancellation fee type</Label>
+            <Label>{t("cancelFeeType")}</Label>
             <select
               className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               value={cancellation.feeType}
               onChange={(e) => setCancellation({ ...cancellation, feeType: e.target.value as PolicyValueType | "" })}
             >
-              <option value="">No fee</option>
-              <option value="PERCENT">Percent of job total</option>
-              <option value="AMOUNT">Fixed amount</option>
+              <option value="">{t("noFee")}</option>
+              <option value="PERCENT">{t("percentOfJob")}</option>
+              <option value="AMOUNT">{t("fixedAmount")}</option>
             </select>
           </div>
           {cancellation.feeType && (

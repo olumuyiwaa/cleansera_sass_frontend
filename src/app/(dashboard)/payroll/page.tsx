@@ -214,7 +214,7 @@ export default function PayrollPage() {
             <p className="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
               {formatMoney(summary.lifetimePaidCents)}
             </p>
-            <p className="mt-1 text-xs text-gray-400">Lifetime, all cleaners</p>
+            <p className="mt-1 text-xs text-gray-400">{t("lifetimeAll")}</p>
           </div>
         </div>
       )}
@@ -242,7 +242,7 @@ export default function PayrollPage() {
               <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Rate</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("rate")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("pending")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("actions")}</TableCell>
                 </TableRow>
@@ -250,7 +250,7 @@ export default function PayrollPage() {
               <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {loading && (
                   <TableRow>
-                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>Loading…</TableCell>
+                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{tc("loading")}</TableCell>
                   </TableRow>
                 )}
                 {!loading && cleaners.length === 0 && (
@@ -268,7 +268,7 @@ export default function PayrollPage() {
                           {cleanerDisplayName(c)}
                         </TableCell>
                         <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {comp ? compensationLabel(comp) : <span className="italic text-gray-400">Not set</span>}
+                          {comp ? compensationLabel(comp) : <span className="italic text-gray-400">{t("notSet")}</span>}
                         </TableCell>
                         <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {formatMoney(pending)}
@@ -301,15 +301,15 @@ export default function PayrollPage() {
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Job</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Amount</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Earned</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("amount")}</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("earned")}</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("status")}</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {loading && (
                   <TableRow>
-                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>Loading…</TableCell>
+                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{tc("loading")}</TableCell>
                   </TableRow>
                 )}
                 {!loading && earnings.length === 0 && (
@@ -355,21 +355,21 @@ export default function PayrollPage() {
               <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Period</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Total</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("period")}</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("total")}</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("status")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("actions")}</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {loading && (
                   <TableRow>
-                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>Loading…</TableCell>
+                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{tc("loading")}</TableCell>
                   </TableRow>
                 )}
                 {!loading && payouts.length === 0 && (
                   <TableRow>
-                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>No payouts yet</TableCell>
+                    <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{t("noPayouts")}</TableCell>
                   </TableRow>
                 )}
                 {!loading &&
@@ -424,7 +424,7 @@ export default function PayrollPage() {
         </h2>
         <form onSubmit={handleSaveRate} className="space-y-4">
           <div>
-            <Label>Type</Label>
+            <Label>{t("type")}</Label>
             <Select
               options={[
                 { value: "PERCENT", label: "Percent of job price" },
@@ -453,7 +453,7 @@ export default function PayrollPage() {
             />
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setRateModal(null)} type="button">Cancel</Button>
+            <Button variant="outline" onClick={() => setRateModal(null)} type="button">{tc("cancel")}</Button>
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
           </div>
         </form>
@@ -471,7 +471,7 @@ export default function PayrollPage() {
           confirm.
         </p>
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" onClick={() => setPayoutCleaner(null)} type="button">Cancel</Button>
+          <Button variant="outline" onClick={() => setPayoutCleaner(null)} type="button">{tc("cancel")}</Button>
           <Button onClick={handleCreatePayout} disabled={saving}>{saving ? "Creating…" : "Create Payout"}</Button>
         </div>
       </Modal>

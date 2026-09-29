@@ -367,7 +367,7 @@ export default function CompliancePage() {
                                 <TableRow>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("titleField")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Date</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("date")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Score</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("actions")}</TableCell>
@@ -381,7 +381,7 @@ export default function CompliancePage() {
                                 )}
                                 {!loading && audits.length === 0 && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>No audits yet</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>{t("noAudits")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading &&
@@ -430,10 +430,10 @@ export default function CompliancePage() {
                         <Table>
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Cleaner</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Document ID</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Acknowledged</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Notes</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("cleaner")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("documentId")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("acknowledged")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("notes")}</TableCell>
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -474,7 +474,7 @@ export default function CompliancePage() {
 
             {/* ─── Add Document Modal ────────────────────────────── */}
             <Modal isOpen={showDocModal} onClose={() => setShowDocModal(false)} className="max-w-md p-6">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Add Compliance Document</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("addDocument")}</h2>
                 <form onSubmit={handleCreateDoc} className="space-y-4">
                     <div>
                         <Label>Type</Label>
@@ -493,7 +493,7 @@ export default function CompliancePage() {
                         <Input value={docForm.title} onChange={(e) => setDocForm({ ...docForm, title: e.target.value })} required placeholder="e.g. SDS – All-Purpose Cleaner" />
                     </div>
                     <div>
-                        <Label>File (PDF or image)</Label>
+                        <Label>{t("fileLabel")}</Label>
                         <input
                             type="file"
                             accept="application/pdf,image/jpeg,image/png,image/webp"
@@ -513,11 +513,11 @@ export default function CompliancePage() {
                         </div>
                     </div>
                     <div>
-                        <Label>Notes</Label>
+                        <Label>{t("notes")}</Label>
                         <Input value={docForm.notes} onChange={(e) => setDocForm({ ...docForm, notes: e.target.value })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setShowDocModal(false)} type="button">Cancel</Button>
+                        <Button variant="outline" onClick={() => setShowDocModal(false)} type="button">{tc("cancel")}</Button>
                         <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
                     </div>
                 </form>
@@ -525,7 +525,7 @@ export default function CompliancePage() {
 
             {/* ─── New Audit Modal ───────────────────────────────── */}
             <Modal isOpen={showAuditModal} onClose={() => setShowAuditModal(false)} className="max-w-md p-6">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">New Compliance Audit</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("newAudit")}</h2>
                 <form onSubmit={handleCreateAudit} className="space-y-4">
                     <div>
                         <Label>{t("titleField")}</Label>
@@ -538,15 +538,15 @@ export default function CompliancePage() {
                             onChange={(e) => setAuditForm({ ...auditForm, type: e.target.value })}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
-                            <option value="INTERNAL">Internal</option>
+                            <option value="INTERNAL">{t("internal")}</option>
                             <option value="OSHA_INSPECTION">OSHA Inspection</option>
-                            <option value="CLIENT">Client Audit</option>
+                            <option value="CLIENT">{t("clientAudit")}</option>
                             <option value="SDS_REVIEW">SDS Review</option>
                         </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label>Date</Label>
+                            <Label>{t("date")}</Label>
                             <Input type="date" value={auditForm.conductedAt} onChange={(e) => setAuditForm({ ...auditForm, conductedAt: e.target.value })} required />
                         </div>
                         <div>
@@ -555,11 +555,11 @@ export default function CompliancePage() {
                         </div>
                     </div>
                     <div>
-                        <Label>Notes</Label>
+                        <Label>{t("notes")}</Label>
                         <Input value={auditForm.notes} onChange={(e) => setAuditForm({ ...auditForm, notes: e.target.value })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setShowAuditModal(false)} type="button">Cancel</Button>
+                        <Button variant="outline" onClick={() => setShowAuditModal(false)} type="button">{tc("cancel")}</Button>
                         <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
                     </div>
                 </form>

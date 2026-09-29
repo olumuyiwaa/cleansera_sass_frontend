@@ -224,7 +224,7 @@ export default function WebsitePage() {
         </h2>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <Label>Logo</Label>
+            <Label>{t("logo")}</Label>
             <div className="flex items-center gap-4">
               {branding?.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -247,7 +247,7 @@ export default function WebsitePage() {
             </div>
           </div>
           <div>
-            <Label>Hero / about image</Label>
+            <Label>{t("heroImage")}</Label>
             <div className="flex items-center gap-4">
               {branding?.heroImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -297,11 +297,11 @@ export default function WebsitePage() {
           <div className="space-y-4">
             <div>
               <Label>{t("titleField")}</Label>
-              <Input value={aboutTitle} onChange={(e) => setAboutTitle(e.target.value)} placeholder="e.g. Locally owned, fully insured" />
+              <Input value={aboutTitle} onChange={(e) => setAboutTitle(e.target.value)} placeholder={t("taglineExample")} />
             </div>
             <div>
-              <Label>Body</Label>
-              <TextArea rows={5} value={aboutBody} onChange={setAboutBody} placeholder="Tell customers who you are and why they should book you." />
+              <Label>{t("body")}</Label>
+              <TextArea rows={5} value={aboutBody} onChange={setAboutBody} placeholder={t("aboutPlaceholder")} />
             </div>
           </div>
         </div>
@@ -315,18 +315,18 @@ export default function WebsitePage() {
             </Button>
           </div>
           <div className="space-y-4">
-            {testimonials.length === 0 && <p className="text-sm text-gray-400">None yet.</p>}
+            {testimonials.length === 0 && <p className="text-sm text-gray-400">{t("noneYet")}</p>}
             {testimonials.map((t, i) => (
               <div key={i} className="grid gap-3 rounded-lg border border-gray-100 p-3 sm:grid-cols-[200px_1fr_auto] dark:border-gray-800">
                 <Input
                   value={t.name}
                   onChange={(e) => setTestimonials(testimonials.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
-                  placeholder="Customer name"
+                  placeholder={t("customerName")}
                 />
                 <Input
                   value={t.quote}
                   onChange={(e) => setTestimonials(testimonials.map((x, j) => (j === i ? { ...x, quote: e.target.value } : x)))}
-                  placeholder="What they said"
+                  placeholder={t("whatTheySaid")}
                 />
                 <button
                   type="button"
@@ -349,14 +349,14 @@ export default function WebsitePage() {
             </Button>
           </div>
           <div className="space-y-4">
-            {faqItems.length === 0 && <p className="text-sm text-gray-400">None yet.</p>}
+            {faqItems.length === 0 && <p className="text-sm text-gray-400">{t("noneYet")}</p>}
             {faqItems.map((f, i) => (
               <div key={i} className="space-y-2 rounded-lg border border-gray-100 p-3 dark:border-gray-800">
                 <div className="flex items-center gap-3">
                   <Input
                     value={f.question}
                     onChange={(e) => setFaqItems(faqItems.map((x, j) => (j === i ? { ...x, question: e.target.value } : x)))}
-                    placeholder="Question"
+                    placeholder={t("question")}
                   />
                   <button
                     type="button"
@@ -370,7 +370,7 @@ export default function WebsitePage() {
                   rows={2}
                   value={f.answer}
                   onChange={(v) => setFaqItems(faqItems.map((x, j) => (j === i ? { ...x, answer: v } : x)))}
-                  placeholder="Answer"
+                  placeholder={t("answer")}
                 />
               </div>
             ))}
@@ -452,7 +452,7 @@ export default function WebsitePage() {
             </Button>
           </div>
           {(branding?.galleryImageUrls || []).length === 0 ? (
-            <p className="text-sm text-gray-400">No photos yet.</p>
+            <p className="text-sm text-gray-400">{t("noPhotos")}</p>
           ) : (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
               {(branding?.galleryImageKeys || []).map((key, i) => (

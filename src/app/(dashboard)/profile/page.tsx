@@ -226,19 +226,19 @@ export default function ProfilePage() {
                     <input
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="First name"
+                        placeholder={t("firstName")}
                         className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Last name"
+                        placeholder={t("lastName")}
                         className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Phone number"
+                        placeholder={t("phone")}
                         className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
@@ -272,7 +272,7 @@ export default function ProfilePage() {
                 <div className="mt-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <p className="text-xs uppercase text-gray-500">Two-factor authentication</p>
+                            <p className="text-xs uppercase text-gray-500">{t("twoFactor")}</p>
                             <p className="mt-1 font-medium text-gray-900 dark:text-white">
                                 {profile?.twoFactorEnabled ? "Enabled" : "Disabled"}
                             </p>
@@ -357,14 +357,14 @@ export default function ProfilePage() {
                 <div className="grid max-w-md gap-4">
                     <input
                         type="password"
-                        placeholder="Current password"
+                        placeholder={t("currentPassword")}
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                     <input
                         type="password"
-                        placeholder="New password (min 8 characters)"
+                        placeholder={t("newPassword")}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         className="rounded-lg border border-gray-300 p-3 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"

@@ -167,8 +167,8 @@ export default function TeamPage() {
                           onChange={(e) => handleRoleChange(m, e.target.value as StaffRole)}
                           className="rounded-lg border border-gray-200 bg-transparent px-2 py-1 text-sm dark:border-gray-700 dark:text-white/90"
                         >
-                          <option value="BUSINESS_MANAGER">Manager</option>
-                          <option value="ORG_ADMIN">Org Admin</option>
+                          <option value="BUSINESS_MANAGER">{t("role.manager")}</option>
+                          <option value="ORG_ADMIN">{t("role.orgAdmin")}</option>
                         </select>
                       ) : (
                         <Badge color={ROLE_COLOR[m.role]} size="sm">{ROLE_LABEL[m.role]}</Badge>

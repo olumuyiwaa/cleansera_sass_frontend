@@ -132,20 +132,20 @@ export default function DispatchPage() {
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Cleaner</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">{t("cleaner")}</label>
             <select
               value={routeCleanerId}
               onChange={(e) => setRouteCleanerId(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-white/[0.03] dark:text-white"
             >
-              <option value="">Select a cleaner…</option>
+              <option value="">{t("selectCleaner")}</option>
               {activeCleaners.map((c) => (
                 <option key={c.id} value={c.id}>{cleanerDisplayName(c)}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Date</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">{t("date")}</label>
             <input
               type="date"
               value={routeDate}
@@ -211,18 +211,18 @@ export default function DispatchPage() {
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Customer</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Service</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Scheduled</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Assign</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("customer")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("service")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("scheduled")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("assign")}</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading && (
-                <TableRow><TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>Loading…</TableCell></TableRow>
+                <TableRow><TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{tc("loading")}</TableCell></TableRow>
               )}
               {!loading && needsAssignment.length === 0 && (
-                <TableRow><TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>Nothing waiting on dispatch</TableCell></TableRow>
+                <TableRow><TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{t("nothingWaiting")}</TableCell></TableRow>
               )}
               {!loading && needsAssignment.map((b) => (
                 <TableRow key={b.id}>
@@ -237,7 +237,7 @@ export default function DispatchPage() {
                     {suggestingFor === b.id ? (
                       <div className="space-y-2">
                         {suggestions.length === 0 ? (
-                          <p className="text-xs text-gray-400">No available cleaners found nearby</p>
+                          <p className="text-xs text-gray-400">{t("noCleanersNearby")}</p>
                         ) : (
                           suggestions.map((c) => (
                             <button
@@ -250,7 +250,7 @@ export default function DispatchPage() {
                             </button>
                           ))
                         )}
-                        <button onClick={() => setSuggestingFor(null)} className="text-xs text-gray-400 underline">Cancel</button>
+                        <button onClick={() => setSuggestingFor(null)} className="text-xs text-gray-400 underline">{tc("cancel")}</button>
                       </div>
                     ) : (
                       <div className="flex gap-3">
@@ -276,15 +276,15 @@ export default function DispatchPage() {
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Customer</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Cleaner</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Scheduled</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("customer")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("scheduled")}</TableCell>
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
               {!loading && assignments.length === 0 && (
-                <TableRow><TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>No active jobs right now</TableCell></TableRow>
+                <TableRow><TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{t("noActiveJobs")}</TableCell></TableRow>
               )}
               {!loading && assignments.map((a) => (
                 <TableRow key={a.id}>

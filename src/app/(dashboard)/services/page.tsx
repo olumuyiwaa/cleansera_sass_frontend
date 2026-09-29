@@ -167,7 +167,7 @@ export default function ServicesPage() {
             className={`${inputCls} sm:col-span-2`}
           />
           <textarea
-            placeholder="Description (optional)"
+            placeholder={t("descOptional")}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className={`${inputCls} h-20 py-2 sm:col-span-2`}
@@ -201,7 +201,7 @@ export default function ServicesPage() {
             type="number"
             min="15"
             step="15"
-            placeholder="Estimated minutes"
+            placeholder={t("estimatedMinutes")}
             value={form.estimatedMinutes}
             onChange={(e) => setForm({ ...form, estimatedMinutes: e.target.value })}
             className={inputCls}
@@ -271,13 +271,13 @@ export default function ServicesPage() {
                         </span>
                       </div>
                     ))}
-                    {!s.addOns?.length && <p className="text-sm text-gray-400">No add-ons yet</p>}
+                    {!s.addOns?.length && <p className="text-sm text-gray-400">{t("noAddons")}</p>}
                   </div>
 
                   <form onSubmit={(e) => submitAddOn(s.id, e)} className="flex flex-wrap gap-2">
                     <input
                       required
-                      placeholder="Add-on name (e.g. Inside fridge)"
+                      placeholder={t("addonNamePh")}
                       value={addOnForm.name}
                       onChange={(e) => setAddOnForm({ ...addOnForm, name: e.target.value })}
                       className={`${inputCls} max-w-[220px]`}
@@ -294,7 +294,7 @@ export default function ServicesPage() {
                     <input
                       type="number"
                       min="0"
-                      placeholder="Extra minutes"
+                      placeholder={t("extraMinutes")}
                       value={addOnForm.extraMinutes}
                       onChange={(e) => setAddOnForm({ ...addOnForm, extraMinutes: e.target.value })}
                       className={`${inputCls} max-w-[140px]`}

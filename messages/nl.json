@@ -435,7 +435,16 @@
       "dayRoute": "Dagroute",
       "checkRoute": "Route controleren",
       "noneUnassigned": "Geen klussen die toewijzing nodig hebben",
-      "noneAssigned": "Nog geen toewijzingen"
+      "noneAssigned": "Nog geen toewijzingen",
+      "cleaner": "Schoonmaker",
+      "customer": "Klant",
+      "date": "Datum",
+      "noActiveJobs": "Geen actieve klussen op dit moment",
+      "noCleanersNearby": "Geen beschikbare schoonmakers in de buurt",
+      "nothingWaiting": "Niets wacht op planning",
+      "scheduled": "Gepland",
+      "selectCleaner": "Selecteer een schoonmaker…",
+      "service": "Dienst"
     },
     "calendar": {
       "title": "Agenda",
@@ -469,7 +478,11 @@
       "primaryColor": "Primaire kleur",
       "accentColor": "Accentkleur",
       "btwHint": "Verplicht op elke Nederlandse factuur. Prijzen worden inclusief BTW getoond; facturen splitsen de BTW automatisch uit.",
-      "stripeConnect": "Stripe Connect"
+      "stripeConnect": "Stripe Connect",
+      "areaName": "Gebiedsnaam",
+      "centerLat": "Breedtegraad centrum",
+      "centerLng": "Lengtegraad centrum",
+      "radiusMeters": "Straal (meters)"
     },
     "invoices": {
       "title": "Facturen",
@@ -500,7 +513,16 @@
       "cleaner": "Schoonmaker",
       "pending": "In behandeling",
       "actions": "Acties",
-      "emptyCleaners": "Nog geen actieve schoonmakers"
+      "emptyCleaners": "Nog geen actieve schoonmakers",
+      "amount": "Bedrag",
+      "earned": "Verdiend",
+      "lifetimeAll": "Totaal, alle schoonmakers",
+      "noPayouts": "Nog geen uitbetalingen",
+      "notSet": "Niet ingesteld",
+      "rate": "Tarief",
+      "status": "Status",
+      "total": "Totaal",
+      "type": "Type"
     },
     "compliance": {
       "title": "Compliance",
@@ -514,7 +536,16 @@
       "version": "Versie",
       "expires": "Verloopt",
       "actions": "Acties",
-      "emptyDocuments": "Nog geen documenten"
+      "emptyDocuments": "Nog geen documenten",
+      "acknowledged": "Bevestigd",
+      "cleaner": "Schoonmaker",
+      "clientAudit": "Klantaudit",
+      "date": "Datum",
+      "documentId": "Document-ID",
+      "fileLabel": "Bestand (PDF of afbeelding)",
+      "internal": "Intern",
+      "noAudits": "Nog geen audits",
+      "notes": "Notities"
     },
     "team": {
       "title": "Team",
@@ -537,6 +568,10 @@
         "active": "Actief",
         "invited": "Uitgenodigd",
         "removed": "Verwijderd"
+      },
+      "role": {
+        "manager": "Manager",
+        "orgAdmin": "Organisatiebeheerder"
       }
     },
     "reports": {
@@ -546,7 +581,14 @@
       "bookings": "Boekingen",
       "period": "Periode",
       "from": "Van",
-      "to": "Tot"
+      "to": "Tot",
+      "checkIns": "Check-ins",
+      "cleaner": "Schoonmaker",
+      "cleanerPerformance": "Prestaties schoonmakers",
+      "completed": "Voltooid",
+      "jobs": "Klussen",
+      "noCompletedInRange": "Geen voltooide klussen in deze periode.",
+      "revenueByDay": "Omzet per dag"
     },
     "messages": {
       "title": "Berichten",
@@ -554,7 +596,11 @@
       "empty": "Nog geen gesprekken",
       "send": "Versturen",
       "hint": "Gesprekken zijn per schoonmaker of klant (geen vrije DM's tussen willekeurige gebruikers).",
-      "startConversation": "Gesprek starten"
+      "startConversation": "Gesprek starten",
+      "noMatches": "Geen resultaten",
+      "noMessagesHello": "Nog geen berichten. Zeg hallo.",
+      "searching": "Zoeken…",
+      "searchPeople": "Zoek schoonmaker of klant…"
     },
     "services": {
       "title": "Diensten",
@@ -566,7 +612,12 @@
       "active": "Actief",
       "namePlaceholder": "Naam van de dienst (bijv. Standaard schoonmaak)",
       "inactive": "Inactief",
-      "addons": "Extra's"
+      "addons": "Extra's",
+      "noAddons": "Nog geen extra's",
+      "addonNamePh": "Naam extra (bijv. Binnenkant koelkast)",
+      "descOptional": "Beschrijving (optioneel)",
+      "estimatedMinutes": "Geschatte minuten",
+      "extraMinutes": "Extra minuten"
     },
     "auditTrail": {
       "title": "Auditlog",
@@ -614,7 +665,16 @@
       "unit": "Eenheid",
       "type": "Type",
       "reorderPoint": "Nabestellingspunt",
-      "manufacturer": "Fabrikant"
+      "manufacturer": "Fabrikant",
+      "address": "Adres",
+      "addressOptional": "Adres (optioneel)",
+      "fromLocation": "Van locatie",
+      "item": "Artikel",
+      "itemsInStock": "Artikelen op voorraad",
+      "lowStock": "Lage voorraad",
+      "noStockData": "Geen voorraadgegevens",
+      "notes": "Notities",
+      "quantity": "Aantal"
     },
     "notifications": {
       "title": "Meldingen",
@@ -630,10 +690,24 @@
       "perRoom": "Tarief per kamer",
       "currency": "Valuta",
       "saveRates": "Tarieven opslaan",
-      "subtitle": "Tarieven bij prijsbepaling op basis van oppervlakte of kamers"
+      "subtitle": "Tarieven bij prijsbepaling op basis van oppervlakte of kamers",
+      "cancelFeeType": "Type annuleringskosten",
+      "depositType": "Type aanbetaling",
+      "fixedAmount": "Vast bedrag",
+      "freeCancelWindow": "Gratis annuleringsvenster (uren voor de klus)",
+      "noDeposit": "Geen aanbetaling vereist",
+      "noFee": "Geen kosten",
+      "percentOfJob": "Percentage van klustotaal"
     },
     "profile": {
-      "title": "Profiel"
+      "title": "Profiel",
+      "twoFactor": "Tweefactorauthenticatie",
+      "currentPassword": "Huidig wachtwoord",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "newPassword": "Nieuw wachtwoord (min. 8 tekens)",
+      "phone": "Telefoonnummer",
+      "timezone": "Tijdzone"
     },
     "recurringSchedules": {
       "title": "Terugkerende planning",
@@ -665,11 +739,19 @@
       "category": "Categorie",
       "updated": "Bijgewerkt",
       "messages": "Berichten",
-      "noMessages": "Nog geen berichten"
+      "noMessages": "Nog geen berichten",
+      "subtitle": "Volg en los problemen op die voor uw bedrijf zijn gemeld",
+      "relatedBooking": "Gerelateerde boeking-ID (optioneel)",
+      "relatedCustomer": "Gerelateerde klant-ID (optioneel)"
     },
     "waitlist": {
       "title": "Wachtlijst",
-      "empty": "Wachtlijst is leeg"
+      "empty": "Wachtlijst is leeg",
+      "contact": "Contact",
+      "desiredWindow": "Gewenst tijdvak",
+      "joined": "Aangemeld",
+      "service": "Dienst",
+      "status": "Status"
     },
     "website": {
       "title": "Website",
@@ -679,7 +761,18 @@
       "socialLinks": "Sociale links",
       "sections": "Secties",
       "gallery": "Galerij",
-      "save": "Opslaan"
+      "save": "Opslaan",
+      "body": "Tekst",
+      "heroImage": "Hero- / over-afbeelding",
+      "logo": "Logo",
+      "noPhotos": "Nog geen foto's.",
+      "noneYet": "Nog geen.",
+      "answer": "Antwoord",
+      "customerName": "Naam klant",
+      "question": "Vraag",
+      "aboutPlaceholder": "Vertel klanten wie u bent en waarom ze bij u moeten boeken.",
+      "whatTheySaid": "Wat ze zeiden",
+      "taglineExample": "bijv. Lokaal eigendom, volledig verzekerd"
     }
   },
   "Portal": {

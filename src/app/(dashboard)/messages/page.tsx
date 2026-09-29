@@ -273,15 +273,15 @@ export default function MessagesPage() {
                                     setRecipientSearch(e.target.value);
                                     setSelectedRecipient(null);
                                 }}
-                                placeholder="Search cleaner or customer…"
+                                placeholder={t("searchPeople")}
                                 className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                             />
                             {recipientSearch.trim().length >= 2 && !selectedRecipient && (
                                 <div className="absolute left-0 right-0 top-12 z-20 max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
                                     {searching ? (
-                                        <div className="px-3 py-2 text-sm text-gray-500">Searching…</div>
+                                        <div className="px-3 py-2 text-sm text-gray-500">{t("searching")}</div>
                                     ) : recipients.length === 0 ? (
-                                        <div className="px-3 py-2 text-sm text-gray-500">No matches</div>
+                                        <div className="px-3 py-2 text-sm text-gray-500">{t("noMatches")}</div>
                                     ) : (
                                         recipients.map((r) => (
                                             <button
@@ -320,9 +320,9 @@ export default function MessagesPage() {
 
                     <div className="flex-1 space-y-2 overflow-y-auto">
                         {loadingConvos ? (
-                            <p className="text-sm text-gray-500">Loading…</p>
+                            <p className="text-sm text-gray-500">{tc("loading")}</p>
                         ) : conversations.length === 0 ? (
-                            <p className="text-sm text-gray-500">No conversations yet.</p>
+                            <p className="text-sm text-gray-500">{t("empty")}</p>
                         ) : (
                             conversations.map((c) => {
                                 const active = selected?.id === c.id;
@@ -392,7 +392,7 @@ export default function MessagesPage() {
                                 {loadingMessages && messages.length === 0 ? (
                                     <p className="text-sm text-gray-500">{tc("loading")}</p>
                                 ) : messages.length === 0 ? (
-                                    <p className="text-sm text-gray-500">No messages yet. Say hello.</p>
+                                    <p className="text-sm text-gray-500">{t("noMessagesHello")}</p>
                                 ) : (
                                     messages.map((msg) => {
                                         const isMe = msg.senderUserId === currentUserId;
@@ -439,7 +439,7 @@ export default function MessagesPage() {
                   <textarea
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
-                      placeholder="Type a message…"
+                      placeholder={t("placeholder")}
                       rows={1}
                       className="max-h-32 flex-1 resize-none border-none bg-transparent py-2.5 text-sm focus:ring-0 dark:text-white"
                       onKeyDown={(e) => {

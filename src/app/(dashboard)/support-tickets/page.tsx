@@ -210,7 +210,7 @@ export default function SupportTicketsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
-          <p className="mt-1 text-sm text-gray-500">Track and resolve issues raised for your business</p>
+          <p className="mt-1 text-sm text-gray-500">{t("subtitle")}</p>
         </div>
         <button
           type="button"
@@ -258,13 +258,13 @@ export default function SupportTicketsPage() {
             ))}
           </select>
           <input
-            placeholder="Related customer ID (optional)"
+            placeholder={t("relatedCustomer")}
             value={createForm.customerId}
             onChange={(e) => setCreateForm({ ...createForm, customerId: e.target.value })}
             className={inputCls}
           />
           <input
-            placeholder="Related booking ID (optional)"
+            placeholder={t("relatedBooking")}
             value={createForm.bookingId}
             onChange={(e) => setCreateForm({ ...createForm, bookingId: e.target.value })}
             className={inputCls}
@@ -305,7 +305,7 @@ export default function SupportTicketsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-gray-500">{tc("loading")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border dark:border-gray-800">
           <table className="min-w-full text-left text-sm">
@@ -393,7 +393,7 @@ export default function SupportTicketsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {selectedLoading ? (
-              <p className="text-sm text-gray-500">Loading…</p>
+              <p className="text-sm text-gray-500">{tc("loading")}</p>
             ) : (
               <>
                 <div className="flex items-start justify-between gap-4">

@@ -239,7 +239,7 @@ export default function InventoryPage() {
                     {tab === "locations" ? (
                         <Button onClick={() => setShowLocationModal(true)}>{t("addLocation")}</Button>
                     ) : (
-                        <Button onClick={() => setShowItemModal(true)}>Add Item</Button>
+                        <Button onClick={() => setShowItemModal(true)}>{t("addItem")}</Button>
                     )}
                 </div>
             </div>
@@ -308,13 +308,13 @@ export default function InventoryPage() {
                         <Table>
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Name</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("name")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">SKU</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Unit</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Reorder</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Actions</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{tc("actions")}</TableCell>
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -377,7 +377,7 @@ export default function InventoryPage() {
                         <Table>
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Item</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("item")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Total Qty</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Reorder Pt</TableCell>
@@ -393,7 +393,7 @@ export default function InventoryPage() {
                                 )}
                                 {!loading && stock.length === 0 && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>No stock data</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>{t("noStockData")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading &&
@@ -413,7 +413,7 @@ export default function InventoryPage() {
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
                                                 {item.isLowStock ? (
-                                                    <Badge color="error" size="sm">Low stock</Badge>
+                                                    <Badge color="error" size="sm">{t("lowStock")}</Badge>
                                                 ) : (
                                                     <Badge color="success" size="sm">OK</Badge>
                                                 )}
@@ -438,10 +438,10 @@ export default function InventoryPage() {
                         <Table>
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Name</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("name")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Address</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Items in stock</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("address")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("itemsInStock")}</TableCell>
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -549,7 +549,7 @@ export default function InventoryPage() {
                         </select>
                     </div>
                     <div>
-                        <Label>Address (optional)</Label>
+                        <Label>{t("addressOptional")}</Label>
                         <Input value={locationForm.address} onChange={(e) => setLocationForm({ ...locationForm, address: e.target.value })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
@@ -564,7 +564,7 @@ export default function InventoryPage() {
                 <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Record Stock Movement</h2>
                 <form onSubmit={handleCreateMovement} className="space-y-4">
                     <div>
-                        <Label>Item</Label>
+                        <Label>{t("item")}</Label>
                         <select
                             value={movementForm.itemId}
                             onChange={(e) => setMovementForm({ ...movementForm, itemId: e.target.value })}
@@ -590,12 +590,12 @@ export default function InventoryPage() {
                         </select>
                     </div>
                     <div>
-                        <Label>Quantity</Label>
+                        <Label>{t("quantity")}</Label>
                         <Input type="number" min="1" value={movementForm.quantity} onChange={(e) => setMovementForm({ ...movementForm, quantity: e.target.value })} required />
                     </div>
                     {["USAGE", "WRITE_OFF", "TRANSFER"].includes(movementForm.type) && (
                         <div>
-                            <Label>From Location</Label>
+                            <Label>{t("fromLocation")}</Label>
                             <select
                                 value={movementForm.fromLocationId}
                                 onChange={(e) => setMovementForm({ ...movementForm, fromLocationId: e.target.value })}
@@ -626,7 +626,7 @@ export default function InventoryPage() {
                         </div>
                     )}
                     <div>
-                        <Label>Notes</Label>
+                        <Label>{t("notes")}</Label>
                         <Input value={movementForm.notes} onChange={(e) => setMovementForm({ ...movementForm, notes: e.target.value })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">

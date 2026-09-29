@@ -435,7 +435,16 @@
       "dayRoute": "Day route",
       "checkRoute": "Check route",
       "noneUnassigned": "No jobs need assignment",
-      "noneAssigned": "No assignments yet"
+      "noneAssigned": "No assignments yet",
+      "cleaner": "Cleaner",
+      "customer": "Customer",
+      "date": "Date",
+      "noActiveJobs": "No active jobs right now",
+      "noCleanersNearby": "No available cleaners found nearby",
+      "nothingWaiting": "Nothing waiting on dispatch",
+      "scheduled": "Scheduled",
+      "selectCleaner": "Select a cleaner…",
+      "service": "Service"
     },
     "calendar": {
       "title": "Calendar",
@@ -469,7 +478,11 @@
       "primaryColor": "Primary color",
       "accentColor": "Accent color",
       "btwHint": "Required on every Dutch invoice. Your prices are shown to customers including BTW; invoices split out the BTW automatically.",
-      "stripeConnect": "Stripe Connect"
+      "stripeConnect": "Stripe Connect",
+      "areaName": "Area name",
+      "centerLat": "Center latitude",
+      "centerLng": "Center longitude",
+      "radiusMeters": "Radius (meters)"
     },
     "invoices": {
       "title": "Invoices",
@@ -500,7 +513,16 @@
       "cleaner": "Cleaner",
       "pending": "Pending",
       "actions": "Actions",
-      "emptyCleaners": "No active cleaners yet"
+      "emptyCleaners": "No active cleaners yet",
+      "amount": "Amount",
+      "earned": "Earned",
+      "lifetimeAll": "Lifetime, all cleaners",
+      "noPayouts": "No payouts yet",
+      "notSet": "Not set",
+      "rate": "Rate",
+      "status": "Status",
+      "total": "Total",
+      "type": "Type"
     },
     "compliance": {
       "title": "Compliance",
@@ -514,7 +536,16 @@
       "version": "Version",
       "expires": "Expires",
       "actions": "Actions",
-      "emptyDocuments": "No documents yet"
+      "emptyDocuments": "No documents yet",
+      "acknowledged": "Acknowledged",
+      "cleaner": "Cleaner",
+      "clientAudit": "Client audit",
+      "date": "Date",
+      "documentId": "Document ID",
+      "fileLabel": "File (PDF or image)",
+      "internal": "Internal",
+      "noAudits": "No audits yet",
+      "notes": "Notes"
     },
     "team": {
       "title": "Team",
@@ -537,6 +568,10 @@
         "active": "Active",
         "invited": "Invited",
         "removed": "Removed"
+      },
+      "role": {
+        "manager": "Manager",
+        "orgAdmin": "Org admin"
       }
     },
     "reports": {
@@ -546,7 +581,14 @@
       "bookings": "Bookings",
       "period": "Period",
       "from": "From",
-      "to": "To"
+      "to": "To",
+      "checkIns": "Check-ins",
+      "cleaner": "Cleaner",
+      "cleanerPerformance": "Cleaner performance",
+      "completed": "Completed",
+      "jobs": "Jobs",
+      "noCompletedInRange": "No completed jobs in this range.",
+      "revenueByDay": "Revenue by day"
     },
     "messages": {
       "title": "Messages",
@@ -554,7 +596,11 @@
       "empty": "No conversations yet",
       "send": "Send",
       "hint": "Threads are per cleaner or customer (not free-form DMs between arbitrary users).",
-      "startConversation": "Start conversation"
+      "startConversation": "Start conversation",
+      "noMatches": "No matches",
+      "noMessagesHello": "No messages yet. Say hello.",
+      "searching": "Searching…",
+      "searchPeople": "Search cleaner or customer…"
     },
     "services": {
       "title": "Services",
@@ -566,7 +612,12 @@
       "active": "Active",
       "namePlaceholder": "Service name (e.g. Standard Clean)",
       "inactive": "Inactive",
-      "addons": "Add-ons"
+      "addons": "Add-ons",
+      "noAddons": "No add-ons yet",
+      "addonNamePh": "Add-on name (e.g. Inside fridge)",
+      "descOptional": "Description (optional)",
+      "estimatedMinutes": "Estimated minutes",
+      "extraMinutes": "Extra minutes"
     },
     "auditTrail": {
       "title": "Audit trail",
@@ -614,7 +665,16 @@
       "unit": "Unit",
       "type": "Type",
       "reorderPoint": "Reorder point",
-      "manufacturer": "Manufacturer"
+      "manufacturer": "Manufacturer",
+      "address": "Address",
+      "addressOptional": "Address (optional)",
+      "fromLocation": "From location",
+      "item": "Item",
+      "itemsInStock": "Items in stock",
+      "lowStock": "Low stock",
+      "noStockData": "No stock data",
+      "notes": "Notes",
+      "quantity": "Quantity"
     },
     "notifications": {
       "title": "Notifications",
@@ -630,10 +690,24 @@
       "perRoom": "Per room rate",
       "currency": "Currency",
       "saveRates": "Save rates",
-      "subtitle": "Rates used when pricing by size or rooms"
+      "subtitle": "Rates used when pricing by size or rooms",
+      "cancelFeeType": "Cancellation fee type",
+      "depositType": "Deposit type",
+      "fixedAmount": "Fixed amount",
+      "freeCancelWindow": "Free-cancellation window (hours before the job)",
+      "noDeposit": "No deposit required",
+      "noFee": "No fee",
+      "percentOfJob": "Percent of job total"
     },
     "profile": {
-      "title": "Profile"
+      "title": "Profile",
+      "twoFactor": "Two-factor authentication",
+      "currentPassword": "Current password",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "newPassword": "New password (min 8 characters)",
+      "phone": "Phone number",
+      "timezone": "Timezone"
     },
     "recurringSchedules": {
       "title": "Recurring schedules",
@@ -665,11 +739,19 @@
       "category": "Category",
       "updated": "Updated",
       "messages": "Messages",
-      "noMessages": "No messages yet"
+      "noMessages": "No messages yet",
+      "subtitle": "Track and resolve issues raised for your business",
+      "relatedBooking": "Related booking ID (optional)",
+      "relatedCustomer": "Related customer ID (optional)"
     },
     "waitlist": {
       "title": "Waitlist",
-      "empty": "Waitlist is empty"
+      "empty": "Waitlist is empty",
+      "contact": "Contact",
+      "desiredWindow": "Desired window",
+      "joined": "Joined",
+      "service": "Service",
+      "status": "Status"
     },
     "website": {
       "title": "Website",
@@ -679,7 +761,18 @@
       "socialLinks": "Social links",
       "sections": "Sections",
       "gallery": "Gallery",
-      "save": "Save"
+      "save": "Save",
+      "body": "Body",
+      "heroImage": "Hero / about image",
+      "logo": "Logo",
+      "noPhotos": "No photos yet.",
+      "noneYet": "None yet.",
+      "answer": "Answer",
+      "customerName": "Customer name",
+      "question": "Question",
+      "aboutPlaceholder": "Tell customers who you are and why they should book you.",
+      "whatTheySaid": "What they said",
+      "taglineExample": "e.g. Locally owned, fully insured"
     }
   },
   "Portal": {

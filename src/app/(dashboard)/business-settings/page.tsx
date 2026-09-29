@@ -204,7 +204,7 @@ export default function BusinessSettingsPage() {
     }
   };
 
-  if (loading) return <div className="p-6 text-sm text-gray-500">Loading…</div>;
+  if (loading) return <div className="p-6 text-sm text-gray-500">{tc("loading")}</div>;
 
   return (
     <div className="p-4 md:p-6 space-y-8">
@@ -397,19 +397,19 @@ export default function BusinessSettingsPage() {
 
         <form onSubmit={addServiceArea} className="grid gap-4 sm:grid-cols-2 max-w-2xl">
           <div>
-            <Label>Area Name</Label>
+            <Label>{t("areaName")}</Label>
             <Input value={areaForm.name} onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })} placeholder="Downtown Lagos" />
           </div>
           <div>
-            <Label>Radius (meters)</Label>
+            <Label>{t("radiusMeters")}</Label>
             <Input type="number" value={areaForm.radiusMeters} onChange={(e) => setAreaForm({ ...areaForm, radiusMeters: e.target.value })} placeholder="10000" />
           </div>
           <div>
-            <Label>Center Latitude</Label>
+            <Label>{t("centerLat")}</Label>
             <Input type="number" value={areaForm.centerLat} onChange={(e) => setAreaForm({ ...areaForm, centerLat: e.target.value })} placeholder="6.5244" />
           </div>
           <div>
-            <Label>Center Longitude</Label>
+            <Label>{t("centerLng")}</Label>
             <Input type="number" value={areaForm.centerLng} onChange={(e) => setAreaForm({ ...areaForm, centerLng: e.target.value })} placeholder="3.3792" />
           </div>
           <div className="sm:col-span-2">
