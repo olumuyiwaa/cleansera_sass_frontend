@@ -177,7 +177,7 @@ export default function WebsitePage() {
         themeStyle,
         aboutTitle: aboutTitle || null,
         aboutBody: aboutBody || null,
-        testimonials: testimonials.filter((t) => t.name.trim() && t.quote.trim()),
+        testimonials: testimonials.filter((item) => item.name.trim() && item.quote.trim()),
         faqItems: faqItems.filter((f) => f.question.trim() && f.answer.trim()),
         socialLinks,
         sectionsEnabled: sections,
@@ -316,15 +316,15 @@ export default function WebsitePage() {
           </div>
           <div className="space-y-4">
             {testimonials.length === 0 && <p className="text-sm text-gray-400">{t("noneYet")}</p>}
-            {testimonials.map((t, i) => (
+            {testimonials.map((item, i) => (
               <div key={i} className="grid gap-3 rounded-lg border border-gray-100 p-3 sm:grid-cols-[200px_1fr_auto] dark:border-gray-800">
                 <Input
-                  value={t.name}
+                  value={item.name}
                   onChange={(e) => setTestimonials(testimonials.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
                   placeholder={t("customerName")}
                 />
                 <Input
-                  value={t.quote}
+                  value={item.quote}
                   onChange={(e) => setTestimonials(testimonials.map((x, j) => (j === i ? { ...x, quote: e.target.value } : x)))}
                   placeholder={t("whatTheySaid")}
                 />
