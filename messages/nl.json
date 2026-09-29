@@ -168,6 +168,476 @@
       "cancel": "Annuleren",
       "saving": "Bezig met opslaan…",
       "markAsPaid": "Markeer als betaald"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "bookings": "Boekingen",
+      "calendar": "Agenda",
+      "dispatch": "Planning",
+      "cleaners": "Schoonmakers",
+      "customers": "Klanten",
+      "services": "Diensten",
+      "pricing": "Prijzen",
+      "coupons": "Kortingscodes",
+      "giftCards": "Cadeaubonnen",
+      "waitlist": "Wachtlijst",
+      "recurringSchedules": "Terugkerende schema's",
+      "payroll": "Loonadministratie",
+      "inventory": "Voorraad",
+      "compliance": "Compliance",
+      "checklistTemplates": "Checklist-sjablonen",
+      "cleanerDocuments": "Documenten schoonmakers",
+      "website": "Website",
+      "subscription": "Abonnement",
+      "team": "Team",
+      "messages": "Berichten",
+      "notifications": "Meldingen",
+      "reports": "Rapporten",
+      "reviews": "Beoordelingen",
+      "businessSettings": "Bedrijfsinstellingen",
+      "onboarding": "Onboarding",
+      "supportTickets": "Support",
+      "auditTrail": "Auditlog",
+      "profile": "Profiel",
+      "signOut": "Uitloggen",
+      "usersGroup": "Gebruikers",
+      "bookingSchedulesGroup": "Boekingen & planning",
+      "businessGroup": "Bedrijf",
+      "userProfile": "Gebruikersprofiel",
+      "menu": "Menu",
+      "others": "Overig",
+      "platform": "Platform",
+      "overview": "Overzicht",
+      "businesses": "Bedrijven",
+      "subscriptions": "Abonnementen"
+    },
+    "navGroups": {
+      "operations": "Operatie",
+      "people": "Mensen",
+      "growth": "Groei & prijzen",
+      "finance": "Financiën",
+      "settings": "Instellingen"
+    },
+    "common": {
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "delete": "Verwijderen",
+      "edit": "Bewerken",
+      "create": "Aanmaken",
+      "add": "Toevoegen",
+      "search": "Zoeken",
+      "filter": "Filteren",
+      "actions": "Acties",
+      "loading": "Laden…",
+      "refresh": "Vernieuwen",
+      "back": "Terug",
+      "next": "Volgende",
+      "confirm": "Bevestigen",
+      "close": "Sluiten",
+      "yes": "Ja",
+      "no": "Nee",
+      "all": "Alles",
+      "none": "Geen",
+      "status": "Status",
+      "date": "Datum",
+      "time": "Tijd",
+      "from": "Van",
+      "to": "Tot",
+      "today": "Vandaag",
+      "empty": "Nog niets hier",
+      "noResults": "Geen resultaten",
+      "errorGeneric": "Er is iets misgegaan. Probeer het opnieuw.",
+      "successSaved": "Opgeslagen",
+      "successDeleted": "Verwijderd",
+      "required": "Verplicht",
+      "optional": "Optioneel",
+      "view": "Bekijken",
+      "export": "Exporteren",
+      "import": "Importeren",
+      "download": "Downloaden",
+      "upload": "Uploaden",
+      "language": "Taal"
+    },
+    "home": {
+      "title": "Dashboard",
+      "welcome": "Welkom terug",
+      "todayBookings": "Boekingen vandaag",
+      "upcoming": "Aankomend",
+      "revenue": "Omzet",
+      "activeCleaners": "Actieve schoonmakers",
+      "openJobs": "Open klussen",
+      "quickActions": "Snelle acties",
+      "welcomeName": "Welkom terug, {name}",
+      "quick": {
+        "bookingsHint": "Klussen maken & beheren",
+        "dispatchHint": "Schoonmakers toewijzen",
+        "cleanersHint": "Teamrooster",
+        "customersHint": "CRM",
+        "calendarHint": "Agendaweergave",
+        "messagesHint": "Teamgesprekken",
+        "reportsHint": "KPI's & omzet",
+        "settingsHint": "Merk & werkgebied"
+      }
+    },
+    "bookings": {
+      "title": "Boekingen",
+      "new": "Nieuwe boeking",
+      "searchPlaceholder": "Zoek op klant, adres, ref…",
+      "filters": {
+        "all": "Alles",
+        "upcoming": "Aankomend",
+        "today": "Vandaag",
+        "past": "Verleden",
+        "cancelled": "Geannuleerd"
+      },
+      "columns": {
+        "when": "Wanneer",
+        "customer": "Klant",
+        "service": "Dienst",
+        "address": "Adres",
+        "cleaner": "Schoonmaker",
+        "status": "Status",
+        "total": "Totaal",
+        "payment": "Betaling"
+      },
+      "actions": {
+        "view": "Bekijken",
+        "assign": "Schoonmaker toewijzen",
+        "reschedule": "Verzetten",
+        "cancel": "Annuleren",
+        "complete": "Markeer als voltooid",
+        "invoice": "Factuur",
+        "downloadUbl": "UBL downloaden",
+        "markPaid": "Betaling ontvangen markeren",
+        "message": "Bericht",
+        "confirm": "Bevestigen",
+        "preparingInvoice": "Factuur voorbereiden…",
+        "preparingUbl": "UBL downloaden…",
+        "creatingLink": "Link aanmaken…",
+        "paymentLink": "Betaallink"
+      },
+      "status": {
+        "requested": "Aangevraagd",
+        "confirmed": "Bevestigd",
+        "assigned": "Toegewezen",
+        "inProgress": "Bezig",
+        "completed": "Voltooid",
+        "cancelled": "Geannuleerd"
+      },
+      "paymentStatus": {
+        "unpaid": "Onbetaald",
+        "depositPaid": "Aanbetaling betaald",
+        "paid": "Betaald",
+        "refunded": "Terugbetaald",
+        "offline": "Offline",
+        "partial": "Gedeeltelijk"
+      },
+      "empty": "Geen boekingen voor deze filters.",
+      "confirmCancel": "Deze boeking annuleren? Er kan een vergoeding gelden volgens uw beleid.",
+      "subtitle": "Eenmalige en terugkerende schoonmaakklussen voor uw klanten.",
+      "chooseExistingCustomer": "Bestaande klant kiezen",
+      "newCustomer": "+ Nieuwe klant",
+      "selectCustomer": "Selecteer een klant…",
+      "selectService": "Selecteer een dienst…",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "phone": "Telefoon",
+      "emailOptional": "E-mail (optioneel)",
+      "addressLine1": "Adresregel 1",
+      "city": "Plaats",
+      "state": "Provincie / regio",
+      "scheduledStart": "Geplande start",
+      "createBooking": "Boeking aanmaken",
+      "modalCancelTitle": "Boeking annuleren",
+      "modalRescheduleTitle": "Boeking verzetten",
+      "modalPaymentTitle": "Betaling bijwerken",
+      "modalCancelHint": "Dit markeert de boeking als geannuleerd.",
+      "reasonOptional": "Reden (optioneel)",
+      "reasonPlaceholder": "Op verzoek van de klant…",
+      "newStartTime": "Nieuwe starttijd",
+      "noteOptional": "Notitie (optioneel)",
+      "notePlaceholder": "Contant / overschrijvingsreferentie…"
+    },
+    "cleaners": {
+      "title": "Schoonmakers",
+      "invite": "Schoonmaker uitnodigen",
+      "searchPlaceholder": "Zoek schoonmakers…",
+      "columns": {
+        "name": "Naam",
+        "email": "E-mail",
+        "phone": "Telefoon",
+        "type": "Type",
+        "status": "Status",
+        "jobs": "Klussen"
+      },
+      "employmentType": {
+        "employee": "Werknemer",
+        "zzp": "ZZP"
+      },
+      "status": {
+        "active": "Actief",
+        "invited": "Uitgenodigd",
+        "suspended": "Geschorst",
+        "offboarded": "Uit dienst"
+      },
+      "actions": {
+        "view": "Profiel bekijken",
+        "edit": "Bewerken",
+        "documents": "Documenten",
+        "availability": "Beschikbaarheid",
+        "offboard": "Uit dienst melden",
+        "resendInvite": "Uitnodiging opnieuw sturen"
+      },
+      "empty": "Nog geen schoonmakers. Nodig uw eerste teamlid uit.",
+      "subtitle": "Schoonmakers die u hier toevoegt, behoren alleen tot uw bedrijf — er is geen cross-business marktplaats.",
+      "hired": "In dienst sinds",
+      "onboardTitle": "Schoonmaker onboarden",
+      "onboard": "Onboarden",
+      "onboarding": "Bezig met onboarden…",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "hireDate": "Indiensttreding",
+      "offboardTitle": "{name} uit dienst melden",
+      "offboardHint": "Dit beëindigt hun actieve status bij uw bedrijf. Eerdere boekingen en beoordelingen blijven bewaard.",
+      "reasonOptional": "Reden (optioneel)",
+      "confirmOffboard": "Bevestig uit dienst",
+      "offboarding": "Bezig met uit dienst melden…"
+    },
+    "customers": {
+      "title": "Klanten",
+      "searchPlaceholder": "Zoek klanten…",
+      "columns": {
+        "name": "Naam",
+        "phone": "Telefoon",
+        "email": "E-mail",
+        "bookings": "Boekingen",
+        "lastVisit": "Laatste bezoek"
+      },
+      "empty": "Nog geen klanten.",
+      "subtitle": "CRM — zoeken, geschiedenis bekijken, adressen beheren",
+      "add": "+ Klant toevoegen",
+      "newTitle": "Nieuwe klant",
+      "notes": "Notities",
+      "deleteConfirm": "Deze klant verwijderen?",
+      "noEmail": "geen e-mail",
+      "addresses": "Adressen",
+      "noAddresses": "Geen adressen",
+      "recentBookings": "Recente boekingen"
+    },
+    "dispatch": {
+      "title": "Planning",
+      "unassigned": "Nog toe te wijzen",
+      "assigned": "Vandaag toegewezen",
+      "dragHint": "Sleep klussen naar schoonmakers of gebruik Toewijzen.",
+      "subtitle": "Wijs schoonmakers toe aan bevestigde klussen en volg het bord van vandaag.",
+      "suggest": "Voorstellen",
+      "assign": "Toewijzen",
+      "dayRoute": "Dagroute",
+      "checkRoute": "Route controleren",
+      "noneUnassigned": "Geen klussen die toewijzing nodig hebben",
+      "noneAssigned": "Nog geen toewijzingen"
+    },
+    "calendar": {
+      "title": "Agenda",
+      "week": "Week",
+      "month": "Maand",
+      "day": "Dag",
+      "show": "Tonen"
+    },
+    "settings": {
+      "title": "Bedrijfsinstellingen",
+      "general": "Algemeen",
+      "branding": "Huisstijl",
+      "payments": "Betalingen",
+      "cancellationPolicy": "Annuleringsbeleid",
+      "openingHours": "Openingstijden",
+      "serviceArea": "Werkgebied",
+      "vatBtw": "BTW",
+      "kvk": "KvK-nummer",
+      "customDomain": "Eigen domein",
+      "notifications": "Meldingen",
+      "language": "Taal & regio",
+      "invoicingBtw": "Facturatie & BTW",
+      "btwId": "BTW-id",
+      "btwRate": "Standaard BTW-tarief",
+      "businessName": "Bedrijfsnaam",
+      "timezone": "Tijdzone",
+      "customDomainOptional": "Eigen domein (optioneel)",
+      "legalName": "Statutaire naam",
+      "iban": "IBAN (op facturen)",
+      "tagline": "Slogan",
+      "primaryColor": "Primaire kleur",
+      "accentColor": "Accentkleur",
+      "btwHint": "Verplicht op elke Nederlandse factuur. Prijzen worden inclusief BTW getoond; facturen splitsen de BTW automatisch uit.",
+      "stripeConnect": "Stripe Connect"
+    },
+    "invoices": {
+      "title": "Facturen",
+      "downloadUbl": "UBL downloaden",
+      "downloadPdf": "PDF downloaden",
+      "issue": "Factuur maken",
+      "ublHint": "UBL 2.1 XML voor Exact, Moneybird, e-Boekhouden of SnelStart."
+    },
+    "subscription": {
+      "title": "Abonnement",
+      "plan": "Pakket",
+      "trial": "Proefperiode",
+      "upgrade": "Upgraden",
+      "manageBilling": "Facturatie beheren",
+      "readOnlyMode": "Uw werkruimte staat in alleen-lezen modus tot de facturatie is bijgewerkt."
+    },
+    "payroll": {
+      "title": "Loonadministratie",
+      "earnings": "Verdiensten",
+      "period": "Periode",
+      "export": "Exporteren",
+      "rates": "Tarieven",
+      "payouts": "Uitbetalingen"
+    },
+    "compliance": {
+      "title": "Compliance",
+      "vog": "VOG",
+      "documents": "Documenten",
+      "upload": "Document uploaden",
+      "empty": "Nog geen items"
+    },
+    "team": {
+      "title": "Team",
+      "subtitle": "Managers en medewerkers die toegang hebben tot dit bedrijfsdashboard.",
+      "invite": "Teamlid uitnodigen",
+      "inviteTitle": "Teamlid uitnodigen",
+      "sendInvite": "Uitnodiging versturen",
+      "sending": "Versturen…",
+      "empty": "Nog geen teamleden",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "phone": "Telefoon",
+      "columns": {
+        "name": "Naam",
+        "email": "E-mail",
+        "role": "Rol",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Actief",
+        "invited": "Uitgenodigd",
+        "removed": "Verwijderd"
+      }
+    },
+    "reports": {
+      "title": "Rapporten",
+      "subtitle": "KPI's en omzet van uw bedrijf",
+      "revenue": "Omzet",
+      "bookings": "Boekingen",
+      "period": "Periode",
+      "from": "Van",
+      "to": "Tot"
+    },
+    "messages": {
+      "title": "Berichten",
+      "placeholder": "Schrijf een bericht…",
+      "empty": "Nog geen gesprekken",
+      "send": "Versturen",
+      "hint": "Gesprekken zijn per schoonmaker of klant (geen vrije DM's tussen willekeurige gebruikers).",
+      "startConversation": "Gesprek starten"
+    },
+    "services": {
+      "title": "Diensten",
+      "subtitle": "Wat klanten kunnen boeken",
+      "new": "Nieuwe dienst",
+      "empty": "Nog geen diensten",
+      "basePrice": "Basisprijs",
+      "duration": "Duur (minuten)",
+      "active": "Actief",
+      "namePlaceholder": "Naam van de dienst (bijv. Standaard schoonmaak)",
+      "inactive": "Inactief",
+      "addons": "Extra's"
+    },
+    "auditTrail": {
+      "title": "Auditlog",
+      "empty": "Nog geen gebeurtenissen"
+    },
+    "checklistTemplates": {
+      "title": "Checklist-sjablonen",
+      "empty": "Nog geen sjablonen"
+    },
+    "cleanerDocuments": {
+      "title": "Documenten schoonmakers",
+      "empty": "Nog geen documenten"
+    },
+    "coupons": {
+      "title": "Kortingscodes",
+      "empty": "Nog geen kortingscodes"
+    },
+    "giftCards": {
+      "title": "Cadeaubonnen",
+      "empty": "Nog geen cadeaubonnen"
+    },
+    "inventory": {
+      "title": "Voorraad",
+      "empty": "Nog geen items",
+      "items": "Artikelen",
+      "locations": "Locaties",
+      "addItem": "Artikel toevoegen",
+      "addLocation": "Locatie toevoegen",
+      "emptyItems": "Nog geen artikelen",
+      "emptyLocations": "Nog geen locaties",
+      "name": "Naam",
+      "sku": "SKU",
+      "unit": "Eenheid",
+      "type": "Type",
+      "reorderPoint": "Nabestellingspunt",
+      "manufacturer": "Fabrikant"
+    },
+    "notifications": {
+      "title": "Meldingen",
+      "empty": "Geen meldingen"
+    },
+    "onboarding": {
+      "title": "CleanSera afronden",
+      "subtitle": "Voltooi de verplichte stappen zodat uw boekingswidget klanten kan accepteren. Stripe is optioneel — u kunt contant of via overschrijving innen zonder Stripe."
+    },
+    "pricing": {
+      "title": "Prijzen",
+      "perSqft": "Tarief per vierkante meter",
+      "perRoom": "Tarief per kamer",
+      "currency": "Valuta",
+      "saveRates": "Tarieven opslaan",
+      "subtitle": "Tarieven bij prijsbepaling op basis van oppervlakte of kamers"
+    },
+    "profile": {
+      "title": "Profiel"
+    },
+    "recurringSchedules": {
+      "title": "Terugkerende planning",
+      "empty": "Nog geen planningen"
+    },
+    "reviews": {
+      "title": "Beoordelingen",
+      "empty": "Nog geen beoordelingen"
+    },
+    "supportTickets": {
+      "title": "Supporttickets",
+      "empty": "Nog geen tickets",
+      "subject": "Onderwerp",
+      "describeIssue": "Beschrijf het probleem",
+      "searchPlaceholder": "Zoek op onderwerp of beschrijving…",
+      "replyPlaceholder": "Schrijf een antwoord…",
+      "allStatuses": "Alle statussen",
+      "allPriorities": "Alle prioriteiten",
+      "status": "Status",
+      "priority": "Prioriteit",
+      "category": "Categorie",
+      "updated": "Bijgewerkt",
+      "messages": "Berichten",
+      "noMessages": "Nog geen berichten"
+    },
+    "waitlist": {
+      "title": "Wachtlijst",
+      "empty": "Wachtlijst is leeg"
+    },
+    "website": {
+      "title": "Website"
     }
   },
   "Portal": {
@@ -297,5 +767,33 @@
       "starsOption": "{n, plural, one {# ster} other {# sterren}}",
       "confirmCancel": "Deze boeking annuleren? Er kan een vergoeding gelden volgens het beleid van het bedrijf."
     }
+  },
+  "Invoices": {
+    "ubl": {
+      "download": "UBL downloaden",
+      "downloadForBooking": "UBL downloaden (XML)",
+      "downloading": "Bezig met downloaden…",
+      "preparing": "Factuur voorbereiden…",
+      "tooltip": "UBL 2.1 XML voor Exact, Moneybird, e-Boekhouden of SnelStart. Alleen bestandsimport — geen Peppol-netwerkverzending.",
+      "success": "UBL gedownload: {filename}",
+      "hint": "Importeer dit XML-bestand in uw boekhoudpakket (Exact Online, Moneybird, e-Boekhouden, SnelStart).",
+      "sectionTitle": "E-factuur export",
+      "sectionDescription": "Download een UBL 2.1 XML-bestand voor uw administratie. Dit is een bestands-export, geen Peppol e-verzending."
+    },
+    "actions": {
+      "viewPdf": "PDF bekijken",
+      "downloadUbl": "UBL downloaden",
+      "issue": "Factuur maken"
+    }
+  },
+  "Auth": {
+    "signIn": "Inloggen",
+    "signOut": "Uitloggen",
+    "email": "E-mail",
+    "password": "Wachtwoord",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "registerBusiness": "Registreer uw bedrijf",
+    "twoFactor": "Tweefactorcode",
+    "continue": "Doorgaan"
   }
 }

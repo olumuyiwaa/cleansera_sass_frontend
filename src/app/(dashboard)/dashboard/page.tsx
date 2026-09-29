@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Badge from "@/components/ui/badge/Badge";
 import { listCleaners } from "@/app/api/cleaners.api";
@@ -66,18 +67,25 @@ function formatWhen(iso: string) {
   }).format(new Date(iso));
 }
 
-const QUICK_ACTIONS = [
-  { href: "/bookings", label: "Bookings", hint: "Create & manage jobs" },
-  { href: "/dispatch", label: "Dispatch", hint: "Assign cleaners" },
-  { href: "/cleaners", label: "Cleaners", hint: "Team roster" },
-  { href: "/customers", label: "Customers", hint: "CRM" },
-  { href: "/calendar", label: "Calendar", hint: "Schedule view" },
-  { href: "/messages", label: "Messages", hint: "Team threads" },
-  { href: "/reports", label: "Reports", hint: "KPIs & revenue" },
-  { href: "/business-settings", label: "Settings", hint: "Brand & areas" },
-] as const;
+function useQuickActions() {
+  const t = useTranslations("Dashboard.home.quick");
+  const tn = useTranslations("Dashboard.nav");
+  return [
+    { href: "/bookings", label: tn("bookings"), hint: t("bookingsHint") },
+    { href: "/dispatch", label: tn("dispatch"), hint: t("dispatchHint") },
+    { href: "/cleaners", label: tn("cleaners"), hint: t("cleanersHint") },
+    { href: "/customers", label: tn("customers"), hint: t("customersHint") },
+    { href: "/calendar", label: tn("calendar"), hint: t("calendarHint") },
+    { href: "/messages", label: tn("messages"), hint: t("messagesHint") },
+    { href: "/reports", label: tn("reports"), hint: t("reportsHint") },
+    { href: "/business-settings", label: tn("businessSettings"), hint: t("settingsHint") },
+  ] as const;
+}
 
 export default function DashboardPage() {
+  const t = useTranslations("Dashboard.home");
+  const tc = useTranslations("Dashboard.common");
+  const quickActions = useQuickActions();
   const { user } = useAuth();
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -219,7 +227,7 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-gray-800 dark:text-white/90 md:text-2xl">
-              {greeting ? `Welcome back, ${greeting.split(" ")[0]}` : "Dashboard"}
+              {greeting ? t("welcomeName", { name: greeting.split(" ")[0] }) : t("title")}
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {user?.business?.name
@@ -357,9 +365,9 @@ export default function DashboardPage() {
 
           {/* Quick actions + team */}
           <div className="space-y-6">
-            <Panel title="Quick actions">
+            <Panel title={t("quickActions")}>
               <div className="grid grid-cols-2 gap-2">
-                {QUICK_ACTIONS.map((a) => (
+                {quickActions.map((a) => (
                     <Link
                         key={a.href}
                         href={a.href}

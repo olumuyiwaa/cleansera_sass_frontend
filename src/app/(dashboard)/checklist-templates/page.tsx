@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
     listChecklistTemplates,
     createChecklistTemplate,
@@ -15,6 +16,8 @@ function emptyItems(): ChecklistItem[] {
 }
 
 export default function ChecklistTemplatesPage() {
+  const t = useTranslations("Dashboard.checklistTemplates");
+  const tc = useTranslations("Dashboard.common");
     const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -120,8 +123,7 @@ export default function ChecklistTemplatesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
-                        Checklist Templates
-                    </h1>
+                        {t("title")}</h1>
                     <p className="mt-1 text-sm text-gray-500">
                         Reusable job checklists cleaners complete on-site — applied
                         per booking.
@@ -203,7 +205,7 @@ export default function ChecklistTemplatesPage() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {loading && (
-                    <p className="text-sm text-gray-400">Loading…</p>
+                    <p className="text-sm text-gray-400">{tc("loading")}</p>
                 )}
                 {!loading && templates.length === 0 && (
                     <p className="text-sm text-gray-400">

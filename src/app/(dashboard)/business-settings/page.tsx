@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -27,6 +28,8 @@ import StripeConnectOptionalCard from "@/components/business/StripeConnectOption
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default function BusinessSettingsPage() {
+  const t = useTranslations("Dashboard.settings");
+  const tc = useTranslations("Dashboard.common");
   const [business, setBusiness] = useState<Business | null>(null);
   const [branding, setBranding] = useState<BusinessBranding | null>(null);
   const [hours, setHours] = useState<BusinessHours[]>([]);
@@ -206,7 +209,7 @@ export default function BusinessSettingsPage() {
   return (
     <div className="p-4 md:p-6 space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Business Settings</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Your booking widget lives at{" "}
           <span className="font-medium">{business?.subdomain}.cleansera.com</span>
@@ -227,49 +230,49 @@ export default function BusinessSettingsPage() {
 
       {/* General */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">General</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("general")}</h2>
         <form onSubmit={saveGeneral} className="space-y-4 max-w-md">
           <div>
-            <Label>Business Name</Label>
+            <Label>{t("businessName")}</Label>
             <Input value={nameForm.name} onChange={(e) => setNameForm({ ...nameForm, name: e.target.value })} required />
           </div>
           <div>
-            <Label>Timezone</Label>
+            <Label>{t("timezone")}</Label>
             <Input value={nameForm.timezone} onChange={(e) => setNameForm({ ...nameForm, timezone: e.target.value })} placeholder="Europe/Amsterdam" required />
           </div>
           <div>
-            <Label>Custom Domain (optional)</Label>
+            <Label>{t("customDomainOptional")}</Label>
             <Input value={nameForm.customDomain} onChange={(e) => setNameForm({ ...nameForm, customDomain: e.target.value })} placeholder="book.yourbusiness.com" />
           </div>
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : tc("save")}</Button>
         </form>
       </section>
 
       {/* Invoicing / BTW */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Invoicing &amp; BTW</h2>
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("invoicingBtw")}</h2>
         <p className="mb-4 max-w-md text-xs text-gray-500 dark:text-gray-400">
-          Required on every Dutch invoice. Your prices are shown to customers including BTW; invoices split out the BTW automatically.
+          {t("btwHint")}
         </p>
         <form onSubmit={saveTax} className="space-y-4 max-w-md">
           <div>
-            <Label>Legal name</Label>
+            <Label>{t("legalName")}</Label>
             <Input value={taxForm.legalName} onChange={(e) => setTaxForm({ ...taxForm, legalName: e.target.value })} placeholder="Schoon Holding B.V." />
           </div>
           <div>
-            <Label>KvK number</Label>
+            <Label>{t("kvk")}</Label>
             <Input value={taxForm.kvkNumber} onChange={(e) => setTaxForm({ ...taxForm, kvkNumber: e.target.value })} placeholder="12345678" />
           </div>
           <div>
-            <Label>BTW-id</Label>
+            <Label>{t("btwId")}</Label>
             <Input value={taxForm.vatNumber} onChange={(e) => setTaxForm({ ...taxForm, vatNumber: e.target.value })} placeholder="NL123456789B01" />
           </div>
           <div>
-            <Label>IBAN (shown on invoices)</Label>
+            <Label>{t("iban")}</Label>
             <Input value={taxForm.invoiceIban} onChange={(e) => setTaxForm({ ...taxForm, invoiceIban: e.target.value })} placeholder="NL91 ABNA 0417 1643 00" />
           </div>
           <div>
-            <Label>Standard BTW rate</Label>
+            <Label>{t("btwRate")}</Label>
             <select
               value={taxForm.vatRateBps}
               onChange={(e) => setTaxForm({ ...taxForm, vatRateBps: e.target.value })}
@@ -286,23 +289,23 @@ export default function BusinessSettingsPage() {
 
       {/* Branding */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Branding</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("branding")}</h2>
         <form onSubmit={saveBranding} className="space-y-4 max-w-md">
           <div>
-            <Label>Tagline</Label>
+            <Label>{t("tagline")}</Label>
             <Input value={brandForm.tagline} onChange={(e) => setBrandForm({ ...brandForm, tagline: e.target.value })} placeholder="Spotless homes, every time" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Primary Color</Label>
+              <Label>{t("primaryColor")}</Label>
               <Input type="text" value={brandForm.primaryColor} onChange={(e) => setBrandForm({ ...brandForm, primaryColor: e.target.value })} placeholder="#2563eb" />
             </div>
             <div>
-              <Label>Accent Color</Label>
+              <Label>{t("accentColor")}</Label>
               <Input type="text" value={brandForm.accentColor} onChange={(e) => setBrandForm({ ...brandForm, accentColor: e.target.value })} placeholder="#22c55e" />
             </div>
           </div>
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : tc("save")}</Button>
         </form>
       </section>
 
@@ -318,7 +321,7 @@ export default function BusinessSettingsPage() {
 
       {/* Hours */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Business Hours</h2>
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("openingHours")}</h2>
         <div className="space-y-3">
           {hours.map((h, i) => (
             <div key={h.dayOfWeek} className="flex items-center gap-4">
@@ -368,7 +371,7 @@ export default function BusinessSettingsPage() {
 
       {/* Service Areas */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
-        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Service Areas</h2>
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("serviceArea")}</h2>
         <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
           The widget only accepts bookings whose address falls inside one of these areas. Add at least one before going live.
         </p>

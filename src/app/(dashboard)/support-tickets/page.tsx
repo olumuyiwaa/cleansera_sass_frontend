@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   listTickets,
   getTicket,
@@ -73,6 +74,8 @@ const inputCls =
   "h-11 w-full rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
 
 export default function SupportTicketsPage() {
+  const t = useTranslations("Dashboard.supportTickets");
+  const tc = useTranslations("Dashboard.common");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -206,7 +209,7 @@ export default function SupportTicketsPage() {
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Support Tickets</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500">Track and resolve issues raised for your business</p>
         </div>
         <button
@@ -224,14 +227,14 @@ export default function SupportTicketsPage() {
         <form onSubmit={onCreate} className="grid gap-3 rounded-2xl border p-5 sm:grid-cols-2 dark:border-gray-800">
           <input
             required
-            placeholder="Subject"
+            placeholder={t("subject")}
             value={createForm.subject}
             onChange={(e) => setCreateForm({ ...createForm, subject: e.target.value })}
             className={`${inputCls} sm:col-span-2`}
           />
           <textarea
             required
-            placeholder="Describe the issue"
+            placeholder={t("describeIssue")}
             value={createForm.description}
             onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
             className={`${inputCls} h-28 py-2 sm:col-span-2`}
@@ -278,20 +281,20 @@ export default function SupportTicketsPage() {
 
       <div className="flex flex-wrap gap-3">
         <input
-          placeholder="Search subject or description…"
+          placeholder={t("searchPlaceholder")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && load(1)}
           className={`${inputCls} max-w-xs`}
         />
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={`${inputCls} max-w-[180px]`}>
-          <option value="">All statuses</option>
+          <option value="">{t("allStatuses")}</option>
           {STATUS_OPTIONS.map((s) => (
             <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
           ))}
         </select>
         <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className={`${inputCls} max-w-[160px]`}>
-          <option value="">All priorities</option>
+          <option value="">{t("allPriorities")}</option>
           {PRIORITY_OPTIONS.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
@@ -308,11 +311,11 @@ export default function SupportTicketsPage() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-white/[0.03]">
               <tr>
-                <th className="px-4 py-3">Subject</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Priority</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Updated</th>
+                <th className="px-4 py-3">{t("subject")}</th>
+                <th className="px-4 py-3">{t("status")}</th>
+                <th className="px-4 py-3">{t("priority")}</th>
+                <th className="px-4 py-3">{t("category")}</th>
+                <th className="px-4 py-3">{t("updated")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -405,7 +408,7 @@ export default function SupportTicketsPage() {
 
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500">Status</label>
+                    <label className="text-xs text-gray-500">{t("status")}</label>
                     <select
                       value={selected.status}
                       onChange={(e) => patchSelected({ status: e.target.value })}
@@ -417,7 +420,7 @@ export default function SupportTicketsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">Priority</label>
+                    <label className="text-xs text-gray-500">{t("priority")}</label>
                     <select
                       value={selected.priority}
                       onChange={(e) => patchSelected({ priority: e.target.value })}
@@ -429,7 +432,7 @@ export default function SupportTicketsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500">Category</label>
+                    <label className="text-xs text-gray-500">{t("category")}</label>
                     <select
                       value={selected.category || "OTHER"}
                       onChange={(e) => patchSelected({ category: e.target.value })}
@@ -443,7 +446,7 @@ export default function SupportTicketsPage() {
                 </div>
 
                 <div className="mt-6">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Messages</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("messages")}</h3>
                   <div className="mt-2 max-h-64 space-y-3 overflow-y-auto">
                     {(selected.messages || []).map((m) => (
                       <div
@@ -462,7 +465,7 @@ export default function SupportTicketsPage() {
                       </div>
                     ))}
                     {!selected.messages?.length && (
-                      <p className="text-sm text-gray-400">No messages yet</p>
+                      <p className="text-sm text-gray-400">{t("noMessages")}</p>
                     )}
                   </div>
 
@@ -470,7 +473,7 @@ export default function SupportTicketsPage() {
                     <textarea
                       value={replyBody}
                       onChange={(e) => setReplyBody(e.target.value)}
-                      placeholder="Write a reply…"
+                      placeholder={t("replyPlaceholder")}
                       className={`${inputCls} h-20 py-2`}
                     />
                     <div className="flex items-center justify-between">

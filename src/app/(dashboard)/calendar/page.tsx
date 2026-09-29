@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -95,6 +96,8 @@ function EventDetailRows({ event }: { event: BackendCalendarEvent }) {
 }
 
 const Calendar: React.FC = () => {
+    const t = useTranslations("Dashboard.calendar");
+    const tc = useTranslations("Dashboard.common");
     const calendarRef = useRef<FullCalendar>(null);
     const { isOpen, openModal, closeModal } = useModal();
 
@@ -187,10 +190,13 @@ const Calendar: React.FC = () => {
 
     return (
         <div className="space-y-4 p-4 md:p-6">
+            <div>
+              <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
+            </div>
             <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex flex-wrap items-center gap-2">
           <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Show:
+            {t("show")}:
           </span>
                     {ALL_EVENT_TYPES.map((type) => {
                         const cfg = EVENT_TYPE_CONFIG[type];

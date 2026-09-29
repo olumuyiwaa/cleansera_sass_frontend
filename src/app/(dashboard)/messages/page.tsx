@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, {
     FormEvent,
     useCallback,
@@ -54,6 +55,8 @@ function conversationSubtitle(c: ConversationListItem) {
 }
 
 export default function MessagesPage() {
+    const t = useTranslations("Dashboard.messages");
+    const tc = useTranslations("Dashboard.common");
     const { user } = useAuth();
     const router = useRouter();
     const currentUserId = useMemo(() => user?.id || "", [user]);
@@ -250,10 +253,10 @@ export default function MessagesPage() {
                 {/* Sidebar */}
                 <div className="flex h-[calc(100vh-140px)] flex-col rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
                     <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
-                        Messages
+                        {t("title")}
                     </h2>
                     <p className="mb-3 text-xs text-gray-500">
-                        Threads are per cleaner or customer (not free-form DMs between arbitrary users).
+                        {t("hint")}
                     </p>
 
                     <form
@@ -261,7 +264,7 @@ export default function MessagesPage() {
                         className="mb-4 rounded-xl border border-gray-200 p-3 dark:border-gray-800"
                     >
                         <p className="mb-2 text-sm font-medium text-gray-800 dark:text-white/90">
-                            Start conversation
+                            {t("startConversation")}
                         </p>
                         <div className="relative">
                             <input
@@ -387,7 +390,7 @@ export default function MessagesPage() {
 
                             <div className="flex-1 space-y-3 overflow-y-auto p-5">
                                 {loadingMessages && messages.length === 0 ? (
-                                    <p className="text-sm text-gray-500">Loading messages…</p>
+                                    <p className="text-sm text-gray-500">{tc("loading")}</p>
                                 ) : messages.length === 0 ? (
                                     <p className="text-sm text-gray-500">No messages yet. Say hello.</p>
                                 ) : (

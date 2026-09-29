@@ -2,6 +2,7 @@
 
 import { isoDateInTimeZone } from "@/app/services/currency";
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import {
@@ -17,6 +18,8 @@ import { listCleaners } from "@/app/api/cleaners.api";
 import { Booking, Cleaner, cleanerDisplayName } from "@/app/api/cleansera-types";
 
 export default function DispatchPage() {
+  const t = useTranslations("Dashboard.dispatch");
+  const tc = useTranslations("Dashboard.common");
   const [needsAssignment, setNeedsAssignment] = useState<Booking[]>([]);
   const [assignments, setAssignments] = useState<DispatchAssignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +109,7 @@ export default function DispatchPage() {
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Dispatch</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Assign confirmed bookings to a cleaner, or let CleanSera suggest the best fit by service area and availability.
         </p>

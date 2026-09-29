@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
     listRecurringSchedules,
     createRecurringSchedule,
@@ -29,6 +30,8 @@ const DAYS = [
 ];
 
 export default function RecurringSchedulesPage() {
+  const t = useTranslations("Dashboard.recurringSchedules");
+  const tc = useTranslations("Dashboard.common");
     const [schedules, setSchedules] = useState<RecurringSchedule[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [services, setServices] = useState<Service[]>([]);
@@ -106,8 +109,7 @@ export default function RecurringSchedulesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
-                        Recurring Schedules
-                    </h1>
+                        {t("title")}</h1>
                     <p className="mt-1 text-sm text-gray-500">
                         Standing cleanings that automatically create new bookings on
                         their cadence.

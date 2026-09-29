@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   listGiftCards,
   issueGiftCard,
@@ -17,6 +18,8 @@ function centsToDollars(cents: number) {
 }
 
 export default function GiftCardsPage() {
+  const t = useTranslations("Dashboard.giftCards");
+  const tc = useTranslations("Dashboard.common");
   const [giftCards, setGiftCards] = useState<GiftCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -84,7 +87,7 @@ export default function GiftCardsPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Gift Cards</h1>
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Issue a stored-value card a customer can redeem, in full or in part, against any future booking.
           Customers apply a code at checkout in the booking widget.
@@ -153,7 +156,7 @@ export default function GiftCardsPage() {
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-gray-500">{tc("loading")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
           <table className="min-w-full text-left text-sm">
@@ -194,7 +197,7 @@ export default function GiftCardsPage() {
               {!giftCards.length && (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    No gift cards yet
+                    {t("empty")}
                   </td>
                 </tr>
               )}

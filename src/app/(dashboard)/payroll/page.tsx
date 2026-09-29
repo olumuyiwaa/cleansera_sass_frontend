@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -45,6 +46,8 @@ const PAYOUT_STATUS_COLOR: Record<Payout["status"], "warning" | "success" | "lig
 };
 
 export default function PayrollPage() {
+  const t = useTranslations("Dashboard.payroll");
+  const tc = useTranslations("Dashboard.common");
   const [tab, setTab] = useState<"rates" | "earnings" | "payouts">("rates");
 
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
@@ -174,7 +177,7 @@ export default function PayrollPage() {
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Payroll</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Set what each cleaner earns per job, track what they&apos;re owed, and pay it out — automatically via
           Stripe once a cleaner has connected a payout account, or manually (bank transfer, cash, your own

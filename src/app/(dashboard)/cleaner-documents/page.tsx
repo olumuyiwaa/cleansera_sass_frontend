@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   listDocuments,
   getUploadUrl,
@@ -14,6 +15,8 @@ import RowActionsMenu from "@/components/tables/RowActionsMenu";
 const DOC_TYPES = ["ID_CARD", "BACKGROUND_CHECK", "CERTIFICATION", "CONTRACT", "INSURANCE", "OTHER"];
 
 export default function CleanerDocumentsPage() {
+  const t = useTranslations("Dashboard.cleanerDocuments");
+  const tc = useTranslations("Dashboard.common");
   const [docs, setDocs] = useState<any[]>([]);
   const [cleaners, setCleaners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +77,7 @@ export default function CleanerDocumentsPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Cleaner Documents</h1>
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="mt-1 text-sm text-gray-500">IDs, background checks, certifications, contracts</p>
       </div>
 
@@ -125,7 +128,7 @@ export default function CleanerDocumentsPage() {
 
       {error && <div className="text-sm text-red-600">{error}</div>}
       {loading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-gray-500">{tc("loading")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border dark:border-gray-800">
           <table className="min-w-full text-left text-sm">
@@ -174,7 +177,7 @@ export default function CleanerDocumentsPage() {
               {!docs.length && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                    No documents yet
+                    {t("empty")}
                   </td>
                 </tr>
               )}

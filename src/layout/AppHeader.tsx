@@ -3,19 +3,19 @@ import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import ReportExportDropdown from "@/components/header/ReportExportDropdown";
 import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState ,useEffect,useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SearchModal from "@/components/header/SearchModal";
-import {useRouter} from "next/navigation";
-import {useAuth} from "@/app/auth/useAuth";
-import {getUserRole} from "@/app/api/types";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/auth/useAuth";
+import { getUserRole } from "@/app/api/types";
 
 const AppHeader: React.FC = () => {
   const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -37,20 +37,20 @@ const AppHeader: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        // Logic for Cmd+K or Ctrl+K
-        if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-          event.preventDefault();
-          setIsSearchOpen(true);
-        }
-        // Close on Escape
-        if (event.key === "Escape") {
-          setIsSearchOpen(false);
-        }
-      };
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
-    }, []);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Logic for Cmd+K or Ctrl+K
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        setIsSearchOpen(true);
+      }
+      // Close on Escape
+      if (event.key === "Escape") {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -133,60 +133,65 @@ const AppHeader: React.FC = () => {
           </button>
 
           {userRole.toUpperCase() === "SUPER_ADMIN" && (
-              <div className="hidden lg:block">
-                <div className="relative">
-                  <input
-                      type="text"
-                      readOnly
-                      onClick={() => setIsSearchOpen(true)}
-                      placeholder="Search or type command..."
-                      className="cursor-pointer dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs focus:outline-none xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
-                  />
-                  <button
-                      onClick={() => setIsSearchOpen(true)}
-                      className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs text-gray-500 dark:border-gray-800 dark:bg-white/[0.03]"
-                  >
-                    <span> ⌘ </span>
-                    <span> K </span>
-                  </button>
-                </div>
+            <div className="hidden lg:block">
+              <div className="relative">
+                <input
+                  type="text"
+                  readOnly
+                  onClick={() => setIsSearchOpen(true)}
+                  placeholder="Search or type command..."
+                  className="cursor-pointer dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs focus:outline-none xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:text-white/90"
+                />
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs text-gray-500 dark:border-gray-800 dark:bg-white/[0.03]"
+                >
+                  <span> ⌘ </span>
+                  <span> K </span>
+                </button>
               </div>
+            </div>
           )}
 
           {/* Global Search Modal — cross-business, so SUPER_ADMIN only.
               Business owners/managers are scoped to their own business and
               use the regular per-page tables/filters instead. */}
           {userRole.toUpperCase() === "SUPER_ADMIN" && (
-          <SearchModal
+            <SearchModal
               isOpen={isSearchOpen}
               onClose={() => setIsSearchOpen(false)}
               onResultClick={(item) => {
-                 const type = item.type.toUpperCase();
-                 const id = item.id;
+                const type = item.type.toUpperCase();
+                const id = item.id;
 
-                 const config: Record<string, { path: string; param: string }> = {
-                   CLEANER: { path: "/cleaners", param: "openCleanerId" },
-                   BOOKING: { path: "/bookings", param: "openBookingId" },
-                   BUSINESS: { path: "/business-settings", param: "openBusinessId" },
-                 };
+                const config: Record<string, { path: string; param: string }> =
+                  {
+                    CLEANER: { path: "/cleaners", param: "openCleanerId" },
+                    BOOKING: { path: "/bookings", param: "openBookingId" },
+                    BUSINESS: {
+                      path: "/business-settings",
+                      param: "openBusinessId",
+                    },
+                  };
 
-                 const match = config[type];
+                const match = config[type];
 
-                 if (match) {
-                   const { path, param } = match;
+                if (match) {
+                  const { path, param } = match;
 
-                   if (window.location.pathname !== path) {
-                     router.push(`${path}?${param}=${id}`);
-                   }
+                  if (window.location.pathname !== path) {
+                    router.push(`${path}?${param}=${id}`);
+                  }
 
-                   window.dispatchEvent(
-                     new CustomEvent("open-resource-modal", {
-                       detail: { type: type, id: id },
-                     })
-                   );
-                 }
-               }}
-          />)}
+                  window.dispatchEvent(
+                    new CustomEvent("open-resource-modal", {
+                      detail: { type: type, id: id },
+                    })
+                  );
+                }
+              }}
+            />
+          )}
         </div>
         <div
           className={`${
@@ -194,19 +199,14 @@ const AppHeader: React.FC = () => {
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            {/* <!-- Dark Mode Toggler --> */}
+            <LanguageSwitcher />
             <ThemeToggleButton />
-            {/* <!-- Dark Mode Toggler --> */}
             {userRole.toUpperCase() === "SUPER_ADMIN" && (
-                <ReportExportDropdown />
+              <ReportExportDropdown />
             )}
-           {/* <!-- Report Export Area --> */}
-           <NotificationDropdown />
-            {/* <!-- Notification Menu Area --> */}
+            <NotificationDropdown />
           </div>
-          {/* <!-- User Area --> */}
-          <UserDropdown /> 
-    
+          <UserDropdown />
         </div>
       </div>
     </header>

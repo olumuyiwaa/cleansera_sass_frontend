@@ -2,6 +2,7 @@
 
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,6 +19,8 @@ const STEP_LINKS: Record<OnboardingStepKey, { href: string; cta: string }> = {
 };
 
 export default function OnboardingPage() {
+  const t = useTranslations("Dashboard.onboarding");
+  const tc = useTranslations("Dashboard.common");
   const router = useRouter();
   const [status, setStatus] = useState<OnboardingStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,17 +43,16 @@ export default function OnboardingPage() {
     load();
   }, []);
 
-  if (loading) return <div className="p-6 text-sm text-gray-500">Loading…</div>;
+  if (loading) return <div className="p-6 text-sm text-gray-500">{tc("loading")}</div>;
 
   return (
       <div className="mx-auto max-w-2xl space-y-6 p-4 md:p-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
-            Finish setting up CleanSera
+            {t("title")}
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Complete the required steps so your booking widget can accept customers. Stripe is
-            optional — you can collect cash or bank transfer without it.
+            {t("subtitle")}
           </p>
         </div>
 

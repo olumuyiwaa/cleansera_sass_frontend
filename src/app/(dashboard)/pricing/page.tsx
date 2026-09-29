@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -23,6 +24,8 @@ function majorToCents(major: string): number | null {
 const FREQUENCIES = ["WEEKLY", "BIWEEKLY", "MONTHLY"] as const;
 
 export default function PricingSettingsPage() {
+  const t = useTranslations("Dashboard.pricing");
+  const tc = useTranslations("Dashboard.common");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -158,7 +161,7 @@ export default function PricingSettingsPage() {
   return (
     <div className="p-4 md:p-6 space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Pricing</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           These rates and policies apply to your business only — other businesses on CleanSera set their own.
           Leave a rate blank to use the platform default instead.

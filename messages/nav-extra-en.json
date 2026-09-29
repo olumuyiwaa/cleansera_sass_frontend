@@ -1,0 +1,16 @@
+{
+  "Dashboard": {
+    "nav": {
+      "usersGroup": "Users",
+      "bookingSchedulesGroup": "Booking & Schedules",
+      "businessGroup": "Business",
+      "userProfile": "User Profile",
+      "menu": "Menu",
+      "others": "Others",
+      "platform": "Platform",
+      "overview": "Overview",
+      "businesses": "Businesses",
+      "subscriptions": "Subscriptions"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { listWaitlist, cancelWaitlistEntry, type WaitlistEntry, type WaitlistStatus } from "@/app/api/waitlist.api";
 import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
@@ -14,6 +15,8 @@ const STATUS_OPTIONS: { value: WaitlistStatus | ""; label: string }[] = [
 ];
 
 export default function WaitlistPage() {
+  const t = useTranslations("Dashboard.waitlist");
+  const tc = useTranslations("Dashboard.common");
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [status, setStatus] = useState<WaitlistStatus | "">("WAITING");
   const [loading, setLoading] = useState(true);
@@ -52,7 +55,7 @@ export default function WaitlistPage() {
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Waitlist</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Customers who couldn&apos;t find an open slot in the booking widget. When a booking is cancelled, the
             first few matching entries are notified automatically.
@@ -78,7 +81,7 @@ export default function WaitlistPage() {
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-gray-500">{tc("loading")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
           <table className="min-w-full text-left text-sm">

@@ -54,3 +54,56 @@ export async function openInvoice(invoiceId: string): Promise<void> {
   // give the new tab time to load before releasing the blob
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
+
+/**
+ * Download UBL 2.1 XML for Exact / Moneybird / e-Boekhouden / SnelStart.
+ * Matches backend GET /invoices/:id/ubl (Bearer auth).
+ */
+export async function downloadInvoiceUbl(
+  invoiceId: string,
+  invoiceNumber?: string | null
+): Promise<void> {
+  const get = (token: string | null) =>
+    fetch(`${API_BASE_URL}/invoices/${invoiceId}/ubl`, {
+      headers: {
+        Authorization: `Bearer ${token ?? ""}`,
+        Accept: "application/xml, text/xml, */*",
+      },
+    });
+
+  let res = await get(sessionService.getAccessToken());
+  if (res.status === 401) res = await get(await refreshAccessToken());
+  if (!res.ok) {
+    let message = `UBL download failed (${res.status})`;
+    try {
+      const body = await res.json();
+      if (body?.message || body?.error) message = String(body.message || body.error);
+    } catch {
+      /* ignore */
+    }
+    throw new Error(message);
+  }
+
+  const blob = await res.blob();
+  const disposition = res.headers.get("Content-Disposition") || "";
+  const match = /filename\*?=(?:UTF-8'')?["']?([^"';\n]+)/i.exec(disposition);
+  const safe = String(invoiceNumber || invoiceId).replace(/[^\w.-]+/g, "_").slice(0, 64);
+  const filename = match?.[1]?.trim() || `${safe}.xml`;
+
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
+/** Issue invoice for a booking, then download UBL XML. */
+export async function issueAndDownloadUbl(bookingId: string): Promise<Invoice> {
+  const invoice = await issueInvoice(bookingId);
+  await downloadInvoiceUbl(invoice.id, invoice.number);
+  return invoice;
+}

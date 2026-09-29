@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -32,6 +33,8 @@ const SECTION_KEYS: Array<"about" | "testimonials" | "gallery" | "faq"> = [
 const SOCIAL_PLATFORMS: Array<keyof SocialLinks> = ["facebook", "instagram", "tiktok", "linkedin", "twitter"];
 
 export default function WebsitePage() {
+  const t = useTranslations("Dashboard.website");
+  const tc = useTranslations("Dashboard.common");
   const [branding, setBranding] = useState<BusinessBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -189,13 +192,13 @@ export default function WebsitePage() {
   };
 
   if (loading) {
-    return <div className="p-4 text-sm text-gray-500 md:p-6">Loading…</div>;
+    return <div className="p-4 text-sm text-gray-500 md:p-6">{tc("loading")}</div>;
   }
 
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Website</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Everything here feeds your public booking site and widget. Colors, logo shape, and your
           subdomain still live under Business Settings — this page is the content: images, story,

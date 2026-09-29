@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -32,6 +33,8 @@ const ROLE_COLOR: Record<StaffRole, "success" | "warning" | "light"> = {
 };
 
 export default function TeamPage() {
+  const t = useTranslations("Dashboard.team");
+  const tc = useTranslations("Dashboard.common");
   const { user } = useAuth();
   const isOwnerOrOrgAdmin = user?.businessRole === "BUSINESS_OWNER" || user?.businessRole === "ORG_ADMIN";
 
@@ -113,12 +116,12 @@ export default function TeamPage() {
     <div className="p-4 md:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Team</h1>
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             People who can manage this business — separate from your cleaner roster.
           </p>
         </div>
-        {isOwnerOrOrgAdmin && <Button onClick={() => setShowInviteModal(true)}>Invite Teammate</Button>}
+        {isOwnerOrOrgAdmin && <Button onClick={() => setShowInviteModal(true)}>{t("invite")}</Button>}
       </div>
 
       {error && (
@@ -132,22 +135,22 @@ export default function TeamPage() {
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Name</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Email</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Role</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Actions</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.name")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.email")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.role")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.status")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{tc("actions")}</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading && (
                 <TableRow>
-                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>Loading…</TableCell>
+                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{tc("loading")}</TableCell>
                 </TableRow>
               )}
               {!loading && members.length === 0 && (
                 <TableRow>
-                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>No team members yet</TableCell>
+                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{t("empty")}</TableCell>
                 </TableRow>
               )}
               {!loading &&
@@ -201,28 +204,28 @@ export default function TeamPage() {
 
       {/* Invite modal */}
       <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} className="max-w-md p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Invite a Teammate</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("inviteTitle")}</h2>
         <form onSubmit={handleInvite} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>First Name</Label>
+              <Label>{t("firstName")}</Label>
               <Input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
             </div>
             <div>
-              <Label>Last Name</Label>
+              <Label>{t("lastName")}</Label>
               <Input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
             </div>
           </div>
           <div>
-            <Label>Email</Label>
+            <Label>{t("columns.email")}</Label>
             <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           </div>
           <div>
-            <Label>Phone</Label>
+            <Label>{t("phone")}</Label>
             <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
-            <Label>Role</Label>
+            <Label>{t("columns.role")}</Label>
             <Select
               options={[
                 { value: "BUSINESS_MANAGER", label: "Manager — day-to-day access" },
@@ -233,8 +236,8 @@ export default function TeamPage() {
             />
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setShowInviteModal(false)} type="button">Cancel</Button>
-            <Button type="submit" disabled={saving}>{saving ? "Sending…" : "Send Invite"}</Button>
+            <Button variant="outline" onClick={() => setShowInviteModal(false)} type="button">{tc("cancel")}</Button>
+            <Button type="submit" disabled={saving}>{saving ? t("sending") : t("sendInvite")}</Button>
           </div>
         </form>
       </Modal>
@@ -248,7 +251,7 @@ export default function TeamPage() {
           They&apos;ll immediately lose access to this business. This can be undone by inviting them again.
         </p>
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" onClick={() => setShowRemoveModal(null)} type="button">Cancel</Button>
+          <Button variant="outline" onClick={() => setShowRemoveModal(null)} type="button">{tc("cancel")}</Button>
           <Button onClick={handleRemove} disabled={saving}>{saving ? "Removing…" : "Confirm Remove"}</Button>
         </div>
       </Modal>

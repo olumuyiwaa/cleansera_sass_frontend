@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   listCoupons,
   createCoupon,
@@ -11,6 +12,8 @@ import {
 import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
 export default function CouponsPage() {
+  const t = useTranslations("Dashboard.coupons");
+  const tc = useTranslations("Dashboard.common");
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -74,7 +77,7 @@ export default function CouponsPage() {
   return (
       <div className="space-y-6 p-4 md:p-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Coupons</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Discount codes for the booking widget
           </p>
@@ -131,7 +134,7 @@ export default function CouponsPage() {
         )}
 
         {loading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
+            <p className="text-sm text-gray-500">{tc("loading")}</p>
         ) : (
             <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
               <table className="min-w-full text-left text-sm">
@@ -174,7 +177,7 @@ export default function CouponsPage() {
                 {!coupons.length && (
                     <tr>
                       <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                        No coupons yet
+                        {t("empty")}
                       </td>
                     </tr>
                 )}

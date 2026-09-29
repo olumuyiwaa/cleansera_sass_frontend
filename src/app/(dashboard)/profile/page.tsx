@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/app/auth/useAuth";
 import { useRouter } from "next/navigation";
 import { Disable2FAModal } from "@/components/modals/twoFactorModal/Disable2FAModal";
@@ -30,6 +31,8 @@ function formatRole(role?: string | null) {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations("Dashboard.profile");
+  const tc = useTranslations("Dashboard.common");
     const { user, setUser, logout } = useAuth();
     const router = useRouter();
 
@@ -173,6 +176,7 @@ export default function ProfilePage() {
                         {(lastName?.charAt(0) || "").toUpperCase()}
                     </div>
                     <div>
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{t("title")}</p>
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
                             {firstName} {lastName}
                         </h1>

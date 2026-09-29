@@ -2,6 +2,7 @@
 
 import { isoDateInTimeZone } from "@/app/services/currency";
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -51,6 +52,8 @@ const DOC_TYPE_LABEL: Record<ComplianceDocType, string> = {
 };
 
 export default function CompliancePage() {
+  const t = useTranslations("Dashboard.compliance");
+  const tc = useTranslations("Dashboard.common");
     const [tab, setTab] = useState<"documents" | "audits" | "training">("documents");
     const [docs, setDocs] = useState<ComplianceDocument[]>([]);
     const [audits, setAudits] = useState<ComplianceAudit[]>([]);
@@ -217,7 +220,7 @@ export default function CompliancePage() {
         <div className="p-4 md:p-6">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Compliance</h1>
+                    <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         SDS library, chemical training acknowledgements, and compliance audits.
                     </p>
@@ -300,7 +303,7 @@ export default function CompliancePage() {
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {loading && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>Loading…</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>{tc("loading")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && docs.length === 0 && (
@@ -373,7 +376,7 @@ export default function CompliancePage() {
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {loading && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>Loading…</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>{tc("loading")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && audits.length === 0 && (
@@ -436,7 +439,7 @@ export default function CompliancePage() {
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {loading && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>Loading…</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{tc("loading")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && acks.length === 0 && (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -30,7 +31,19 @@ const STATUS_COLOR: Record<CleanerStatus, "success" | "warning" | "error" | "lig
 
 const STATUS_FILTERS: (CleanerStatus | "ALL")[] = ["ALL", "ACTIVE", "PENDING", "SUSPENDED", "OFFBOARDED"];
 
+const STATUS_I18N: Record<CleanerStatus, "active" | "invited" | "suspended" | "offboarded"> = {
+  ACTIVE: "active",
+  PENDING: "invited",
+  SUSPENDED: "suspended",
+  OFFBOARDED: "offboarded",
+};
+
 export default function CleanersPage() {
+  const t = useTranslations("Dashboard.cleaners");
+  const tc = useTranslations("Dashboard.common");
+  const ts = useTranslations("Dashboard.cleaners.status");
+  const ta = useTranslations("Dashboard.cleaners.actions");
+
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
   const [statusFilter, setStatusFilter] = useState<CleanerStatus | "ALL">("ALL");
   const [loading, setLoading] = useState(true);
@@ -50,11 +63,11 @@ export default function CleanersPage() {
       const data = await listCleaners(statusFilter === "ALL" ? undefined : statusFilter);
       setCleaners(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load cleaners");
+      setError(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, tc]);
 
   useEffect(() => {
     load();
@@ -76,7 +89,7 @@ export default function CleanersPage() {
       setForm({ firstName: "", lastName: "", email: "", phone: "", hireDate: "" });
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to onboard cleaner");
+      setError(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setSaving(false);
     }
@@ -92,22 +105,25 @@ export default function CleanersPage() {
       setOffboardReason("");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to offboard cleaner");
+      setError(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setSaving(false);
     }
+  };
+
+  const filterLabel = (s: CleanerStatus | "ALL") => {
+    if (s === "ALL") return tc("all");
+    return ts(STATUS_I18N[s]);
   };
 
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Cleaners</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Cleaners you onboard here belong only to your business — there's no cross-business marketplace.
-          </p>
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
-        <Button onClick={() => setShowOnboardModal(true)}>Onboard Cleaner</Button>
+        <Button onClick={() => setShowOnboardModal(true)}>{t("invite")}</Button>
       </div>
 
       {error && (
@@ -127,7 +143,7 @@ export default function CleanersPage() {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300"
             }`}
           >
-            {s === "ALL" ? "All" : s.charAt(0) + s.slice(1).toLowerCase()}
+            {filterLabel(s)}
           </button>
         ))}
       </div>
@@ -137,23 +153,23 @@ export default function CleanersPage() {
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Name</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Email</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Phone</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Hired</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Actions</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.name")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.email")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.phone")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("hired")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("columns.status")}</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{tc("actions")}</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading && (
                 <TableRow>
-                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>Loading…</TableCell>
+                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>{tc("loading")}</TableCell>
                 </TableRow>
               )}
               {!loading && cleaners.length === 0 && (
                 <TableRow>
-                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>No cleaners yet</TableCell>
+                  <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>{t("empty")}</TableCell>
                 </TableRow>
               )}
               {!loading &&
@@ -168,16 +184,16 @@ export default function CleanersPage() {
                       {c.hireDate ? new Date(c.hireDate).toLocaleDateString() : "—"}
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      <Badge color={STATUS_COLOR[c.status]} size="sm">{c.status}</Badge>
+                      <Badge color={STATUS_COLOR[c.status]} size="sm">{ts(STATUS_I18N[c.status])}</Badge>
                     </TableCell>
                     <TableCell className="px-5 py-4">
                       <RowActionsMenu
-                        label={`Actions for ${cleanerDisplayName(c)}`}
+                        label={`${tc("actions")} ${cleanerDisplayName(c)}`}
                         actions={[
                           ...(c.status === "ACTIVE"
                             ? [
                                 {
-                                  label: "Offboard",
+                                  label: ta("offboard"),
                                   variant: "danger" as const,
                                   onClick: () => setShowOffboardModal(c),
                                 },
@@ -193,52 +209,48 @@ export default function CleanersPage() {
         </div>
       </div>
 
-      {/* Onboard modal */}
       <Modal isOpen={showOnboardModal} onClose={() => setShowOnboardModal(false)} className="max-w-md p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Onboard a Cleaner</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("onboardTitle")}</h2>
         <form onSubmit={handleOnboard} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>First Name</Label>
+              <Label>{t("firstName")}</Label>
               <Input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
             </div>
             <div>
-              <Label>Last Name</Label>
+              <Label>{t("lastName")}</Label>
               <Input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
             </div>
           </div>
           <div>
-            <Label>Email</Label>
+            <Label>{t("columns.email")}</Label>
             <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           </div>
           <div>
-            <Label>Phone</Label>
+            <Label>{t("columns.phone")}</Label>
             <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
-            <Label>Hire Date</Label>
+            <Label>{t("hireDate")}</Label>
             <Input type="date" value={form.hireDate} onChange={(e) => setForm({ ...form, hireDate: e.target.value })} />
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setShowOnboardModal(false)} type="button">Cancel</Button>
-            <Button type="submit" disabled={saving}>{saving ? "Onboarding…" : "Onboard"}</Button>
+            <Button variant="outline" onClick={() => setShowOnboardModal(false)} type="button">{tc("cancel")}</Button>
+            <Button type="submit" disabled={saving}>{saving ? t("onboarding") : t("onboard")}</Button>
           </div>
         </form>
       </Modal>
 
-      {/* Offboard modal */}
       <Modal isOpen={!!showOffboardModal} onClose={() => setShowOffboardModal(null)} className="max-w-md p-6">
         <h2 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
-          Offboard {showOffboardModal ? cleanerDisplayName(showOffboardModal) : ""}
+          {t("offboardTitle", { name: showOffboardModal ? cleanerDisplayName(showOffboardModal) : "" })}
         </h2>
-        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          This ends their active status with your business. Past bookings and reviews are kept.
-        </p>
-        <Label>Reason (optional)</Label>
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">{t("offboardHint")}</p>
+        <Label>{t("reasonOptional")}</Label>
         <Input value={offboardReason} onChange={(e) => setOffboardReason(e.target.value)} />
         <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={() => setShowOffboardModal(null)} type="button">Cancel</Button>
-          <Button onClick={handleOffboard} disabled={saving}>{saving ? "Offboarding…" : "Confirm Offboard"}</Button>
+          <Button variant="outline" onClick={() => setShowOffboardModal(null)} type="button">{tc("cancel")}</Button>
+          <Button onClick={handleOffboard} disabled={saving}>{saving ? t("offboarding") : t("confirmOffboard")}</Button>
         </div>
       </Modal>
     </div>

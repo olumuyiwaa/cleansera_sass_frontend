@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   listServices,
   createService,
@@ -37,6 +38,8 @@ function centsToDisplay(cents: number) {
 }
 
 export default function ServicesPage() {
+  const t = useTranslations("Dashboard.services");
+  const tc = useTranslations("Dashboard.common");
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -138,7 +141,7 @@ export default function ServicesPage() {
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Services</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500">
             What your business sells — pricing, duration, and add-ons. This is what customers see on your booking widget.
           </p>
@@ -148,7 +151,7 @@ export default function ServicesPage() {
           onClick={() => setShowCreate((s) => !s)}
           className="h-11 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white"
         >
-          {showCreate ? "Cancel" : "New service"}
+          {showCreate ? tc("cancel") : t("new")}
         </button>
       </div>
 
@@ -158,7 +161,7 @@ export default function ServicesPage() {
         <form onSubmit={onCreate} className="grid gap-3 rounded-2xl border p-5 sm:grid-cols-2 dark:border-gray-800">
           <input
             required
-            placeholder="Service name (e.g. Standard Clean)"
+            placeholder={t("namePlaceholder")}
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className={`${inputCls} sm:col-span-2`}
@@ -214,7 +217,7 @@ export default function ServicesPage() {
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-gray-500">{tc("loading")}</p>
       ) : (
         <div className="space-y-3">
           {services.map((s) => (
@@ -251,7 +254,7 @@ export default function ServicesPage() {
                 <div className="border-t px-4 py-4 dark:border-gray-800">
                   {s.description && <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">{s.description}</p>}
 
-                  <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Add-ons</h4>
+                  <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{t("addons")}</h4>
                   <div className="mb-3 space-y-2">
                     {(s.addOns || []).map((a: ServiceAddOn) => (
                       <div key={a.id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-white/[0.03]">

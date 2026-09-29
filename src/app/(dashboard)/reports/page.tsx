@@ -2,6 +2,7 @@
 
 import { isoDateInTimeZone } from "@/app/services/currency";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   getReportKPIs,
   getRevenueByDay,
@@ -33,6 +34,8 @@ function defaultRange() {
 }
 
 export default function ReportsPage() {
+  const t = useTranslations("Dashboard.reports");
+  const tc = useTranslations("Dashboard.common");
   const [range, setRange] = useState(defaultRange);
   const [kpis, setKpis] = useState<ReportKPIs | null>(null);
   const [revenue, setRevenue] = useState<RevenueDay[]>([]);
@@ -82,7 +85,7 @@ export default function ReportsPage() {
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Reports</h1>
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Revenue, utilization, and cleaner performance.
           </p>
@@ -150,7 +153,7 @@ export default function ReportsPage() {
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Jobs</TableCell>
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Completed</TableCell>
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Check-ins</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Revenue</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("revenue")}</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import {
@@ -24,6 +25,8 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "light"> = 
 };
 
 export default function SubscriptionPage() {
+  const t = useTranslations("Dashboard.subscription");
+  const tc = useTranslations("Dashboard.common");
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subscription, setSubscription] = useState<BusinessSubscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,7 +120,7 @@ export default function SubscriptionPage() {
   return (
       <div className="p-4 md:p-6">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Subscription</h1>
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             This is your business&apos;s CleanSera billing only — job payments from your customers
             happen via Stripe Connect and are unaffected by this plan.
@@ -137,7 +140,7 @@ export default function SubscriptionPage() {
         )}
 
         {loading ? (
-            <p className="text-sm text-gray-500">Loading…</p>
+            <p className="text-sm text-gray-500">{tc("loading")}</p>
         ) : subscription ? (
             <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
               <div className="flex flex-wrap items-center justify-between gap-4">

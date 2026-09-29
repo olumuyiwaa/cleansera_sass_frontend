@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {authFetch} from "@/app/api/authFetch";
 import {NotificationItem, Pagination} from "@/app/api/types";
@@ -55,6 +56,8 @@ function getNotificationBadgeClass(type: string) {
 }
 
 export default function NotificationsPage() {
+  const t = useTranslations("Dashboard.notifications");
+  const tc = useTranslations("Dashboard.common");
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
 
@@ -217,8 +220,7 @@ export default function NotificationsPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
-                            Notifications
-                        </h1>
+                            {t("title")}</h1>
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Review and manage your system notifications.
                         </p>
@@ -313,7 +315,7 @@ export default function NotificationsPage() {
                             ) : notifications.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-5 py-8 text-center text-sm text-gray-500">
-                                        No notifications found.
+                                        {t("empty")} found.
                                     </td>
                                 </tr>
                             ) : (

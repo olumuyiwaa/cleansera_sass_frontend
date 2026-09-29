@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { authFetch } from "@/app/api/authFetch";
 import SearchSelect from "@/components/SearchSelect/SearchSelect";
 import {useAuth} from "@/app/auth/useAuth";
@@ -66,6 +67,8 @@ function getChangeLabel(log: AuditLog): string {
 // ─── Page ─────────────────────────────────────────────────────
 
 export default function AuditTrailPage() {
+  const t = useTranslations("Dashboard.auditTrail");
+  const tc = useTranslations("Dashboard.common");
     const [logs, setLogs]             = useState<AuditLog[]>([]);
     const [pagination, setPagination] = useState<any>(null);
     const [page, setPage]             = useState(1);
@@ -170,8 +173,7 @@ export default function AuditTrailPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
-                            Audit Trail
-                        </h1>
+                            {t("title")}</h1>
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Immutable log of all platform activity.
                         </p>

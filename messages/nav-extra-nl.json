@@ -1,0 +1,16 @@
+{
+  "Dashboard": {
+    "nav": {
+      "usersGroup": "Gebruikers",
+      "bookingSchedulesGroup": "Boekingen & planning",
+      "businessGroup": "Bedrijf",
+      "userProfile": "Gebruikersprofiel",
+      "menu": "Menu",
+      "others": "Overig",
+      "platform": "Platform",
+      "overview": "Overzicht",
+      "businesses": "Bedrijven",
+      "subscriptions": "Abonnementen"
+    }
+  }
+}

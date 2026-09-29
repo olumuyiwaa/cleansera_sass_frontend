@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -47,6 +48,8 @@ const TYPE_COLOR: Record<InventoryItemType, "success" | "warning" | "error" | "l
 };
 
 export default function InventoryPage() {
+  const t = useTranslations("Dashboard.inventory");
+  const tc = useTranslations("Dashboard.common");
     const [tab, setTab] = useState<"items" | "stock" | "locations">("items");
     const [items, setItems] = useState<InventoryItem[]>([]);
     const [stock, setStock] = useState<InventoryItem[]>([]);
@@ -224,7 +227,7 @@ export default function InventoryPage() {
         <div className="p-4 md:p-6">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">Inventory</h1>
+                    <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Track supplies, chemicals, equipment and stock levels across locations.
                     </p>
@@ -234,7 +237,7 @@ export default function InventoryPage() {
                         Record Movement
                     </Button>
                     {tab === "locations" ? (
-                        <Button onClick={() => setShowLocationModal(true)}>Add Location</Button>
+                        <Button onClick={() => setShowLocationModal(true)}>{t("addLocation")}</Button>
                     ) : (
                         <Button onClick={() => setShowItemModal(true)}>Add Item</Button>
                     )}
@@ -317,12 +320,12 @@ export default function InventoryPage() {
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {loading && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={7}>Loading…</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={7}>{tc("loading")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && items.length === 0 && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={7}>No items yet</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={7}>{t("emptyItems")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading &&
@@ -379,13 +382,13 @@ export default function InventoryPage() {
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Total Qty</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Reorder Pt</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Locations</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("locations")}</TableCell>
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {loading && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>Loading…</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={6}>{tc("loading")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && stock.length === 0 && (
@@ -444,12 +447,12 @@ export default function InventoryPage() {
                             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {loading && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>Loading…</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{tc("loading")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && locations.length === 0 && (
                                     <TableRow>
-                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>No locations yet</TableCell>
+                                        <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>{t("emptyLocations")}</TableCell>
                                     </TableRow>
                                 )}
                                 {!loading &&
@@ -473,24 +476,24 @@ export default function InventoryPage() {
 
             {/* ─── Create Item Modal ─────────────────────────────── */}
             <Modal isOpen={showItemModal} onClose={() => setShowItemModal(false)} className="max-w-md p-6">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Add Inventory Item</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("addItem")}</h2>
                 <form onSubmit={handleCreateItem} className="space-y-4">
                     <div>
-                        <Label>Name</Label>
+                        <Label>{t("name")}</Label>
                         <Input value={itemForm.name} onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })} required />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label>SKU</Label>
+                            <Label>{t("sku")}</Label>
                             <Input value={itemForm.sku} onChange={(e) => setItemForm({ ...itemForm, sku: e.target.value })} />
                         </div>
                         <div>
-                            <Label>Unit</Label>
+                            <Label>{t("unit")}</Label>
                             <Input value={itemForm.unit} onChange={(e) => setItemForm({ ...itemForm, unit: e.target.value })} placeholder="each, liter, box…" />
                         </div>
                     </div>
                     <div>
-                        <Label>Type</Label>
+                        <Label>{t("type")}</Label>
                         <select
                             value={itemForm.type}
                             onChange={(e) => setItemForm({ ...itemForm, type: e.target.value as InventoryItemType })}
@@ -502,11 +505,11 @@ export default function InventoryPage() {
                         </select>
                     </div>
                     <div>
-                        <Label>Reorder Point</Label>
+                        <Label>{t("reorderPoint")}</Label>
                         <Input type="number" min="0" value={itemForm.reorderPoint} onChange={(e) => setItemForm({ ...itemForm, reorderPoint: e.target.value })} />
                     </div>
                     <div>
-                        <Label>Manufacturer</Label>
+                        <Label>{t("manufacturer")}</Label>
                         <Input value={itemForm.manufacturer} onChange={(e) => setItemForm({ ...itemForm, manufacturer: e.target.value })} />
                     </div>
                     <label className="flex items-center gap-2 text-sm">
@@ -519,7 +522,7 @@ export default function InventoryPage() {
                         Hazardous chemical (requires SDS)
                     </label>
                     <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setShowItemModal(false)} type="button">Cancel</Button>
+                        <Button variant="outline" onClick={() => setShowItemModal(false)} type="button">{tc("cancel")}</Button>
                         <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
                     </div>
                 </form>
@@ -527,14 +530,14 @@ export default function InventoryPage() {
 
             {/* ─── Create Location Modal ─────────────────────────── */}
             <Modal isOpen={showLocationModal} onClose={() => setShowLocationModal(false)} className="max-w-md p-6">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Add Location</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("addLocation")}</h2>
                 <form onSubmit={handleCreateLocation} className="space-y-4">
                     <div>
-                        <Label>Name</Label>
+                        <Label>{t("name")}</Label>
                         <Input value={locationForm.name} onChange={(e) => setLocationForm({ ...locationForm, name: e.target.value })} required placeholder="Main Warehouse, Van 1…" />
                     </div>
                     <div>
-                        <Label>Type</Label>
+                        <Label>{t("type")}</Label>
                         <select
                             value={locationForm.type}
                             onChange={(e) => setLocationForm({ ...locationForm, type: e.target.value })}
@@ -550,7 +553,7 @@ export default function InventoryPage() {
                         <Input value={locationForm.address} onChange={(e) => setLocationForm({ ...locationForm, address: e.target.value })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setShowLocationModal(false)} type="button">Cancel</Button>
+                        <Button variant="outline" onClick={() => setShowLocationModal(false)} type="button">{tc("cancel")}</Button>
                         <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
                     </div>
                 </form>
@@ -575,7 +578,7 @@ export default function InventoryPage() {
                         </select>
                     </div>
                     <div>
-                        <Label>Type</Label>
+                        <Label>{t("type")}</Label>
                         <select
                             value={movementForm.type}
                             onChange={(e) => setMovementForm({ ...movementForm, type: e.target.value as StockMovementType })}
@@ -627,7 +630,7 @@ export default function InventoryPage() {
                         <Input value={movementForm.notes} onChange={(e) => setMovementForm({ ...movementForm, notes: e.target.value })} />
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setShowMovementModal(false)} type="button">Cancel</Button>
+                        <Button variant="outline" onClick={() => setShowMovementModal(false)} type="button">{tc("cancel")}</Button>
                         <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Record"}</Button>
                     </div>
                 </form>

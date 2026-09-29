@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { listReviews, deleteReview } from "@/app/api/reviews.api";
 
 export default function ReviewsPage() {
+  const t = useTranslations("Dashboard.reviews");
+  const tc = useTranslations("Dashboard.common");
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,12 +33,12 @@ export default function ReviewsPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Reviews</h1>
+        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="mt-1 text-sm text-gray-500">Customer feedback from completed jobs</p>
       </div>
       {error && <div className="text-sm text-red-600">{error}</div>}
       {loading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-gray-500">{tc("loading")}</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {reviews.map((r) => (
@@ -58,7 +61,7 @@ export default function ReviewsPage() {
               </button>
             </div>
           ))}
-          {!reviews.length && <p className="text-sm text-gray-500">No reviews yet</p>}
+          {!reviews.length && <p className="text-sm text-gray-500">{t("empty")}</p>}
         </div>
       )}
     </div>

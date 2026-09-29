@@ -168,6 +168,476 @@
       "cancel": "Cancel",
       "saving": "Saving…",
       "markAsPaid": "Mark as paid"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "bookings": "Bookings",
+      "calendar": "Calendar",
+      "dispatch": "Dispatch",
+      "cleaners": "Cleaners",
+      "customers": "Customers",
+      "services": "Services",
+      "pricing": "Pricing",
+      "coupons": "Coupons",
+      "giftCards": "Gift cards",
+      "waitlist": "Waitlist",
+      "recurringSchedules": "Recurring schedules",
+      "payroll": "Payroll",
+      "inventory": "Inventory",
+      "compliance": "Compliance",
+      "checklistTemplates": "Checklist templates",
+      "cleanerDocuments": "Cleaner documents",
+      "website": "Website",
+      "subscription": "Subscription",
+      "team": "Team",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "reports": "Reports",
+      "reviews": "Reviews",
+      "businessSettings": "Business settings",
+      "onboarding": "Onboarding",
+      "supportTickets": "Support",
+      "auditTrail": "Audit trail",
+      "profile": "Profile",
+      "signOut": "Sign out",
+      "usersGroup": "Users",
+      "bookingSchedulesGroup": "Booking & Schedules",
+      "businessGroup": "Business",
+      "userProfile": "User Profile",
+      "menu": "Menu",
+      "others": "Others",
+      "platform": "Platform",
+      "overview": "Overview",
+      "businesses": "Businesses",
+      "subscriptions": "Subscriptions"
+    },
+    "navGroups": {
+      "operations": "Operations",
+      "people": "People",
+      "growth": "Growth & pricing",
+      "finance": "Finance",
+      "settings": "Settings"
+    },
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "add": "Add",
+      "search": "Search",
+      "filter": "Filter",
+      "actions": "Actions",
+      "loading": "Loading…",
+      "refresh": "Refresh",
+      "back": "Back",
+      "next": "Next",
+      "confirm": "Confirm",
+      "close": "Close",
+      "yes": "Yes",
+      "no": "No",
+      "all": "All",
+      "none": "None",
+      "status": "Status",
+      "date": "Date",
+      "time": "Time",
+      "from": "From",
+      "to": "To",
+      "today": "Today",
+      "empty": "Nothing here yet",
+      "noResults": "No results",
+      "errorGeneric": "Something went wrong. Please try again.",
+      "successSaved": "Saved",
+      "successDeleted": "Deleted",
+      "required": "Required",
+      "optional": "Optional",
+      "view": "View",
+      "export": "Export",
+      "import": "Import",
+      "download": "Download",
+      "upload": "Upload",
+      "language": "Language"
+    },
+    "home": {
+      "title": "Dashboard",
+      "welcome": "Welcome back",
+      "todayBookings": "Today's bookings",
+      "upcoming": "Upcoming",
+      "revenue": "Revenue",
+      "activeCleaners": "Active cleaners",
+      "openJobs": "Open jobs",
+      "quickActions": "Quick actions",
+      "welcomeName": "Welcome back, {name}",
+      "quick": {
+        "bookingsHint": "Create & manage jobs",
+        "dispatchHint": "Assign cleaners",
+        "cleanersHint": "Team roster",
+        "customersHint": "CRM",
+        "calendarHint": "Schedule view",
+        "messagesHint": "Team threads",
+        "reportsHint": "KPIs & revenue",
+        "settingsHint": "Brand & areas"
+      }
+    },
+    "bookings": {
+      "title": "Bookings",
+      "new": "New booking",
+      "searchPlaceholder": "Search by customer, address, ref…",
+      "filters": {
+        "all": "All",
+        "upcoming": "Upcoming",
+        "today": "Today",
+        "past": "Past",
+        "cancelled": "Cancelled"
+      },
+      "columns": {
+        "when": "When",
+        "customer": "Customer",
+        "service": "Service",
+        "address": "Address",
+        "cleaner": "Cleaner",
+        "status": "Status",
+        "total": "Total",
+        "payment": "Payment"
+      },
+      "actions": {
+        "view": "View",
+        "assign": "Assign cleaner",
+        "reschedule": "Reschedule",
+        "cancel": "Cancel",
+        "complete": "Mark complete",
+        "invoice": "Invoice",
+        "downloadUbl": "Download UBL",
+        "markPaid": "Mark payment received",
+        "message": "Message",
+        "confirm": "Confirm",
+        "preparingInvoice": "Preparing invoice…",
+        "preparingUbl": "Downloading UBL…",
+        "creatingLink": "Creating link…",
+        "paymentLink": "Payment link"
+      },
+      "status": {
+        "requested": "Requested",
+        "confirmed": "Confirmed",
+        "assigned": "Assigned",
+        "inProgress": "In progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "paymentStatus": {
+        "unpaid": "Unpaid",
+        "depositPaid": "Deposit paid",
+        "paid": "Paid",
+        "refunded": "Refunded",
+        "offline": "Offline",
+        "partial": "Partial"
+      },
+      "empty": "No bookings match these filters.",
+      "confirmCancel": "Cancel this booking? A fee may apply per your policy.",
+      "subtitle": "One-time and recurring cleaning jobs for your customers.",
+      "chooseExistingCustomer": "Choose existing customer",
+      "newCustomer": "+ New customer",
+      "selectCustomer": "Select a customer…",
+      "selectService": "Select a service…",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone",
+      "emailOptional": "Email (optional)",
+      "addressLine1": "Address line 1",
+      "city": "City",
+      "state": "Province / region",
+      "scheduledStart": "Scheduled start",
+      "createBooking": "Create booking",
+      "modalCancelTitle": "Cancel booking",
+      "modalRescheduleTitle": "Reschedule booking",
+      "modalPaymentTitle": "Update payment",
+      "modalCancelHint": "This will mark the booking as cancelled.",
+      "reasonOptional": "Reason (optional)",
+      "reasonPlaceholder": "Customer requested…",
+      "newStartTime": "New start time",
+      "noteOptional": "Note (optional)",
+      "notePlaceholder": "Cash / transfer reference…"
+    },
+    "cleaners": {
+      "title": "Cleaners",
+      "invite": "Invite cleaner",
+      "searchPlaceholder": "Search cleaners…",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "type": "Type",
+        "status": "Status",
+        "jobs": "Jobs"
+      },
+      "employmentType": {
+        "employee": "Employee",
+        "zzp": "ZZP (self-employed)"
+      },
+      "status": {
+        "active": "Active",
+        "invited": "Invited",
+        "suspended": "Suspended",
+        "offboarded": "Offboarded"
+      },
+      "actions": {
+        "view": "View profile",
+        "edit": "Edit",
+        "documents": "Documents",
+        "availability": "Availability",
+        "offboard": "Offboard",
+        "resendInvite": "Resend invite"
+      },
+      "empty": "No cleaners yet. Invite your first team member.",
+      "subtitle": "Cleaners you onboard here belong only to your business — there is no cross-business marketplace.",
+      "hired": "Hired",
+      "onboardTitle": "Onboard a cleaner",
+      "onboard": "Onboard",
+      "onboarding": "Onboarding…",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "hireDate": "Hire date",
+      "offboardTitle": "Offboard {name}",
+      "offboardHint": "This ends their active status with your business. Past bookings and reviews are kept.",
+      "reasonOptional": "Reason (optional)",
+      "confirmOffboard": "Confirm offboard",
+      "offboarding": "Offboarding…"
+    },
+    "customers": {
+      "title": "Customers",
+      "searchPlaceholder": "Search customers…",
+      "columns": {
+        "name": "Name",
+        "phone": "Phone",
+        "email": "Email",
+        "bookings": "Bookings",
+        "lastVisit": "Last visit"
+      },
+      "empty": "No customers yet.",
+      "subtitle": "CRM — search, view history, manage addresses",
+      "add": "+ Add customer",
+      "newTitle": "New customer",
+      "notes": "Notes",
+      "deleteConfirm": "Delete this customer?",
+      "noEmail": "no email",
+      "addresses": "Addresses",
+      "noAddresses": "No addresses",
+      "recentBookings": "Recent bookings"
+    },
+    "dispatch": {
+      "title": "Dispatch",
+      "unassigned": "Needs assignment",
+      "assigned": "Assigned today",
+      "dragHint": "Drag jobs onto cleaners or use Assign.",
+      "subtitle": "Assign cleaners to confirmed jobs and track today's board.",
+      "suggest": "Suggest",
+      "assign": "Assign",
+      "dayRoute": "Day route",
+      "checkRoute": "Check route",
+      "noneUnassigned": "No jobs need assignment",
+      "noneAssigned": "No assignments yet"
+    },
+    "calendar": {
+      "title": "Calendar",
+      "week": "Week",
+      "month": "Month",
+      "day": "Day",
+      "show": "Show"
+    },
+    "settings": {
+      "title": "Business settings",
+      "general": "General",
+      "branding": "Branding",
+      "payments": "Payments",
+      "cancellationPolicy": "Cancellation policy",
+      "openingHours": "Business hours",
+      "serviceArea": "Service area",
+      "vatBtw": "BTW / VAT",
+      "kvk": "KvK number",
+      "customDomain": "Custom domain",
+      "notifications": "Notifications",
+      "language": "Language & region",
+      "invoicingBtw": "Invoicing & BTW",
+      "btwId": "BTW-id",
+      "btwRate": "Standard BTW rate",
+      "businessName": "Business name",
+      "timezone": "Timezone",
+      "customDomainOptional": "Custom domain (optional)",
+      "legalName": "Legal name",
+      "iban": "IBAN (shown on invoices)",
+      "tagline": "Tagline",
+      "primaryColor": "Primary color",
+      "accentColor": "Accent color",
+      "btwHint": "Required on every Dutch invoice. Your prices are shown to customers including BTW; invoices split out the BTW automatically.",
+      "stripeConnect": "Stripe Connect"
+    },
+    "invoices": {
+      "title": "Invoices",
+      "downloadUbl": "Download UBL",
+      "downloadPdf": "Download PDF",
+      "issue": "Issue invoice",
+      "ublHint": "UBL 2.1 XML for Exact, Moneybird, e-Boekhouden or SnelStart."
+    },
+    "subscription": {
+      "title": "Subscription",
+      "plan": "Plan",
+      "trial": "Trial",
+      "upgrade": "Upgrade",
+      "manageBilling": "Manage billing",
+      "readOnlyMode": "Your workspace is in read-only mode until billing is updated."
+    },
+    "payroll": {
+      "title": "Payroll",
+      "earnings": "Earnings",
+      "period": "Period",
+      "export": "Export",
+      "rates": "Rates",
+      "payouts": "Payouts"
+    },
+    "compliance": {
+      "title": "Compliance",
+      "vog": "VOG",
+      "documents": "Documents",
+      "upload": "Upload document",
+      "empty": "No items yet"
+    },
+    "team": {
+      "title": "Team",
+      "subtitle": "Managers and staff who can access this business dashboard.",
+      "invite": "Invite teammate",
+      "inviteTitle": "Invite a teammate",
+      "sendInvite": "Send invite",
+      "sending": "Sending…",
+      "empty": "No team members yet",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "invited": "Invited",
+        "removed": "Removed"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "KPIs and revenue for your business",
+      "revenue": "Revenue",
+      "bookings": "Bookings",
+      "period": "Period",
+      "from": "From",
+      "to": "To"
+    },
+    "messages": {
+      "title": "Messages",
+      "placeholder": "Write a message…",
+      "empty": "No conversations yet",
+      "send": "Send",
+      "hint": "Threads are per cleaner or customer (not free-form DMs between arbitrary users).",
+      "startConversation": "Start conversation"
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "What customers can book",
+      "new": "New service",
+      "empty": "No services yet",
+      "basePrice": "Base price",
+      "duration": "Duration (minutes)",
+      "active": "Active",
+      "namePlaceholder": "Service name (e.g. Standard Clean)",
+      "inactive": "Inactive",
+      "addons": "Add-ons"
+    },
+    "auditTrail": {
+      "title": "Audit trail",
+      "empty": "No events yet"
+    },
+    "checklistTemplates": {
+      "title": "Checklist templates",
+      "empty": "No templates yet"
+    },
+    "cleanerDocuments": {
+      "title": "Cleaner documents",
+      "empty": "No documents yet"
+    },
+    "coupons": {
+      "title": "Coupons",
+      "empty": "No coupons yet"
+    },
+    "giftCards": {
+      "title": "Gift cards",
+      "empty": "No gift cards yet"
+    },
+    "inventory": {
+      "title": "Inventory",
+      "empty": "No items yet",
+      "items": "Items",
+      "locations": "Locations",
+      "addItem": "Add inventory item",
+      "addLocation": "Add location",
+      "emptyItems": "No items yet",
+      "emptyLocations": "No locations yet",
+      "name": "Name",
+      "sku": "SKU",
+      "unit": "Unit",
+      "type": "Type",
+      "reorderPoint": "Reorder point",
+      "manufacturer": "Manufacturer"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications"
+    },
+    "onboarding": {
+      "title": "Finish setting up CleanSera",
+      "subtitle": "Complete the required steps so your booking widget can accept customers. Stripe is optional — you can collect cash or bank transfer without it."
+    },
+    "pricing": {
+      "title": "Pricing",
+      "perSqft": "Per square foot rate",
+      "perRoom": "Per room rate",
+      "currency": "Currency",
+      "saveRates": "Save rates",
+      "subtitle": "Rates used when pricing by size or rooms"
+    },
+    "profile": {
+      "title": "Profile"
+    },
+    "recurringSchedules": {
+      "title": "Recurring schedules",
+      "empty": "No schedules yet"
+    },
+    "reviews": {
+      "title": "Reviews",
+      "empty": "No reviews yet"
+    },
+    "supportTickets": {
+      "title": "Support tickets",
+      "empty": "No tickets yet",
+      "subject": "Subject",
+      "describeIssue": "Describe the issue",
+      "searchPlaceholder": "Search subject or description…",
+      "replyPlaceholder": "Write a reply…",
+      "allStatuses": "All statuses",
+      "allPriorities": "All priorities",
+      "status": "Status",
+      "priority": "Priority",
+      "category": "Category",
+      "updated": "Updated",
+      "messages": "Messages",
+      "noMessages": "No messages yet"
+    },
+    "waitlist": {
+      "title": "Waitlist",
+      "empty": "Waitlist is empty"
+    },
+    "website": {
+      "title": "Website"
     }
   },
   "Portal": {
@@ -297,5 +767,33 @@
       "starsOption": "{n, plural, one {# star} other {# stars}}",
       "confirmCancel": "Cancel this booking? A fee may apply per business policy."
     }
+  },
+  "Invoices": {
+    "ubl": {
+      "download": "Download UBL",
+      "downloadForBooking": "Download UBL (XML)",
+      "downloading": "Downloading…",
+      "preparing": "Preparing invoice…",
+      "tooltip": "UBL 2.1 XML for Exact, Moneybird, e-Boekhouden or SnelStart. File import only — not Peppol network delivery.",
+      "success": "UBL downloaded: {filename}",
+      "hint": "Import this XML into your accounting software (Exact Online, Moneybird, e-Boekhouden, SnelStart).",
+      "sectionTitle": "E-invoice export",
+      "sectionDescription": "Download a UBL 2.1 XML file for your bookkeeping. This is a file export, not Peppol e-delivery."
+    },
+    "actions": {
+      "viewPdf": "View PDF",
+      "downloadUbl": "Download UBL",
+      "issue": "Issue invoice"
+    }
+  },
+  "Auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "registerBusiness": "Register your business",
+    "twoFactor": "Two-factor code",
+    "continue": "Continue"
   }
 }
