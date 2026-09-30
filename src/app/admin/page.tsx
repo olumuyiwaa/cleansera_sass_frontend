@@ -156,6 +156,13 @@ export default function SuperAdminDashboardPage() {
       {/* Charts row */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          {/*<MonthlySalesChart*/}
+          {/*  title="Subscriptions by status"*/}
+          {/*  seriesName="Count"*/}
+          {/*  data={subscriptionChart}*/}
+          {/*  viewMoreHref="/admin/subscriptions"*/}
+          {/*  height={200}*/}
+          {/*/>*/}
           <StatisticsChart
             title="Subscription mix"
             subtitle="Live counts from platform overview"
