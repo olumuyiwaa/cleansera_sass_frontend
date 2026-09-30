@@ -22,6 +22,10 @@ import {
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Button from "@/components/ui/button/Button";
+import MonthlySalesChart from "@/components/overview/MonthlySalesChart";
+import StatisticsChart from "@/components/overview/StatisticsChart";
+import MonthlyTarget from "@/components/overview/MonthlyTarget";
+import { EcommerceMetrics } from "@/components/overview/EcommerceMetrics";
 
 function defaultRange() {
   const to = new Date();
@@ -108,8 +112,19 @@ export default function ReportsPage() {
           {error}
         </div>
       )}
+        <MonthlySalesChart
+            title={t("revenueByDay")}
+            seriesName="Revenue"
+            data={revenue.map((d) => ({
+                label: d.date.slice(5),
+                value: (d.revenueCents || 0) / 100,
+            }))}
+            formatValue={(n) => formatMoney(Math.round(n * 100))}
+            viewMoreHref={undefined}
+            height={220}
+        />
 
-      <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+      <div className="my-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {cards.map((c) => (
           <div
             key={c.label}
@@ -121,24 +136,39 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      <div className="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">
-        <div className="border-b border-gray-100 px-5 py-3 dark:border-gray-800">
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-white/90">{t("revenueByDay")}</h2>
+      <div className="mb-8 grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <StatisticsChart
+            title="Revenue trend"
+            subtitle={t("revenueByDay")}
+            categories={revenue.map((d) => d.date.slice(5))}
+            series={[
+              {
+                name: "Revenue",
+                data: revenue.map((d) => (d.revenueCents || 0) / 100),
+              },
+            ]}
+            formatY={(n) => formatMoney(Math.round(n * 100))}
+            viewMoreHref={undefined}
+          />
         </div>
-        <div className="max-h-64 overflow-y-auto px-5 py-3">
-          {revenue.length === 0 ? (
-            <p className="text-sm text-gray-500">{t("noCompletedInRange")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {revenue.map((d) => (
-                <li key={d.date} className="flex justify-between text-sm">
-                  <span className="text-gray-500">{d.date}</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">{formatMoney(d.revenueCents)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <MonthlyTarget
+          title="Completion rate"
+          progressPct={
+            kpis
+              ? kpis.completionRate <= 1
+                ? kpis.completionRate * 100
+                : kpis.completionRate
+              : 0
+          }
+          targetLabel="Completed"
+          targetValue={kpis ? String(kpis.completed) : "—"}
+          revenueLabel="Revenue"
+          revenueValue={kpis ? formatMoney(kpis.revenueCents) : "—"}
+          todayLabel="Utilization"
+          todayValue={kpis ? `${Math.round(kpis.utilizationPct)}%` : "—"}
+          viewMoreHref={undefined}
+        />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">

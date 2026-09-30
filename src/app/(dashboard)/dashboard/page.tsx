@@ -7,9 +7,13 @@ import Badge from "@/components/ui/badge/Badge";
 import { listCleaners } from "@/app/api/cleaners.api";
 import { listBookings } from "@/app/api/bookings.api";
 import { getSubscription } from "@/app/api/subscriptions.api";
-import { getReportKPIs, type ReportKPIs } from "@/app/api/reports.api";
+import { getReportKPIs, getRevenueByDay, type ReportKPIs, type RevenueDay } from "@/app/api/reports.api";
 import { Booking, Cleaner, formatMoney } from "@/app/api/cleansera-types";
 import { useAuth } from "@/app/auth/useAuth";
+import { EcommerceMetrics } from "@/components/overview/EcommerceMetrics";
+import MonthlySalesChart from "@/components/overview/MonthlySalesChart";
+import MonthlyTarget from "@/components/overview/MonthlyTarget";
+import StatisticsChart from "@/components/overview/StatisticsChart";
 
 function displayName(user: {
   firstName?: string | null;
@@ -91,6 +95,7 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [subStatus, setSubStatus] = useState<string | null>(null);
   const [kpis, setKpis] = useState<ReportKPIs | null>(null);
+  const [revenueDays, setRevenueDays] = useState<RevenueDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -102,16 +107,18 @@ export default function DashboardPage() {
       const from = new Date(now);
       from.setDate(from.getDate() - 30);
 
-      const [c, b, s, k] = await Promise.all([
+      const [c, b, s, k, rev] = await Promise.all([
         listCleaners("ACTIVE").catch(() => [] as Cleaner[]),
         listBookings().catch(() => [] as Booking[]),
         getSubscription().catch(() => null),
         getReportKPIs(from.toISOString(), now.toISOString()).catch(() => null),
+        getRevenueByDay(from.toISOString(), now.toISOString()).catch(() => [] as RevenueDay[]),
       ]);
       setCleaners(Array.isArray(c) ? c : []);
       setBookings(Array.isArray(b) ? b : []);
       setSubStatus(s?.status ?? null);
       setKpis(k);
+      setRevenueDays(Array.isArray(rev) ? rev : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load dashboard");
     } finally {
@@ -313,6 +320,17 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        <MonthlySalesChart
+            title="Revenue by day"
+            seriesName="Revenue"
+            viewMoreHref="/reports"
+            data={revenueDays.map((d) => ({
+              label: d.date.slice(5), // MM-DD
+              value: (d.revenueCents || 0) / 100,
+            }))}
+            formatValue={(n) => formatMoney(Math.round(n * 100))}
+        />
+
         {/* 30d KPI strip when reports work */}
         {kpis && !loading && (
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:grid-cols-4 dark:border-gray-800 dark:bg-white/[0.02]">
@@ -322,6 +340,53 @@ export default function DashboardPage() {
               <MiniStat label="Utilization" value={`${Math.round(kpis.utilizationPct)}%`} />
             </div>
         )}
+
+
+        {/* Charts — overview + Apex components */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <StatisticsChart
+              title="Jobs vs revenue"
+              subtitle="Daily revenue (units) over the selected period"
+              categories={revenueDays.map((d) => d.date.slice(5))}
+              series={[
+                {
+                  name: "Revenue",
+                  data: revenueDays.map((d) => (d.revenueCents || 0) / 100),
+                },
+              ]}
+              formatY={(n) => formatMoney(Math.round(n * 100))}
+              viewMoreHref="/reports"
+            />
+          </div>
+          <div>
+            <MonthlyTarget
+              title="Completion rate"
+              subtitle="Jobs completed in the last 30 days"
+              progressPct={
+                kpis
+                  ? kpis.completionRate <= 1
+                    ? kpis.completionRate * 100
+                    : kpis.completionRate
+                  : 0
+              }
+              targetLabel="Completed"
+              targetValue={loading ? "…" : String(kpis?.completed ?? "—")}
+              revenueLabel="Revenue"
+              revenueValue={
+                loading ? "…" : formatMoney(kpis?.revenueCents ?? 0)
+              }
+              todayLabel="Today"
+              todayValue={loading ? "…" : String(todayJobs.length)}
+              footerNote={
+                kpis
+                  ? `Avg ticket ${formatMoney(kpis.avgTicketCents)} · utilization ${Math.round(kpis.utilizationPct)}%`
+                  : undefined
+              }
+              viewMoreHref="/reports"
+            />
+          </div>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Today + upcoming */}

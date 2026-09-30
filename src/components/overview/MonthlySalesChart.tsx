@@ -1,26 +1,53 @@
 "use client";
 import { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
-import { MoreDotIcon } from "@/icons";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { useState } from "react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
+import Link from "next/link";
 
-// Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export default function MonthlySalesChart() {
+export type SalesSeriesPoint = {
+  /** Category label (e.g. month or date) */
+  label: string;
+  /** Numeric value — jobs count or currency units (not cents) */
+  value: number;
+};
+
+type Props = {
+  title?: string;
+  seriesName?: string;
+  data?: SalesSeriesPoint[];
+  /** Format y tooltip (default: raw number) */
+  formatValue?: (n: number) => string;
+  viewMoreHref?: string;
+  height?: number;
+};
+
+const DEFAULT_CATEGORIES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+export default function MonthlySalesChart({
+  title = "Monthly revenue",
+  seriesName = "Revenue",
+  data,
+  formatValue,
+  viewMoreHref = "/reports",
+  height = 180,
+}: Props) {
+  const categories = data?.length ? data.map((d) => d.label) : DEFAULT_CATEGORIES;
+  const values = data?.length ? data.map((d) => d.value) : Array(12).fill(0);
+  const empty = !data?.length || values.every((v) => !v);
+
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {
       fontFamily: "Outfit, sans-serif",
       type: "bar",
-      height: 180,
-      toolbar: {
-        show: false,
-      },
+      height,
+      toolbar: { show: false },
     },
     plotOptions: {
       bar: {
@@ -30,35 +57,12 @@ export default function MonthlySalesChart() {
         borderRadiusApplication: "end",
       },
     },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      show: true,
-      width: 4,
-      colors: ["transparent"],
-    },
+    dataLabels: { enabled: false },
+    stroke: { show: true, width: 4, colors: ["transparent"] },
     xaxis: {
-      categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-      axisBorder: {
-        show: false,
-      },
-      axisTicks: {
-        show: false,
-      },
+      categories,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     legend: {
       show: true,
@@ -67,88 +71,57 @@ export default function MonthlySalesChart() {
       fontFamily: "Outfit",
     },
     yaxis: {
-      title: {
-        text: undefined,
+      title: { text: undefined },
+      labels: {
+        formatter: (val: number) =>
+          formatValue ? formatValue(val) : String(Math.round(val)),
       },
     },
-    grid: {
-      yaxis: {
-        lines: {
-          show: true,
-        },
-      },
-    },
-    fill: {
-      opacity: 1,
-    },
-
+    grid: { yaxis: { lines: { show: true } } },
+    fill: { opacity: 1 },
     tooltip: {
-      x: {
-        show: false,
-      },
+      x: { show: true },
       y: {
-        formatter: (val: number) => `${val}`,
+        formatter: (val: number) =>
+          formatValue ? formatValue(val) : `${val}`,
       },
     },
   };
-  const series = [
-    {
-      name: "Sales",
-      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
-    },
-  ];
-  const [isOpen, setIsOpen] = useState(false);
 
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
-
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+  const series = [{ name: seriesName, data: values }];
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Monthly Sales
+          {title}
         </h3>
-
-        <div className="relative inline-block">
-          <button onClick={toggleDropdown} className="dropdown-toggle">
-            <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
-          </button>
-          <Dropdown
-            isOpen={isOpen}
-            onClose={closeDropdown}
-            className="w-40 p-2"
+        {viewMoreHref && (
+          <Link
+            href={viewMoreHref}
+            className="text-sm font-medium text-brand-500 hover:text-brand-600"
           >
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              View More
-            </DropdownItem>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              Delete
-            </DropdownItem>
-          </Dropdown>
-        </div>
+            View more
+          </Link>
+        )}
       </div>
 
-      <div className="max-w-full overflow-x-auto custom-scrollbar">
-        <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
-          <ReactApexChart
-            options={options}
-            series={series}
-            type="bar"
-            height={180}
-          />
+      {empty ? (
+        <div className="flex h-[180px] items-center justify-center text-sm text-gray-400">
+          No data for this period.
         </div>
-      </div>
+      ) : (
+        <div className="max-w-full overflow-x-auto custom-scrollbar">
+          <div className="-ml-5 min-w-[650px] xl:min-w-full pl-2">
+            <ReactApexChart
+              options={options}
+              series={series}
+              type="bar"
+              height={height}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
