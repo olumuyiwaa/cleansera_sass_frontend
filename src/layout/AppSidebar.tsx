@@ -87,13 +87,11 @@ const AppSidebar: React.FC = () => {
       },
       {
         icon: <ShootingStarIcon />,
-        name: t("coupons"),
-        path: "/coupons",
-      },
-      {
-        icon: <BoltIcon />,
-        name: t("giftCards"),
-        path: "/gift-cards",
+        name: t("vouchers"),
+        subItems: [
+          { name: t("giftCards"), path: "/gift-cards",},
+          { name: t("coupons"), path: "/coupons", },
+        ],
       },
       {
         icon: <TaskIcon />,
@@ -419,7 +417,7 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href={isSuperAdmin ? "/admin" : "/dashboard"}>
+        <Link href={"/"}>
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <Image
