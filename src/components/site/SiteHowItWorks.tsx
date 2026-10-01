@@ -1,31 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Reveal } from "./Reveal";
 import BeforeAfterSlider from "./BeforeAfterSlider";
-
-const STEPS = [
-  {
-    step: "01",
-    title: "Instant online quote",
-    body: "Choose your service and share a few details about your space to see the available options.",
-  },
-  {
-    step: "02",
-    title: "Professional cleaning specialists",
-    body: "Your local team arrives prepared with the tools and products needed for the service.",
-  },
-  {
-    step: "03",
-    title: "Quality-checked service",
-    body: "Your booking is completed with care, and you can arrange another visit whenever you need one.",
-  },
-];
 
 type SiteHowItWorksProps = {
   primaryColor: string;
 };
 
 export function SiteHowItWorks({ primaryColor }: SiteHowItWorksProps) {
+  const t = useTranslations("Site.howItWorks");
+
+  const steps = [
+    { step: "01", title: t("step1Title"), body: t("step1Body") },
+    { step: "02", title: t("step2Title"), body: t("step2Body") },
+    { step: "03", title: t("step3Title"), body: t("step3Body") },
+  ];
+
   return (
     <section
       id="how-it-works"
@@ -37,8 +28,8 @@ export function SiteHowItWorks({ primaryColor }: SiteHowItWorksProps) {
             <BeforeAfterSlider
               beforeSrc="/images/before-room.jpg"
               afterSrc="/images/after-room.jpg"
-              beforeAlt="Living room before cleaning"
-              afterAlt="Living room after cleaning"
+              beforeAlt={t("beforeAlt")}
+              afterAlt={t("afterAlt")}
             />
           </div>
         </Reveal>
@@ -47,24 +38,30 @@ export function SiteHowItWorks({ primaryColor }: SiteHowItWorksProps) {
           <Reveal>
             <div className="max-w-xl">
               <span className="site-eyebrow">
-                <span className="site-eyebrow-dot" style={{ backgroundColor: primaryColor }} />
-                Our cleaning process
+                <span
+                  className="site-eyebrow-dot"
+                  style={{ backgroundColor: primaryColor }}
+                />
+                {t("eyebrow")}
               </span>
-              <h2 className="site-section-title mt-5">A better clean, from the first click.</h2>
+              <h2 className="site-section-title mt-5">{t("title")}</h2>
               <p className="mt-4 text-base leading-relaxed text-[#616963] sm:text-lg">
-                Booking a clean should be simple. Choose what you need, pick a time,
-                and let your cleaning team take it from there.
+                {t("subtitle")}
               </p>
             </div>
           </Reveal>
           <ol className="site-process-steps mt-8">
-            {STEPS.map((item, i) => (
+            {steps.map((item, i) => (
               <Reveal key={item.step} delay={i * 70}>
                 <li className="site-process-step">
                   <span className="site-process-number">{item.step}</span>
                   <div>
-                    <h3 className="text-lg font-semibold text-[#102c24]">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#616963]">{item.body}</p>
+                    <h3 className="text-lg font-semibold text-[#102c24]">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[#616963]">
+                      {item.body}
+                    </p>
                   </div>
                 </li>
               </Reveal>

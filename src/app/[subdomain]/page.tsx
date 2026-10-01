@@ -1,11 +1,13 @@
 "use client";
 
 import { use, useCallback, useEffect, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   getStorefront,
   type StorefrontResponse,
   type WidgetSectionsEnabled,
 } from "@/app/api/widget.api";
+import { setActiveCurrency } from "@/app/services/currency";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteHero } from "@/components/site/SiteHero";
 import { SiteServices } from "@/components/site/SiteServices";
@@ -33,6 +35,7 @@ export default function BusinessSitePage({
   params: Promise<{ subdomain: string }>;
 }) {
   const { subdomain } = use(params);
+  const t = useTranslations("Site");
   const [data, setData] = useState<StorefrontResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,12 +51,19 @@ export default function BusinessSitePage({
 
     getStorefront(subdomain)
       .then((storefront) => {
-        if (!cancelled) setData(storefront);
+        if (cancelled) return;
+        setData(storefront);
+        // Align money formatting in the booking modal with this business.
+        setActiveCurrency(storefront.business?.currency);
+        const name = storefront.business?.name;
+        if (name && typeof document !== "undefined") {
+          document.title = `${name} · CleanSera`;
+        }
       })
       .catch((e) => {
         if (!cancelled) {
           setError(
-            e instanceof Error ? e.message : "This site isn't available."
+            e instanceof Error ? e.message : t("notFoundBody")
           );
         }
       })
@@ -64,12 +74,26 @@ export default function BusinessSitePage({
     return () => {
       cancelled = true;
     };
-  }, [subdomain]);
+  }, [subdomain, t]);
+
+  // Escape closes the booking modal
+  useEffect(() => {
+    if (!bookOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeBook();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [bookOpen, closeBook]);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-8 text-[#5F6664]">
-        Loading…
+      <div
+        className="flex min-h-screen items-center justify-center p-8 text-[#5F6664]"
+        role="status"
+        aria-live="polite"
+      >
+        {t("loading")}
       </div>
     );
   }
@@ -77,10 +101,9 @@ export default function BusinessSitePage({
   if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 p-8 text-center">
-        <p className="text-lg font-semibold text-[#171B1A]">Site not found</p>
+        <p className="text-lg font-semibold text-[#171B1A]">{t("notFoundTitle")}</p>
         <p className="max-w-sm text-sm text-[#5F6664]">
-          {error ||
-            "We couldn't find an active business for this link. Check the URL or contact the business."}
+          {error || t("notFoundBody")}
         </p>
       </div>
     );
@@ -100,28 +123,42 @@ export default function BusinessSitePage({
   // itself) even when enabled here — this config only controls
   // visibility/order, not whether content exists.
   const sectionsConfig = branding?.sectionsEnabled;
-  const order = sectionsConfig?.order?.length ? sectionsConfig.order : DEFAULT_SECTION_ORDER;
+  const order = sectionsConfig?.order?.length
+    ? sectionsConfig.order
+    : DEFAULT_SECTION_ORDER;
   const isEnabled = (key: "about" | "testimonials" | "gallery" | "faq") =>
-      sectionsConfig ? sectionsConfig[key] !== false : true; // default on if the business never configured this
+    sectionsConfig ? sectionsConfig[key] !== false : true;
 
   const optionalSections: Record<string, ReactNode> = {
     about: isEnabled("about") ? (
-        <SiteAbout
-            key="about"
-            title={branding?.aboutTitle ?? null}
-            body={branding?.aboutBody ?? null}
-            heroImageUrl={branding?.heroImageUrl ?? null}
-            primaryColor={primaryColor}
-        />
+      <SiteAbout
+        key="about"
+        title={branding?.aboutTitle ?? null}
+        body={branding?.aboutBody ?? null}
+        heroImageUrl={branding?.heroImageUrl ?? null}
+        primaryColor={primaryColor}
+      />
     ) : null,
     testimonials: isEnabled("testimonials") ? (
-        <SiteTestimonials key="testimonials" testimonials={branding?.testimonials} primaryColor={primaryColor} />
+      <SiteTestimonials
+        key="testimonials"
+        testimonials={branding?.testimonials}
+        primaryColor={primaryColor}
+      />
     ) : null,
     gallery: isEnabled("gallery") ? (
-        <SiteGallery key="gallery" imageUrls={branding?.galleryImageUrls} primaryColor={primaryColor} />
+      <SiteGallery
+        key="gallery"
+        imageUrls={branding?.galleryImageUrls}
+        primaryColor={primaryColor}
+      />
     ) : null,
     faq: isEnabled("faq") ? (
-        <SiteFaq key="faq" items={branding?.faqItems} primaryColor={primaryColor} />
+      <SiteFaq
+        key="faq"
+        items={branding?.faqItems}
+        primaryColor={primaryColor}
+      />
     ) : null,
   };
 
@@ -137,7 +174,7 @@ export default function BusinessSitePage({
         hasFaq={Boolean(branding?.faqItems?.length)}
         onBook={openBook}
       />
-      <main>
+      <main id="main-content">
         <SiteHero
           subdomain={subdomain}
           businessName={name}
@@ -166,6 +203,7 @@ export default function BusinessSitePage({
         subdomain={subdomain}
         businessName={name}
         onBook={openBook}
+        phoneNumber={business.phone}
         socialLinks={branding?.socialLinks}
       />
 

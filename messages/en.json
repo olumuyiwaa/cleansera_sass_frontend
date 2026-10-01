@@ -1656,5 +1656,73 @@
     "registerBusiness": "Register your business",
     "twoFactor": "Two-factor code",
     "continue": "Continue"
+  },
+  "Site": {
+    "loading": "Loading…",
+    "notFoundTitle": "Site not found",
+    "notFoundBody": "We couldn't find an active business for this link. Check the URL or contact the business.",
+    "nav": {
+      "services": "Services",
+      "howItWorks": "How it works",
+      "about": "About",
+      "reviews": "Reviews",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "portal": "Client portal",
+      "book": "Book cleaning",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "siteNav": "Site navigation"
+    },
+    "hero": {
+      "eyebrow": "Cleaning, made easy",
+      "titleLine1": "Professional cleaning",
+      "titleLine2": "for a home you love.",
+      "copy": "Book {name} online in minutes. Choose the service and time that suit your home, and leave the cleaning to a trusted local team.",
+      "checkPrice": "Check price & availability",
+      "exploreServices": "Explore cleaning services",
+      "call": "Call {phone}",
+      "proofTrusted": "Trusted local cleaners",
+      "proofFlexible": "Flexible scheduling",
+      "proofClear": "Clear booking details"
+    },
+    "services": {
+      "eyebrow": "Cleaning services",
+      "title": "A clean for every kind of home.",
+      "subtitle": "Choose the service that fits your space, see clear starting prices, and book a time that works for you.",
+      "from": "From {price}",
+      "approxMin": "Approx. {count} min",
+      "bookThis": "Book this service",
+      "emptyTitle": "Services coming soon",
+      "emptyBody": "This business is still setting up its service menu. Please check back shortly or use the client portal if you already have an account."
+    },
+    "howItWorks": {
+      "eyebrow": "Our cleaning process",
+      "title": "A better clean, from the first click.",
+      "subtitle": "Booking a clean should be simple. Choose what you need, pick a time, and let your cleaning team take it from there.",
+      "step1Title": "Instant online quote",
+      "step1Body": "Choose your service and share a few details about your space to see the available options.",
+      "step2Title": "Professional cleaning specialists",
+      "step2Body": "Your local team arrives prepared with the tools and products needed for the service.",
+      "step3Title": "Quality-checked service",
+      "step3Body": "Your booking is completed with care, and you can arrange another visit whenever you need one.",
+      "beforeAlt": "Room before cleaning",
+      "afterAlt": "Room after cleaning"
+    },
+    "footer": {
+      "blurb": "Professional cleaning you can book online — local, reliable, and built around your schedule.",
+      "explore": "Explore",
+      "ready": "Ready to book?",
+      "book": "Book a cleaning",
+      "viewServices": "View services",
+      "portal": "Client portal",
+      "rights": "All rights reserved.",
+      "poweredBy": "Powered by"
+    },
+    "cta": {
+      "title": "Ready for a cleaner home?",
+      "subtitle": "Book online in a few steps — no phone tag required.",
+      "book": "Book now"
+    }
   }
 }

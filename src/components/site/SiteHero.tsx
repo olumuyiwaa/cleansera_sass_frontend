@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 import { Reveal } from "./Reveal";
 
 type SiteHeroProps = {
@@ -36,6 +37,7 @@ export function SiteHero({
   accentColor,
   onBook,
 }: SiteHeroProps) {
+  const t = useTranslations("Site.hero");
   const bookHref = `/book-now/${subdomain}`;
   const accent = accentColor || "#D0AA62";
   const image = heroImageUrl || "/images/after-room.jpg";
@@ -45,6 +47,9 @@ export function SiteHero({
     event.preventDefault();
     onBook();
   }
+
+  const copy = t("copy", { name: businessName });
+  const fullCopy = tagline?.trim() ? `${copy} ${tagline.trim()}` : copy;
 
   return (
     <section
@@ -64,42 +69,40 @@ export function SiteHero({
             className="site-call-pill site-hero-call"
             href={`tel:${phoneNumber.replace(/[^+\d]/g, "")}`}
           >
-            <span className="site-call-icon" aria-hidden="true">☎</span>
-            <span>Call {phoneNumber}</span>
+            <span className="site-call-icon" aria-hidden="true">
+              ☎
+            </span>
+            <span>{t("call", { phone: phoneNumber })}</span>
           </a>
         )}
         <Reveal>
           <div className="site-hero-content">
             <span className="site-eyebrow site-hero-eyebrow">
               <span className="site-eyebrow-dot" style={{ backgroundColor: accent }} />
-              Cleaning, made easy
+              {t("eyebrow")}
             </span>
 
             <h1 className="site-hero-title mt-6">
-              <span className="block">Professional cleaning</span>
-              <span className="site-hero-title-accent block">for a home you love.</span>
+              <span className="block">{businessName}</span>
+              <span className="site-hero-title-accent block">{t("titleLine2")}</span>
             </h1>
 
-            <p className="site-hero-copy mt-6 max-w-2xl">
-              Book {businessName} online in minutes. Choose the service and time
-              that suit your home, and leave the cleaning to a trusted local team.
-              {tagline?.trim() ? ` ${tagline.trim()}` : ""}
-            </p>
+            <p className="site-hero-copy mt-6 max-w-2xl">{fullCopy}</p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <a href={bookHref} onClick={handleBook} className="site-btn-primary site-btn-gold">
-                Check price &amp; availability
+                {t("checkPrice")}
                 <ArrowIcon />
               </a>
               <a href="#services" className="site-btn-secondary site-btn-dark">
-                Explore cleaning services
+                {t("exploreServices")}
               </a>
             </div>
 
             <div className="site-hero-proof mt-8" aria-label="Service highlights">
-              <span>Trusted local cleaners</span>
-              <span>Flexible scheduling</span>
-              <span>Clear booking details</span>
+              <span>{t("proofTrusted")}</span>
+              <span>{t("proofFlexible")}</span>
+              <span>{t("proofClear")}</span>
             </div>
           </div>
         </Reveal>

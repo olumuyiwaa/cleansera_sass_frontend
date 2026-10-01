@@ -1,8 +1,15 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 type SiteFooterProps = {
   subdomain: string;
   businessName: string;
   onBook?: () => void;
-  socialLinks?: Partial<Record<"facebook" | "instagram" | "tiktok" | "linkedin" | "twitter", string>> | null;
+  phoneNumber?: string | null;
+  socialLinks?: Partial<
+    Record<"facebook" | "instagram" | "tiktok" | "linkedin" | "twitter", string>
+  > | null;
 };
 
 const SOCIAL_LABELS: Record<string, string> = {
@@ -17,8 +24,11 @@ export function SiteFooter({
   subdomain,
   businessName,
   onBook,
+  phoneNumber,
   socialLinks,
 }: SiteFooterProps) {
+  const t = useTranslations("Site.footer");
+  const tn = useTranslations("Site.nav");
   const initial = businessName.trim().charAt(0).toUpperCase() || "C";
   const bookHref = `/book-now/${subdomain}`;
   const socialEntries = Object.entries(socialLinks || {}).filter(([, url]) => !!url);
@@ -42,14 +52,21 @@ export function SiteFooter({
               >
                 {initial}
               </span>
-              <span className="text-base font-semibold text-[#171B1A]">
+              <span className="text-base font-semibold text-white/85 hover:text-white">
                 {businessName}
               </span>
             </div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#c7d1cb]">
-              Professional cleaning you can book online — local, reliable, and
-              built around your schedule.
+              {t("blurb")}
             </p>
+            {phoneNumber && (
+              <a
+                href={`tel:${phoneNumber.replace(/[^+\d]/g, "")}`}
+                className="mt-3 inline-block text-sm font-medium text-white/85 hover:text-white"
+              >
+                {phoneNumber}
+              </a>
+            )}
             {socialEntries.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-3">
                 {socialEntries.map(([platform, url]) => (
@@ -68,35 +85,48 @@ export function SiteFooter({
           </div>
 
           <div className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#d0aa62]">Explore</h2>
-            <a href="#services" className="text-sm text-white/80 hover:text-white">Services</a>
-            <a href="#how-it-works" className="text-sm text-white/80 hover:text-white">How it works</a>
-            <a href={`/${subdomain}/portal`} className="text-sm text-white/80 hover:text-white">Client portal</a>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#d0aa62]">
+              {t("explore")}
+            </h2>
+            <a href="#services" className="text-sm text-white/80 hover:text-white">
+              {tn("services")}
+            </a>
+            <a href="#how-it-works" className="text-sm text-white/80 hover:text-white">
+              {tn("howItWorks")}
+            </a>
+            <a
+              href={`/${subdomain}/portal`}
+              className="text-sm text-white/80 hover:text-white"
+            >
+              {t("portal")}
+            </a>
           </div>
           <div className="flex flex-col gap-3 sm:items-start">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#d0aa62]">Ready to book?</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#d0aa62]">
+              {t("ready")}
+            </h2>
             <a
               href={bookHref}
               onClick={handleBook}
               className="inline-flex min-h-[46px] items-center justify-center rounded-full bg-[#d0aa62] px-6 text-sm font-bold text-[#092f26]"
             >
-              Book a cleaning
+              {t("book")}
             </a>
             <a
               href="#services"
               className="text-sm font-medium text-white/75 hover:text-white"
             >
-              View services
+              {t("viewServices")}
             </a>
           </div>
         </div>
 
         <div className="mt-10 flex flex-col-reverse items-start justify-between gap-3 border-t border-white/15 pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-white/55">
-            © {new Date().getFullYear()} {businessName}. All rights reserved.
+            © {new Date().getFullYear()} {businessName}. {t("rights")}
           </p>
           <p className="text-xs text-white/55">
-            Powered by{" "}
+            {t("poweredBy")}{" "}
             <span className="font-medium text-white/75">CleanSera</span>
           </p>
         </div>

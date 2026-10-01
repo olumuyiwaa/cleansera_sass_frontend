@@ -1656,5 +1656,73 @@
     "registerBusiness": "Registreer uw bedrijf",
     "twoFactor": "Tweefactorcode",
     "continue": "Doorgaan"
+  },
+  "Site": {
+    "loading": "Laden…",
+    "notFoundTitle": "Site niet gevonden",
+    "notFoundBody": "We konden geen actief bedrijf vinden voor deze link. Controleer de URL of neem contact op met het bedrijf.",
+    "nav": {
+      "services": "Diensten",
+      "howItWorks": "Hoe het werkt",
+      "about": "Over ons",
+      "reviews": "Beoordelingen",
+      "faq": "Veelgestelde vragen",
+      "contact": "Contact",
+      "portal": "Klantportaal",
+      "book": "Boek schoonmaak",
+      "openMenu": "Menu openen",
+      "closeMenu": "Menu sluiten",
+      "siteNav": "Sitenavigatie"
+    },
+    "hero": {
+      "eyebrow": "Schoonmaken, eenvoudig gemaakt",
+      "titleLine1": "Professionele schoonmaak",
+      "titleLine2": "voor een huis waar u van houdt.",
+      "copy": "Boek {name} online in enkele minuten. Kies de dienst en tijd die bij uw woning passen, en laat het schoonmaken over aan een betrouwbaar lokaal team.",
+      "checkPrice": "Prijs & beschikbaarheid",
+      "exploreServices": "Bekijk schoonmaakdiensten",
+      "call": "Bel {phone}",
+      "proofTrusted": "Betrouwbare lokale schoonmakers",
+      "proofFlexible": "Flexibele planning",
+      "proofClear": "Duidelijke boekingsdetails"
+    },
+    "services": {
+      "eyebrow": "Schoonmaakdiensten",
+      "title": "Een schoonmaak voor elk type woning.",
+      "subtitle": "Kies de dienst die bij uw ruimte past, zie duidelijke startprijzen en boek een tijd die u uitkomt.",
+      "from": "Vanaf {price}",
+      "approxMin": "Ca. {count} min",
+      "bookThis": "Boek deze dienst",
+      "emptyTitle": "Diensten binnenkort beschikbaar",
+      "emptyBody": "Dit bedrijf is de dienstenlijst nog aan het inrichten. Kom later terug of gebruik het klantportaal als u al een account heeft."
+    },
+    "howItWorks": {
+      "eyebrow": "Ons schoonmaakproces",
+      "title": "Beter schoon, vanaf de eerste klik.",
+      "subtitle": "Een schoonmaak boeken moet eenvoudig zijn. Kies wat u nodig heeft, kies een tijd, en laat uw team de rest doen.",
+      "step1Title": "Directe online offerte",
+      "step1Body": "Kies uw dienst en geef een paar details over uw ruimte om de beschikbare opties te zien.",
+      "step2Title": "Professionele schoonmaakspecialisten",
+      "step2Body": "Uw lokale team komt voorbereid met de tools en producten die nodig zijn voor de dienst.",
+      "step3Title": "Kwaliteitsgecontroleerde service",
+      "step3Body": "Uw boeking wordt zorgvuldig afgerond, en u kunt eenvoudig een volgende afspraak plannen wanneer u wilt.",
+      "beforeAlt": "Kamer vóór schoonmaak",
+      "afterAlt": "Kamer na schoonmaak"
+    },
+    "footer": {
+      "blurb": "Professionele schoonmaak die u online boekt — lokaal, betrouwbaar en afgestemd op uw planning.",
+      "explore": "Ontdekken",
+      "ready": "Klaar om te boeken?",
+      "book": "Boek een schoonmaak",
+      "viewServices": "Bekijk diensten",
+      "portal": "Klantportaal",
+      "rights": "Alle rechten voorbehouden.",
+      "poweredBy": "Mogelijk gemaakt door"
+    },
+    "cta": {
+      "title": "Klaar voor een schoner huis?",
+      "subtitle": "Boek online in een paar stappen — zonder heen-en-weer bellen.",
+      "book": "Nu boeken"
+    }
   }
 }
