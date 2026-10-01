@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { getStorefront } from "@/app/api/widget.api";
+import { getStorefront, type StorefrontCancellationPolicy } from "@/app/api/widget.api";
 import { setActiveCurrency } from "@/app/services/currency";
 import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 import Link from "next/link";
@@ -44,23 +44,49 @@ export default function CustomerPortalPage() {
     const t = useTranslations("Portal");
     const tStatus = useTranslations("Portal.status");
 
+    // Business timezone + cancellation policy come from the same storefront
+    // call that already supplies the currency.
+    const [timezone, setTimezone] = useState<string | undefined>(undefined);
+    const [policy, setPolicy] = useState<StorefrontCancellationPolicy | null>(null);
+
+    // Times are shown in the BUSINESS's timezone, not the visitor's: a customer
+    // travelling (or a VPN) would otherwise see a different hour than the cleaner.
     const formatWhen = useCallback(
-        (iso: string) =>
-            new Date(iso).toLocaleString(locale, {
+        (iso: string) => {
+            const opts: Intl.DateTimeFormatOptions = {
                 weekday: "short",
                 month: "short",
                 day: "numeric",
                 hour: "numeric",
                 minute: "2-digit",
-            }),
-        [locale]
+            };
+            try {
+                return new Date(iso).toLocaleString(locale, { ...opts, timeZone: timezone });
+            } catch {
+                // An unrecognised IANA name must not crash the whole page.
+                return new Date(iso).toLocaleString(locale, opts);
+            }
+        },
+        [locale, timezone]
     );
+
+    // Currency was formatted with the browser locale (so a Dutch UI on an
+    // English browser showed "EUR 1,234.50"); use the app locale like dates do.
+    const money = useCallback(
+        (cents: number) => formatMoney(cents, currency, locale),
+        [currency, locale]
+    );
+
     useEffect(() => {
         if (!slug) return;
         getStorefront(slug)
-            .then((s) => setActiveCurrency(s.business?.currency))
+            .then((s) => {
+                setActiveCurrency(s.business?.currency);
+                setTimezone(s.business?.timezone);
+                setPolicy(s.cancellationPolicy ?? null);
+            })
             .catch(() => {
-                /* keep the default currency */
+                /* keep the default currency; times fall back to the browser timezone */
             });
     }, [slug]);
 
@@ -644,7 +670,7 @@ export default function CustomerPortalPage() {
                                         <div className="mt-auto border-t border-gray-100 pt-4">
                                             <div className="mb-3 flex items-center justify-between">
                                                 <p className="text-lg font-semibold tabular-nums text-gray-900">
-                                                    {formatMoney(b.quotedPriceCents)}
+                                                    {money(b.quotedPriceCents)}
                                                 </p>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
@@ -719,12 +745,12 @@ export default function CustomerPortalPage() {
                         <DetailRow label={t("detailModal.status")} value={statusLabel(detail.status, tStatus)} />
                         <DetailRow
                             label={t("detailModal.price")}
-                            value={formatMoney(detail.quotedPriceCents)}
+                            value={money(detail.quotedPriceCents)}
                         />
                         {detail.tipAmountCents != null && detail.tipAmountCents > 0 && (
                             <DetailRow
                                 label={t("detailModal.tip")}
-                                value={formatMoney(detail.tipAmountCents)}
+                                value={money(detail.tipAmountCents)}
                             />
                         )}
                         {cleanerName(detail) && (
@@ -825,7 +851,7 @@ export default function CustomerPortalPage() {
                                         : "border-gray-200 text-gray-700 hover:border-gray-300"
                                 }`}
                             >
-                                {formatMoney(c)}
+                                {money(c)}
                             </button>
                         ))}
                     </div>
@@ -845,7 +871,7 @@ export default function CustomerPortalPage() {
                     <ModalActions
                         onClose={() => setTipId(null)}
                         onConfirm={handleTip}
-                        confirmLabel={t("tipModal.tipButton", { amount: formatMoney(tipCents) })}
+                        confirmLabel={t("tipModal.tipButton", { amount: money(tipCents) })}
                         disabled={loading || tipCents < 50}
                         loading={loading}
                     />

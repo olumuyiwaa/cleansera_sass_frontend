@@ -193,8 +193,12 @@ export async function tipPortalBooking(
   return result.data as { url: string; sessionId: string };
 }
 
-export function formatMoney(cents: number, currency: string = getActiveCurrency()) {
-  return new Intl.NumberFormat(undefined, {
+export function formatMoney(
+  cents: number,
+  currency: string = getActiveCurrency(),
+  locale?: string
+) {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
   }).format(cents / 100);
