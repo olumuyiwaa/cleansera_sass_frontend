@@ -1588,6 +1588,13 @@
       "tipButton": "Fooi geven van {amount}"
     },
     "confirmCancel": "Deze boeking annuleren? Er kan een annuleringsvergoeding gelden als de afspraak dichtbij is, afhankelijk van het beleid van het bedrijf.",
+    "cancelModal": {
+      "title": "Deze boeking annuleren?",
+      "free": "Er zijn geen annuleringskosten.",
+      "fee": "Als je nu annuleert, betaal je maximaal {fee}, omdat deze afspraak binnen de annuleringstermijn valt.",
+      "keep": "Boeking behouden",
+      "confirm": "Boeking annuleren"
+    },
     "pleaseWait": "Even geduld…",
     "modalCancel": "Annuleren",
     "closeAria": "Sluiten",

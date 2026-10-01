@@ -1588,6 +1588,13 @@
       "tipButton": "Tip {amount}"
     },
     "confirmCancel": "Cancel this booking? A cancellation fee may apply if it's close to the scheduled time, based on the business policy.",
+    "cancelModal": {
+      "title": "Cancel this booking?",
+      "free": "No cancellation fee applies.",
+      "fee": "Cancelling now costs up to {fee}, because this visit starts inside the cancellation window.",
+      "keep": "Keep booking",
+      "confirm": "Cancel booking"
+    },
     "pleaseWait": "Please wait…",
     "modalCancel": "Cancel",
     "closeAria": "Close",

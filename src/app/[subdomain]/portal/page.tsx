@@ -8,6 +8,7 @@ import { isoDateInTimeZone, setActiveCurrency } from "@/app/services/currency";
 import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { cancellationPolicyLabel } from "@/components/booking/types";
 import {
     requestPortalAccess,
     verifyPortalAccess,
@@ -45,6 +46,7 @@ export default function CustomerPortalPage() {
     const tStatus = useTranslations("Portal.status");
     // Reuse the booking wizard's wording for the slot picker states.
     const tSchedule = useTranslations("Booking.schedule");
+    const tPolicy = useTranslations("Booking.cancellationPolicy");
 
     // Business timezone + cancellation policy come from the same storefront
     // call that already supplies the currency.
@@ -114,6 +116,11 @@ export default function CustomerPortalPage() {
     const [reviewId, setReviewId] = useState<string | null>(null);
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
+    // Cancellation is confirmed in a modal that shows the fee up front; the fee
+    // is computed when the modal opens (an event handler) so render stays pure.
+    const [cancelPreview, setCancelPreview] = useState<{ id: string; feeCents: number } | null>(
+        null
+    );
     const [tipId, setTipId] = useState<string | null>(null);
     const [tipCents, setTipCents] = useState(500);
 
@@ -325,19 +332,39 @@ export default function CustomerPortalPage() {
         [locale, timezone]
     );
 
-    const handleCancel = async (id: string) => {
-        if (!token) return;
-        if (!confirm(t("confirmCancel"))) {
-            return;
+    // Mirrors lib/cancellationPolicy.js on the backend: a fee applies only inside
+    // the window, as PERCENT of the quoted price or a flat AMOUNT (cents), never
+    // more than the quote. The backend also caps it at what was actually paid and
+    // is the source of truth, so this is shown as "up to".
+    const openCancel = (b: PortalBooking) => {
+        let feeCents = 0;
+        if (policy && policy.windowHours != null) {
+            const hoursUntilStart = (new Date(b.scheduledStart).getTime() - Date.now()) / 3_600_000;
+            if (hoursUntilStart < policy.windowHours) {
+                if (policy.feeType === "PERCENT") {
+                    feeCents = Math.round((b.quotedPriceCents * (policy.feeValue ?? 0)) / 100);
+                } else if (policy.feeType === "AMOUNT") {
+                    feeCents = policy.feeValue ?? 0;
+                }
+                feeCents = Math.min(feeCents, b.quotedPriceCents);
+            }
         }
+        setCancelPreview({ id: b.id, feeCents });
+    };
+
+    const handleCancel = async () => {
+        if (!token || !cancelPreview) return;
+        const id = cancelPreview.id;
         setLoading(true);
         setError("");
         try {
             await cancelPortalBooking(slug, token, id, "Cancelled by customer");
+            setCancelPreview(null);
             await loadBookings(token);
             setDetail(null);
             setMsg(t("success.bookingCancelled"));
         } catch (err) {
+            setCancelPreview(null);
             handleActionError(err, t("errors.cancelFailed"));
         } finally {
             setLoading(false);
@@ -759,7 +786,7 @@ export default function CustomerPortalPage() {
                                                         </ActionBtn>
                                                         <ActionBtn
                                                             danger
-                                                            onClick={() => handleCancel(b.id)}
+                                                            onClick={() => openCancel(b)}
                                                         >
                                                             {t("card.cancel")}
                                                         </ActionBtn>
@@ -957,6 +984,42 @@ export default function CustomerPortalPage() {
                         disabled={loading}
                         loading={loading}
                     />
+                </Modal>
+            )}
+
+            {cancelPreview && (
+                <Modal onClose={() => setCancelPreview(null)} title={t("cancelModal.title")}>
+                    <p
+                        className={`mb-3 rounded-xl px-3 py-2 text-sm ${
+                            cancelPreview.feeCents > 0
+                                ? "bg-amber-50 text-amber-900"
+                                : "bg-emerald-50 text-emerald-900"
+                        }`}
+                    >
+                        {cancelPreview.feeCents > 0
+                            ? t("cancelModal.fee", { fee: money(cancelPreview.feeCents) })
+                            : t("cancelModal.free")}
+                    </p>
+                    <p className="mb-5 text-xs text-gray-500">
+                        {cancellationPolicyLabel(policy, tPolicy)}
+                    </p>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            onClick={() => setCancelPreview(null)}
+                            className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-800"
+                        >
+                            {t("cancelModal.keep")}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={loading}
+                            className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-60"
+                        >
+                            {loading ? t("pleaseWait") : t("cancelModal.confirm")}
+                        </button>
+                    </div>
                 </Modal>
             )}
 
