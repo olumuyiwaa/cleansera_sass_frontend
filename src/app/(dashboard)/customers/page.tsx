@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   listCustomers,
   getCustomer,
@@ -25,6 +25,8 @@ export default function CustomersPage() {
   const t = useTranslations("Dashboard.customers");
   const tc = useTranslations("Dashboard.common");
   const tb = useTranslations("Dashboard.bookings");
+  const ts = useTranslations("Dashboard.bookings.status");
+  const locale = useLocale();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [q, setQ] = useState("");
@@ -236,7 +238,7 @@ export default function CustomersPage() {
             <ul className="mt-2 space-y-1 text-sm">
               {(selected.bookings || []).slice(0, 5).map((b: any) => (
                 <li key={b.id}>
-                  {new Date(b.scheduledStart).toLocaleString()} — {b.status}
+                  {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(b.scheduledStart))} — {ts(b.status.toLowerCase())}
                 </li>
               ))}
             </ul>

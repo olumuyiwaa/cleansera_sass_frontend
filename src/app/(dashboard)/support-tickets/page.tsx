@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   listTickets,
   getTicket,
@@ -42,12 +42,12 @@ type TicketMessage = {
 const STATUS_OPTIONS: TicketStatus[] = ["OPEN", "IN_PROGRESS", "WAITING_ON_CUSTOMER", "RESOLVED", "CLOSED"];
 const PRIORITY_OPTIONS: TicketPriority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 const CATEGORY_OPTIONS = [
-  { value: "ACCOUNT_ACCESS", label: "Account & Access" },
-  { value: "CREDENTIALS", label: "Credentials" },
-  { value: "SHIFTS_SCHEDULING", label: "Shifts & Scheduling" },
-  { value: "PAYMENTS_BILLING", label: "Payments & Billing" },
-  { value: "TECHNICAL", label: "Technical" },
-  { value: "OTHER", label: "Other" },
+  "ACCOUNT_ACCESS",
+  "CREDENTIALS",
+  "SHIFTS_SCHEDULING",
+  "PAYMENTS_BILLING",
+  "TECHNICAL",
+  "OTHER",
 ];
 
 const STATUS_CLS: Record<TicketStatus, string> = {
@@ -65,9 +65,9 @@ const PRIORITY_CLS: Record<TicketPriority, string> = {
   LOW: "text-gray-500",
 };
 
-function fmt(value?: string | null) {
+function fmt(value: string | null | undefined, locale: string) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
 const inputCls =
@@ -76,6 +76,7 @@ const inputCls =
 export default function SupportTicketsPage() {
   const t = useTranslations("Dashboard.supportTickets");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -117,7 +118,7 @@ export default function SupportTicketsPage() {
       setTickets(res.data?.data || []);
       setPagination(res.data?.pagination || { page: 1, limit: 20, total: 0, totalPages: 1 });
     } catch (e: any) {
-      setError(e.message || "Failed to load tickets");
+      setError(e.message || t("loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -135,7 +136,7 @@ export default function SupportTicketsPage() {
       if (!res.success) throw new Error(res.message);
       setSelected(res.data);
     } catch (e: any) {
-      setError(e.message || "Failed to load ticket");
+      setError(e.message || t("loadTicketFailed"));
     } finally {
       setSelectedLoading(false);
     }
@@ -159,7 +160,7 @@ export default function SupportTicketsPage() {
       setCreateForm({ subject: "", description: "", priority: "MEDIUM", category: "OTHER", customerId: "", bookingId: "" });
       load(1);
     } catch (e: any) {
-      setError(e.message || "Failed to create ticket");
+      setError(e.message || t("createFailed"));
     } finally {
       setCreating(false);
     }
@@ -173,7 +174,7 @@ export default function SupportTicketsPage() {
       setSelected({ ...selected, ...res.data });
       load(pagination.page);
     } catch (e: any) {
-      setError(e.message || "Failed to update ticket");
+      setError(e.message || t("updateFailed"));
     }
   };
 
@@ -187,21 +188,21 @@ export default function SupportTicketsPage() {
       setReplyInternal(false);
       await openTicket(selected.id);
     } catch (e: any) {
-      setError(e.message || "Failed to send reply");
+      setError(e.message || t("replyFailed"));
     } finally {
       setSendingReply(false);
     }
   };
 
   const removeTicket = async (id: string) => {
-    if (!confirm("Delete this ticket? This cannot be undone.")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     try {
       const res = await deleteTicket(id);
       if (!res.success) throw new Error(res.message);
       if (selected?.id === id) setSelected(null);
       load(pagination.page);
     } catch (e: any) {
-      setError(e.message || "Failed to delete ticket");
+      setError(e.message || t("deleteFailed"));
     }
   };
 
@@ -217,7 +218,7 @@ export default function SupportTicketsPage() {
           onClick={() => setShowCreate((s) => !s)}
           className="h-11 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white"
         >
-          {showCreate ? "Cancel" : "New ticket"}
+          {showCreate ? tc("cancel") : t("newTicket")}
         </button>
       </div>
 
@@ -245,7 +246,7 @@ export default function SupportTicketsPage() {
             className={inputCls}
           >
             {PRIORITY_OPTIONS.map((p) => (
-              <option key={p} value={p}>{p}</option>
+              <option key={p} value={p}>{t(`priorities.${p}`)}</option>
             ))}
           </select>
           <select
@@ -254,7 +255,7 @@ export default function SupportTicketsPage() {
             className={inputCls}
           >
             {CATEGORY_OPTIONS.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
+              <option key={c} value={c}>{t(`categories.${c}`)}</option>
             ))}
           </select>
           <input
@@ -274,7 +275,7 @@ export default function SupportTicketsPage() {
             disabled={creating}
             className="h-11 rounded-lg bg-brand-500 text-sm font-medium text-white disabled:opacity-60 sm:col-span-2"
           >
-            {creating ? "Creating…" : "Create ticket"}
+            {creating ? tc("loading") : t("createTicket")}
           </button>
         </form>
       )}
@@ -290,17 +291,17 @@ export default function SupportTicketsPage() {
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={`${inputCls} max-w-[180px]`}>
           <option value="">{t("allStatuses")}</option>
           {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+            <option key={s} value={s}>{t(`statuses.${s}`)}</option>
           ))}
         </select>
         <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className={`${inputCls} max-w-[160px]`}>
           <option value="">{t("allPriorities")}</option>
           {PRIORITY_OPTIONS.map((p) => (
-            <option key={p} value={p}>{p}</option>
+            <option key={p} value={p}>{t(`priorities.${p}`)}</option>
           ))}
         </select>
         <button type="button" onClick={() => load(1)} className="h-11 rounded-lg border px-4 text-sm dark:border-gray-700">
-          Apply
+          {t("apply")}
         </button>
       </div>
 
@@ -320,31 +321,31 @@ export default function SupportTicketsPage() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((t) => (
+              {tickets.map((ticket) => (
                 <tr
-                  key={t.id}
+                  key={ticket.id}
                   className="cursor-pointer border-t hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
-                  onClick={() => openTicket(t.id)}
+                  onClick={() => openTicket(ticket.id)}
                 >
-                  <td className="px-4 py-3 font-medium text-gray-800 dark:text-white/90">{t.subject}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800 dark:text-white/90">{ticket.subject}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLS[t.status]}`}>
-                      {t.status.replace(/_/g, " ")}
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLS[ticket.status]}`}>
+                      {t(`statuses.${ticket.status}`)}
                     </span>
                   </td>
-                  <td className={`px-4 py-3 text-xs ${PRIORITY_CLS[t.priority]}`}>{t.priority}</td>
+                  <td className={`px-4 py-3 text-xs ${PRIORITY_CLS[ticket.priority]}`}>{t(`priorities.${ticket.priority}`)}</td>
                   <td className="px-4 py-3 text-gray-500">
-                    {CATEGORY_OPTIONS.find((c) => c.value === t.category)?.label || t.category || "—"}
+                    {ticket.category ? t(`categories.${ticket.category}`) : "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{fmt(t.updatedAt)}</td>
+                  <td className="px-4 py-3 text-gray-500">{fmt(ticket.updatedAt, locale)}</td>
                   <td className="px-4 py-3 text-right">
                     <RowActionsMenu
-                      label={`Actions for ticket: ${t.subject}`}
+                      label={t("actionsFor", { subject: ticket.subject })}
                       actions={[
                         {
-                          label: "Delete",
+                          label: tc("delete"),
                           variant: "danger" as const,
-                          onClick: () => removeTicket(t.id),
+                          onClick: () => removeTicket(ticket.id),
                         },
                       ]}
                     />
@@ -354,7 +355,7 @@ export default function SupportTicketsPage() {
               {!tickets.length && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                    No tickets yet
+                    {t("empty")}
                   </td>
                 </tr>
               )}
@@ -362,7 +363,7 @@ export default function SupportTicketsPage() {
           </table>
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-gray-500 dark:border-gray-800">
-              <span>Page {pagination.page} of {pagination.totalPages} · {pagination.total} tickets</span>
+              <span>{t("pageSummary", { page: pagination.page, totalPages: pagination.totalPages, total: pagination.total })}</span>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -370,7 +371,7 @@ export default function SupportTicketsPage() {
                   onClick={() => load(pagination.page - 1)}
                   className="rounded border px-3 py-1 disabled:opacity-40 dark:border-gray-700"
                 >
-                  Prev
+                  {tc("back")}
                 </button>
                 <button
                   type="button"
@@ -378,7 +379,7 @@ export default function SupportTicketsPage() {
                   onClick={() => load(pagination.page + 1)}
                   className="rounded border px-3 py-1 disabled:opacity-40 dark:border-gray-700"
                 >
-                  Next
+                  {tc("next")}
                 </button>
               </div>
             </div>
@@ -438,8 +439,8 @@ export default function SupportTicketsPage() {
                       onChange={(e) => patchSelected({ category: e.target.value })}
                       className={inputCls}
                     >
-                      {CATEGORY_OPTIONS.map((c) => (
-                        <option key={c.value} value={c.value}>{c.label}</option>
+                      {CATEGORY_OPTIONS.map((category) => (
+                        <option key={category} value={category}>{t(`categories.${category}`)}</option>
                       ))}
                     </select>
                   </div>
@@ -458,8 +459,8 @@ export default function SupportTicketsPage() {
                         }`}
                       >
                         <div className="flex justify-between text-xs text-gray-500">
-                          <span>{m.isInternal ? "Internal note" : "Reply"}</span>
-                          <span>{fmt(m.createdAt)}</span>
+                          <span>{m.isInternal ? t("internalNote") : t("reply")}</span>
+                          <span>{fmt(m.createdAt, locale)}</span>
                         </div>
                         <p className="mt-1 whitespace-pre-wrap text-gray-700 dark:text-gray-200">{m.body}</p>
                       </div>
@@ -483,7 +484,7 @@ export default function SupportTicketsPage() {
                           checked={replyInternal}
                           onChange={(e) => setReplyInternal(e.target.checked)}
                         />
-                        Internal note (not visible to customer)
+                        {t("internalNoteHint")}
                       </label>
                       <button
                         type="button"
@@ -491,7 +492,7 @@ export default function SupportTicketsPage() {
                         onClick={sendReply}
                         className="h-9 rounded-lg bg-brand-500 px-4 text-sm font-medium text-white disabled:opacity-60"
                       >
-                        {sendingReply ? "Sending…" : "Send"}
+                        {sendingReply ? t("sending") : t("send")}
                       </button>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import Badge from "@/components/ui/badge/Badge";
 import { listCleaners } from "@/app/api/cleaners.api";
@@ -61,8 +61,17 @@ function statusBadgeColor(
   }
 }
 
-function formatWhen(iso: string) {
-  return new Intl.DateTimeFormat("en", {
+const STATUS_LABELS: Record<string, "requested" | "confirmed" | "assigned" | "inProgress" | "completed" | "cancelled"> = {
+  REQUESTED: "requested",
+  CONFIRMED: "confirmed",
+  ASSIGNED: "assigned",
+  IN_PROGRESS: "inProgress",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+};
+
+function formatWhen(iso: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -89,6 +98,7 @@ function useQuickActions() {
 export default function DashboardPage() {
   const t = useTranslations("Dashboard.home");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const quickActions = useQuickActions();
   const { user } = useAuth();
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
@@ -120,11 +130,11 @@ export default function DashboardPage() {
       setKpis(k);
       setRevenueDays(Array.isArray(rev) ? rev : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load dashboard");
+      setError(err instanceof Error ? err.message : tc("errorGeneric"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tc]);
 
   useEffect(() => {
     load();
@@ -187,40 +197,39 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      label: "Active cleaners",
+      label: t("activeCleaners"),
       value: loading ? "…" : String(cleaners.length),
-      sub: kpis ? `${kpis.activeCleaners} in last 30d KPIs` : undefined,
+      sub: kpis ? t("activeCleanersKpi", { count: kpis.activeCleaners }) : undefined,
       href: "/cleaners",
       accent: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
     },
     {
-      label: "Today’s jobs",
+      label: t("todayJobs"),
       value: loading ? "…" : String(todayJobs.length),
-      sub: needsAttention ? `${needsAttention} need confirmation` : "On the schedule",
+      sub: needsAttention ? t("needConfirmation", { count: needsAttention }) : t("onSchedule"),
       href: "/bookings",
       accent: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
     },
     {
-      label: "Needs attention",
+      label: t("needsAttention"),
       value: loading ? "…" : String(needsAttention + unassignedUpcoming),
-      sub:
-          unassignedUpcoming > 0
-              ? `${unassignedUpcoming} unassigned · ${needsAttention} requested`
-              : needsAttention
-                  ? "Awaiting confirmation"
-                  : "All clear",
+      sub: unassignedUpcoming > 0
+        ? t("unassignedRequested", { unassigned: unassignedUpcoming, requested: needsAttention })
+        : needsAttention
+          ? t("awaitingConfirmation")
+          : t("allClear"),
       href: "/dispatch",
       accent:
-          needsAttention || unassignedUpcoming
-              ? "bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"
-              : "bg-gray-50 text-gray-700 dark:bg-white/[0.04] dark:text-gray-300",
+        needsAttention || unassignedUpcoming
+          ? "bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"
+          : "bg-gray-50 text-gray-700 dark:bg-white/[0.04] dark:text-gray-300",
     },
     {
-      label: "Revenue (completed)",
+      label: t("revenueCompleted"),
       value: loading ? "…" : formatMoney(kpis?.revenueCents ?? completedRevenue),
       sub: kpis
-          ? `30d · avg ticket ${formatMoney(kpis.avgTicketCents)}`
-          : "From completed bookings in list",
+        ? t("averageTicket30Days", { amount: formatMoney(kpis.avgTicketCents) })
+        : t("fromCompletedBookings"),
       href: "/reports",
       accent: "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300",
     },
@@ -238,8 +247,8 @@ export default function DashboardPage() {
             </h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {user?.business?.name
-                  ? `Operations snapshot for ${user.business.name}`
-                  : "Here’s what’s happening across your cleaning business."}
+                ? t("operationsSnapshot", { business: user.business.name })
+                : t("businessSnapshot")}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -247,13 +256,13 @@ export default function DashboardPage() {
                 href="/bookings"
                 className="inline-flex items-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
             >
-              + New booking
+              + {t("newBooking")}
             </Link>
             <Link
                 href="/dispatch"
                 className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-white/[0.04]"
             >
-              Open dispatch
+              {t("openDispatch")}
             </Link>
           </div>
         </div>
@@ -263,31 +272,31 @@ export default function DashboardPage() {
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
               {error}
               <button type="button" onClick={load} className="ml-2 font-medium underline">
-                Retry
+                {t("retry")}
               </button>
             </div>
         )}
         {subStatus === "PAST_DUE" && (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
-              Your CleanSera subscription payment is past due.{" "}
+              {t("subscriptionPastDue")} {" "}
               <Link href="/subscription" className="font-medium underline">
-                Update billing
+                {t("updateBilling")}
               </Link>
             </div>
         )}
         {subStatus === "TRIALING" && (
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300">
-              You’re on a trial plan.{" "}
+              {t("trialPlan")} {" "}
               <Link href="/subscription" className="font-medium underline">
-                View subscription
+                {t("viewSubscription")}
               </Link>
             </div>
         )}
         {!subStatus && !loading && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
-              No active CleanSera subscription yet.{" "}
+              {t("noActiveSubscription")} {" "}
               <Link href="/subscription" className="font-medium underline">
-                Choose a plan
+                {t("choosePlan")}
               </Link>
             </div>
         )}
@@ -305,7 +314,7 @@ export default function DashboardPage() {
                   <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.accent}`}
                   >
-                Live
+                {tc("live")}
               </span>
                 </div>
                 <p className="mt-3 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white/90">
@@ -321,8 +330,10 @@ export default function DashboardPage() {
         </div>
 
         <MonthlySalesChart
-            title="Revenue by day"
-            seriesName="Revenue"
+            title={t("revenueByDay")}
+            seriesName={t("revenue")}
+            viewMoreLabel={t("viewReports")}
+            emptyMessage={t("noDataForPeriod")}
             viewMoreHref="/reports"
             data={revenueDays.map((d) => ({
               label: d.date.slice(5), // MM-DD
@@ -334,10 +345,10 @@ export default function DashboardPage() {
         {/* 30d KPI strip when reports work */}
         {kpis && !loading && (
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:grid-cols-4 dark:border-gray-800 dark:bg-white/[0.02]">
-              <MiniStat label="Completion rate" value={`${Math.round(kpis.completionRate * 100)}%`} />
-              <MiniStat label="Cancel rate" value={`${Math.round(kpis.cancelRate * 100)}%`} />
-              <MiniStat label="Collected" value={formatMoney(kpis.collectedCents)} />
-              <MiniStat label="Utilization" value={`${Math.round(kpis.utilizationPct)}%`} />
+              <MiniStat label={t("completionRate")} value={`${Math.round(kpis.completionRate * 100)}%`} />
+              <MiniStat label={t("cancelRate")} value={`${Math.round(kpis.cancelRate * 100)}%`} />
+              <MiniStat label={t("collected")} value={formatMoney(kpis.collectedCents)} />
+              <MiniStat label={t("utilization")} value={`${Math.round(kpis.utilizationPct)}%`} />
             </div>
         )}
 
@@ -346,12 +357,14 @@ export default function DashboardPage() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <StatisticsChart
-              title="Jobs vs revenue"
-              subtitle="Daily revenue (units) over the selected period"
+              title={t("jobsVsRevenue")}
+              subtitle={t("dailyRevenueSubtitle")}
+              viewMoreLabel={t("viewReports")}
+              emptyMessage={t("noStatisticsForPeriod")}
               categories={revenueDays.map((d) => d.date.slice(5))}
               series={[
                 {
-                  name: "Revenue",
+                  name: t("revenue"),
                   data: revenueDays.map((d) => (d.revenueCents || 0) / 100),
                 },
               ]}
@@ -361,8 +374,8 @@ export default function DashboardPage() {
           </div>
           <div>
             <MonthlyTarget
-              title="Completion rate"
-              subtitle="Jobs completed in the last 30 days"
+              title={t("completionRate")}
+              subtitle={t("completedLast30Days")}
               progressPct={
                 kpis
                   ? kpis.completionRate <= 1
@@ -370,19 +383,23 @@ export default function DashboardPage() {
                     : kpis.completionRate
                   : 0
               }
-              targetLabel="Completed"
+              targetLabel={t("completed")}
               targetValue={loading ? "…" : String(kpis?.completed ?? "—")}
-              revenueLabel="Revenue"
+              revenueLabel={t("revenue")}
               revenueValue={
                 loading ? "…" : formatMoney(kpis?.revenueCents ?? 0)
               }
-              todayLabel="Today"
+              todayLabel={tc("today")}
               todayValue={loading ? "…" : String(todayJobs.length)}
               footerNote={
                 kpis
-                  ? `Avg ticket ${formatMoney(kpis.avgTicketCents)} · utilization ${Math.round(kpis.utilizationPct)}%`
+                  ? t("averageTicketUtilization", {
+                      amount: formatMoney(kpis.avgTicketCents),
+                      utilization: Math.round(kpis.utilizationPct),
+                    })
                   : undefined
               }
+                  detailsLabel={t("details")}
               viewMoreHref="/reports"
             />
           </div>
@@ -392,36 +409,34 @@ export default function DashboardPage() {
           {/* Today + upcoming */}
           <div className="space-y-6 lg:col-span-2">
             <Panel
-                title="Today’s schedule"
-                action={{ href: "/calendar", label: "Calendar" }}
+                title={t("todaysSchedule")}
+                action={{ href: "/calendar", label: t("calendar") }}
             >
               {loading ? (
                   <SkeletonRows n={3} />
               ) : todayJobs.length === 0 ? (
-                  <Empty>No jobs scheduled for today.</Empty>
+                  <Empty>{t("noJobsToday")}</Empty>
               ) : (
                   <ul className="divide-y divide-gray-100 dark:divide-gray-800">
                     {todayJobs.slice(0, 8).map((b) => (
-                        <BookingRow key={b.id} booking={b} />
+                        <BookingRow key={b.id} booking={b} locale={locale} />
                     ))}
                   </ul>
               )}
             </Panel>
 
             <Panel
-                title="Upcoming"
-                action={{ href: "/bookings", label: "View all" }}
+                title={t("upcoming")}
+                action={{ href: "/bookings", label: t("viewAll") }}
             >
               {loading ? (
                   <SkeletonRows n={4} />
               ) : upcoming.length === 0 ? (
-                  <Empty>
-                    Nothing upcoming — widget bookings and manual jobs will appear here.
-                  </Empty>
+                  <Empty>{t("noUpcomingBookings")}</Empty>
               ) : (
                   <ul className="divide-y divide-gray-100 dark:divide-gray-800">
                     {upcoming.slice(0, 8).map((b) => (
-                        <BookingRow key={b.id} booking={b} />
+                        <BookingRow key={b.id} booking={b} locale={locale} />
                     ))}
                   </ul>
               )}
@@ -446,16 +461,16 @@ export default function DashboardPage() {
             </Panel>
 
             <Panel
-                title="Active team"
-                action={{ href: "/cleaners", label: "Manage" }}
+                title={t("activeTeam")}
+                action={{ href: "/cleaners", label: t("manage") }}
             >
               {loading ? (
                   <SkeletonRows n={3} />
               ) : cleaners.length === 0 ? (
                   <Empty>
-                    No active cleaners.{" "}
+                    {t("noActiveCleaners")}{" "}
                     <Link href="/cleaners" className="font-medium text-brand-600 underline">
-                      Onboard your first
+                      {t("onboardFirst")}
                     </Link>
                   </Empty>
               ) : (
@@ -469,7 +484,7 @@ export default function DashboardPage() {
                             <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">
                               {c.user
                                   ? `${c.user.firstName} ${c.user.lastName}`.trim()
-                                  : "Cleaner"}
+                                  : t("cleanerFallback")}
                             </p>
                             <p className="truncate text-xs text-gray-500">{c.user?.email}</p>
                           </div>
@@ -479,7 +494,7 @@ export default function DashboardPage() {
                         </li>
                     ))}
                     {cleaners.length > 6 && (
-                        <p className="text-xs text-gray-500">+{cleaners.length - 6} more</p>
+                        <p className="text-xs text-gray-500">{t("moreCleaners", { count: cleaners.length - 6 })}</p>
                     )}
                   </ul>
               )}
@@ -519,41 +534,43 @@ function Panel({
   );
 }
 
-function BookingRow({ booking: b }: { booking: Booking }) {
+function BookingRow({ booking: b, locale }: { booking: Booking; locale: string }) {
+  const t = useTranslations("Dashboard.home");
+  const ts = useTranslations("Dashboard.bookings.status");
   const customer = b.customer
-      ? `${b.customer.firstName} ${b.customer.lastName}`.trim()
-      : "—";
-  const cleaner =
-      b.assignments?.[0]?.cleaner?.user
-          ? `${b.assignments[0].cleaner.user.firstName} ${b.assignments[0].cleaner.user.lastName}`.trim()
-          : null;
+    ? `${b.customer.firstName} ${b.customer.lastName}`.trim()
+    : "—";
+  const cleaner = b.assignments?.[0]?.cleaner?.user
+    ? `${b.assignments[0].cleaner.user.firstName} ${b.assignments[0].cleaner.user.lastName}`.trim()
+    : null;
+  const statusKey = STATUS_LABELS[b.status];
 
   return (
-      <li className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">
-            {customer}
-            <span className="font-normal text-gray-500"> · {b.service?.name || "Service"}</span>
+    <li className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">
+          {customer}
+          <span className="font-normal text-gray-500"> · {b.service?.name || t("service")}</span>
+        </p>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+          {formatWhen(b.scheduledStart, locale)}
+          {cleaner ? ` · ${cleaner}` : ` · ${t("unassigned")}`}
+        </p>
+        {(b.addressLine1 || b.city) && (
+          <p className="mt-0.5 truncate text-xs text-gray-400">
+            {[b.addressLine1, b.city].filter(Boolean).join(", ")}
           </p>
-          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-            {formatWhen(b.scheduledStart)}
-            {cleaner ? ` · ${cleaner}` : " · Unassigned"}
-          </p>
-          {(b.addressLine1 || b.city) && (
-              <p className="mt-0.5 truncate text-xs text-gray-400">
-                {[b.addressLine1, b.city].filter(Boolean).join(", ")}
-              </p>
-          )}
-        </div>
-        <div className="flex flex-shrink-0 flex-col items-end gap-1">
-          <Badge size="sm" color={statusBadgeColor(b.status)}>
-            {b.status}
-          </Badge>
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+        )}
+      </div>
+      <div className="flex flex-shrink-0 flex-col items-end gap-1">
+        <Badge size="sm" color={statusBadgeColor(b.status)}>
+          {statusKey ? ts(statusKey) : b.status}
+        </Badge>
+        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
           {formatMoney(b.quotedPriceCents || 0)}
         </span>
-        </div>
-      </li>
+      </div>
+    </li>
   );
 }
 

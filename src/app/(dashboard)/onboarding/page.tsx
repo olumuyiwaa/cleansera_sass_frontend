@@ -1,7 +1,7 @@
 "use client";
 
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -11,11 +11,11 @@ import {
   OnboardingStepKey,
 } from "@/app/api/businesses.api";
 
-const STEP_LINKS: Record<OnboardingStepKey, { href: string; cta: string }> = {
-  services: { href: "/services", cta: "Add a service" },
-  hours: { href: "/business-settings", cta: "Set business hours" },
-  serviceAreas: { href: "/business-settings", cta: "Add a service area" },
-  stripeConnect: { href: "/business-settings#stripe", cta: "Connect Stripe (optional)" },
+const STEP_LINKS: Record<OnboardingStepKey, { href: string }> = {
+  services: { href: "/services" },
+  hours: { href: "/business-settings" },
+  serviceAreas: { href: "/business-settings" },
+  stripeConnect: { href: "/business-settings#stripe" },
 };
 
 export default function OnboardingPage() {
@@ -26,22 +26,22 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const s = await getOnboardingStatus();
       setStatus(s);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load setup status");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   if (loading) return <div className="p-6 text-sm text-gray-500">{tc("loading")}</div>;
 
@@ -87,11 +87,11 @@ export default function OnboardingPage() {
                                   : "font-medium text-gray-800 dark:text-white/90"
                           }`}
                       >
-                        {step.label}
+                        {t(`steps.${step.key}`)}
                       </span>
                             {isOptional && !step.complete && (
                                 <span className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase text-gray-500 dark:bg-white/10">
-                          Optional
+                          {t("optional")}
                         </span>
                             )}
                           </div>
@@ -105,7 +105,7 @@ export default function OnboardingPage() {
                                         : "bg-brand-500 text-white hover:bg-brand-600"
                                 }`}
                             >
-                              {STEP_LINKS[step.key].cta}
+                              {t(`ctas.${step.key}`)}
                             </Link>
                         )}
                       </li>
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
                     onClick={load}
                     className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  Refresh status
+                  {t("refreshStatus")}
                 </button>
                 <button
                     type="button"
@@ -128,8 +128,8 @@ export default function OnboardingPage() {
                     className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 hover:bg-brand-600"
                 >
                   {status.isComplete
-                      ? "Go to dashboard"
-                      : "Complete the required steps to continue"}
+                      ? t("goToDashboard")
+                      : t("completeRequired")}
                 </button>
               </div>
             </div>

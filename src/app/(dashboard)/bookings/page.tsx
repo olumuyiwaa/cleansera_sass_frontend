@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -59,6 +59,7 @@ export default function BookingsPage() {
   const tc = useTranslations("Dashboard.common");
   const ts = useTranslations("Dashboard.bookings.status");
   const ta = useTranslations("Dashboard.bookings.actions");
+  const locale = useLocale();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -181,7 +182,7 @@ export default function BookingsPage() {
     try {
       const result = await createPaymentLink(id);
       const url = result?.data?.url;
-      if (!url) throw new Error("No checkout URL returned");
+      if (!url) throw new Error(ta("paymentLinkMissing"));
       if (navigator.clipboard) {
         try {
           await navigator.clipboard.writeText(url);
@@ -330,7 +331,7 @@ export default function BookingsPage() {
                     </TableCell>
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{b.service?.name || "—"}</TableCell>
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(b.scheduledStart).toLocaleString()}
+                      {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(b.scheduledStart))}
                     </TableCell>
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
                       {formatMoney(b.quotedPriceCents)}
@@ -362,7 +363,7 @@ export default function BookingsPage() {
                               ]
                             : []),
                           {
-                            label: `${t("columns.payment")}: ${b.paymentStatus || "UNPAID"}`,
+                            label: `${t("columns.payment")}: ${b.paymentStatus ? t(`paymentStatus.${b.paymentStatus.toLowerCase()}`) : t("paymentStatus.unpaid")}`,
                             onClick: () => openAction(b, "payment"),
                           },
                           ...(b.paymentStatus !== "PAID" && b.status !== "CANCELLED"

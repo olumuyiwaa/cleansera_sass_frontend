@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import React, { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   listGiftCards,
   issueGiftCard,
@@ -20,6 +20,7 @@ function centsToDollars(cents: number) {
 export default function GiftCardsPage() {
   const t = useTranslations("Dashboard.giftCards");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [giftCards, setGiftCards] = useState<GiftCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,23 +34,23 @@ export default function GiftCardsPage() {
     expiresAt: "",
   });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const res = await listGiftCards();
       setGiftCards((res.data as GiftCard[]) || []);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load gift cards");
+      setError(e instanceof Error ? e.message : t("loadFailed"));
       setGiftCards([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const onIssue = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,20 +68,20 @@ export default function GiftCardsPage() {
       setForm({ code: "", valueDollars: 50, recipientName: "", recipientEmail: "", message: "", expiresAt: "" });
       await load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to issue gift card");
+      setError(err instanceof Error ? err.message : t("issueFailed"));
     } finally {
       setBusy(false);
     }
   };
 
   const onDeactivate = async (id: string) => {
-    if (!confirm("Deactivate this gift card? Its remaining balance will no longer be redeemable.")) return;
+    if (!confirm(t("deactivateConfirm"))) return;
     setError("");
     try {
       await deactivateGiftCard(id);
       await load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to deactivate gift card");
+      setError(err instanceof Error ? err.message : t("deactivateFailed"));
     }
   };
 
@@ -89,8 +90,7 @@ export default function GiftCardsPage() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Issue a stored-value card a customer can redeem, in full or in part, against any future booking.
-          Customers apply a code at checkout in the booking widget.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -99,7 +99,7 @@ export default function GiftCardsPage() {
         className="grid gap-3 rounded-2xl border border-gray-200 p-5 sm:grid-cols-2 lg:grid-cols-6 dark:border-gray-800"
       >
         <input
-          placeholder="Code (auto-generated if blank)"
+          placeholder={t("codePlaceholder")}
           value={form.code}
           onChange={(e) => setForm({ ...form, code: e.target.value })}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm uppercase dark:border-gray-700 dark:bg-gray-900 dark:text-white lg:col-span-2"
@@ -111,18 +111,18 @@ export default function GiftCardsPage() {
           required
           value={form.valueDollars}
           onChange={(e) => setForm({ ...form, valueDollars: Number(e.target.value) })}
-          placeholder={`Value (${currencySymbol()})`}
+          placeholder={t("valuePlaceholder", { currency: currencySymbol() })}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
         />
         <input
-          placeholder="Recipient name (optional)"
+          placeholder={t("recipientNamePlaceholder")}
           value={form.recipientName}
           onChange={(e) => setForm({ ...form, recipientName: e.target.value })}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
         />
         <input
           type="email"
-          placeholder="Recipient email (optional)"
+          placeholder={t("recipientEmailPlaceholder")}
           value={form.recipientEmail}
           onChange={(e) => setForm({ ...form, recipientEmail: e.target.value })}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
@@ -131,11 +131,11 @@ export default function GiftCardsPage() {
           type="date"
           value={form.expiresAt}
           onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
-          title="Optional expiry"
+          title={t("optionalExpiry")}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
         />
         <input
-          placeholder="Gift message (optional)"
+          placeholder={t("messagePlaceholder")}
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white lg:col-span-4"
@@ -145,7 +145,7 @@ export default function GiftCardsPage() {
           disabled={busy}
           className="h-11 rounded-lg bg-brand-500 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-60 lg:col-span-2"
         >
-          {busy ? "Issuing…" : "Issue gift card"}
+          {busy ? t("issuing") : t("issue")}
         </button>
       </form>
 
@@ -162,7 +162,7 @@ export default function GiftCardsPage() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-white/[0.03]">
               <tr>
-                <th className="px-4 py-3">Code</th>
+                <th className="px-4 py-3">{t("code")}</th>
                 <th className="px-4 py-3">{t("recipient")}</th>
                 <th className="px-4 py-3">{t("balance")}</th>
                 <th className="px-4 py-3">{t("initialValue")}</th>
@@ -178,16 +178,16 @@ export default function GiftCardsPage() {
                   <td className="px-4 py-3">{g.recipientName || g.recipientEmail || "—"}</td>
                   <td className="px-4 py-3">{centsToDollars(g.balanceCents)}</td>
                   <td className="px-4 py-3 text-gray-500">{centsToDollars(g.initialValueCents)}</td>
-                  <td className="px-4 py-3">{g.isActive ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3">{g.isActive ? tc("yes") : tc("no")}</td>
                   <td className="px-4 py-3 text-gray-500">
-                    {g.expiresAt ? new Date(g.expiresAt).toLocaleDateString() : "—"}
+                    {g.expiresAt ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(g.expiresAt)) : "—"}
                   </td>
                   <td className="px-4 py-3">
                     <RowActionsMenu
-                      label={`Actions for gift card ${g.code}`}
+                      label={t("actionsFor", { code: g.code })}
                       actions={
                         g.isActive
-                          ? [{ label: "Deactivate", variant: "danger" as const, onClick: () => onDeactivate(g.id) }]
+                          ? [{ label: t("deactivate"), variant: "danger" as const, onClick: () => onDeactivate(g.id) }]
                           : []
                       }
                     />

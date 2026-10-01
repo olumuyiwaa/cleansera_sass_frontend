@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -48,6 +48,7 @@ const PAYOUT_STATUS_COLOR: Record<Payout["status"], "warning" | "success" | "lig
 export default function PayrollPage() {
   const t = useTranslations("Dashboard.payroll");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [tab, setTab] = useState<"rates" | "earnings" | "payouts">("rates");
 
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
@@ -96,11 +97,11 @@ export default function PayrollPage() {
       setPayouts(p);
       setSummary(s);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load payroll data");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -125,7 +126,7 @@ export default function PayrollPage() {
       setRateModal(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save rate");
+      setError(err instanceof Error ? err.message : t("saveRateFailed"));
     } finally {
       setSaving(false);
     }
@@ -140,7 +141,7 @@ export default function PayrollPage() {
       setPayoutCleaner(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create payout");
+      setError(err instanceof Error ? err.message : t("createPayoutFailed"));
     } finally {
       setSaving(false);
     }
@@ -152,7 +153,7 @@ export default function PayrollPage() {
       await markPayoutPaid(payout.id, { method: "MANUAL_TRANSFER" });
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to mark payout as paid");
+      setError(err instanceof Error ? err.message : t("markPaidFailed"));
     }
   };
 
@@ -168,7 +169,7 @@ export default function PayrollPage() {
       // Most common cause here is the business's own Connect balance not
       // having settled enough job payments yet — surfaced by the backend
       // as a 402 with a clear message, not a generic failure.
-      setError(err instanceof Error ? err.message : "Failed to pay via Stripe");
+      setError(err instanceof Error ? err.message : t("stripePayoutFailed"));
     } finally {
       setPayingStripeId(null);
     }
@@ -179,9 +180,7 @@ export default function PayrollPage() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Set what each cleaner earns per job, track what they&apos;re owed, and pay it out — automatically via
-          Stripe once a cleaner has connected a payout account, or manually (bank transfer, cash, your own
-          payroll run) otherwise.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -199,7 +198,7 @@ export default function PayrollPage() {
               {formatMoney(summary.pendingEarningsCents)}
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              {summary.cleanersWithPendingEarnings} cleaner{summary.cleanersWithPendingEarnings === 1 ? "" : "s"} owed
+              {t("cleanersOwed", { count: summary.cleanersWithPendingEarnings })}
             </p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
@@ -220,17 +219,17 @@ export default function PayrollPage() {
       )}
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {(["rates", "earnings", "payouts"] as const).map((t) => (
+        {(["rates", "earnings", "payouts"] as const).map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium capitalize transition ${
-              tab === t
+              tab === tabKey
                 ? "bg-brand-500 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300"
             }`}
           >
-            {t}
+            {t(`tabs.${tabKey}`)}
           </button>
         ))}
       </div>
@@ -275,11 +274,11 @@ export default function PayrollPage() {
                         </TableCell>
                         <TableCell className="px-5 py-4">
                           <RowActionsMenu
-                            label={`Actions for ${cleanerDisplayName(c)}`}
+                            label={t("actionsForCleaner", { name: cleanerDisplayName(c) })}
                             actions={[
-                              { label: comp ? "Edit rate" : "Set rate", onClick: () => openRateModal(c) },
+                              { label: comp ? t("editRate") : t("setRate"), onClick: () => openRateModal(c) },
                               ...(pending > 0
-                                ? [{ label: "Pay out", onClick: () => setPayoutCleaner(c) }]
+                                ? [{ label: t("payOut"), onClick: () => setPayoutCleaner(c) }]
                                 : []),
                             ]}
                           />
@@ -300,7 +299,7 @@ export default function PayrollPage() {
               <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
-                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Job</TableCell>
+                  <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("job")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("amount")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("earned")}</TableCell>
                   <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("status")}</TableCell>
@@ -315,7 +314,7 @@ export default function PayrollPage() {
                 {!loading && earnings.length === 0 && (
                   <TableRow>
                     <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={5}>
-                      No earnings yet — they appear here as jobs with a rate configured are completed.
+                      {t("noEarnings")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -328,15 +327,15 @@ export default function PayrollPage() {
                           {cleaner ? cleanerDisplayName(cleaner) : e.cleanerId}
                         </TableCell>
                         <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {e.booking ? new Date(e.booking.scheduledAt).toLocaleDateString() : e.bookingId}
+                          {e.booking ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(e.booking.scheduledAt)) : e.bookingId}
                         </TableCell>
                         <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{formatMoney(e.amountCents)}</TableCell>
                         <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(e.earnedAt).toLocaleDateString()}
+                          {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(e.earnedAt))}
                         </TableCell>
                         <TableCell className="px-5 py-4">
                           <Badge color={e.status === "PAID" ? "success" : e.status === "VOIDED" ? "error" : "warning"} size="sm">
-                            {e.status}
+                            {t(`earningStatus.${e.status}`)}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -379,26 +378,26 @@ export default function PayrollPage() {
                         {`${p.cleaner.user.firstName} ${p.cleaner.user.lastName}`.trim()}
                       </TableCell>
                       <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(p.periodStart).toLocaleDateString()} – {new Date(p.periodEnd).toLocaleDateString()}
+                        {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(p.periodStart))} – {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(p.periodEnd))}
                       </TableCell>
                       <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{formatMoney(p.totalCents)}</TableCell>
                       <TableCell className="px-5 py-4">
-                        <Badge color={PAYOUT_STATUS_COLOR[p.status]} size="sm">{p.status}</Badge>
+                        <Badge color={PAYOUT_STATUS_COLOR[p.status]} size="sm">{t(`payoutStatus.${p.status}`)}</Badge>
                       </TableCell>
                       <TableCell className="px-5 py-4">
                         <RowActionsMenu
-                          label={`Actions for payout to ${p.cleaner.user.firstName} ${p.cleaner.user.lastName}`.trim()}
+                          label={t("actionsForPayout", { name: `${p.cleaner.user.firstName} ${p.cleaner.user.lastName}`.trim() })}
                           actions={
                             p.status === "PENDING"
                                 ? [
                                   {
-                                    label: "Mark paid (bank transfer / cash)",
+                                    label: t("markPaidManual"),
                                     onClick: () => handleMarkPaid(p),
                                   },
                                   ...(p.cleaner.user.stripePayoutsEnabled
                                       ? [
                                         {
-                                          label: payingStripeId === p.id ? "Paying…" : "Pay via Stripe",
+                                          label: payingStripeId === p.id ? t("paying") : t("payViaStripe"),
                                           disabled: payingStripeId === p.id,
                                           onClick: () => handlePayStripe(p),
                                         },
@@ -420,16 +419,16 @@ export default function PayrollPage() {
       {/* Set/edit rate modal */}
       <Modal isOpen={!!rateModal} onClose={() => setRateModal(null)} className="max-w-md p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
-          Pay rate for {rateModal ? cleanerDisplayName(rateModal) : ""}
+          {t("payRateFor", { name: rateModal ? cleanerDisplayName(rateModal) : "" })}
         </h2>
         <form onSubmit={handleSaveRate} className="space-y-4">
           <div>
             <Label>{t("type")}</Label>
             <Select
               options={[
-                { value: "PERCENT", label: "Percent of job price" },
-                { value: "FLAT_PER_JOB", label: "Flat amount per job" },
-                { value: "HOURLY", label: "Hourly (based on clocked time)" },
+                { value: "PERCENT", label: t("rateTypes.percent") },
+                { value: "FLAT_PER_JOB", label: t("rateTypes.flatPerJob") },
+                { value: "HOURLY", label: t("rateTypes.hourly") },
               ]}
               defaultValue={rateForm.type}
               onChange={(value) => setRateForm({ ...rateForm, type: value as CompensationType })}
@@ -438,10 +437,10 @@ export default function PayrollPage() {
           <div>
             <Label>
               {rateForm.type === "PERCENT"
-                ? "Percent (1–100)"
+                ? t("percentRange")
                 : rateForm.type === "FLAT_PER_JOB"
-                ? "Amount per job (cents)"
-                : "Amount per hour (cents)"}
+                ? t("amountPerJob")
+                : t("amountPerHour")}
             </Label>
             <Input
               type="number"
@@ -454,7 +453,7 @@ export default function PayrollPage() {
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setRateModal(null)} type="button">{tc("cancel")}</Button>
-            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+            <Button type="submit" disabled={saving}>{saving ? tc("loading") : tc("save")}</Button>
           </div>
         </form>
       </Modal>
@@ -462,17 +461,14 @@ export default function PayrollPage() {
       {/* Create payout confirmation */}
       <Modal isOpen={!!payoutCleaner} onClose={() => setPayoutCleaner(null)} className="max-w-md p-6">
         <h2 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
-          Pay out {payoutCleaner ? cleanerDisplayName(payoutCleaner) : ""}?
+          {t("confirmPayoutTitle", { name: payoutCleaner ? cleanerDisplayName(payoutCleaner) : "" })}
         </h2>
         <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          This batches all of their pending earnings into one payout of{" "}
-          <strong>{payoutCleaner ? formatMoney(pendingByCleanerId.get(payoutCleaner.id) || 0) : ""}</strong>.
-          You&apos;ll still need to actually send the money — this just records it as owed, then paid once you
-          confirm.
+          {t("confirmPayoutBody", { amount: payoutCleaner ? formatMoney(pendingByCleanerId.get(payoutCleaner.id) || 0) : "" })}
         </p>
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="outline" onClick={() => setPayoutCleaner(null)} type="button">{tc("cancel")}</Button>
-          <Button onClick={handleCreatePayout} disabled={saving}>{saving ? "Creating…" : "Create Payout"}</Button>
+          <Button onClick={handleCreatePayout} disabled={saving}>{saving ? tc("loading") : t("createPayout")}</Button>
         </div>
       </Modal>
     </div>

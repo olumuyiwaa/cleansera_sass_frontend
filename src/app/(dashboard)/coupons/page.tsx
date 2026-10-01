@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import React, { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   listCoupons,
   createCoupon,
@@ -14,6 +14,7 @@ import RowActionsMenu from "@/components/tables/RowActionsMenu";
 export default function CouponsPage() {
   const t = useTranslations("Dashboard.coupons");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,23 +26,23 @@ export default function CouponsPage() {
     expiresAt: "",
   });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const res = await listCoupons();
       setCoupons((res.data as Coupon[]) || []);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load coupons");
+      setError(e instanceof Error ? e.message : t("loadFailed"));
       setCoupons([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,20 +58,20 @@ export default function CouponsPage() {
       setForm({ code: "", type: "PERCENT", value: 10, expiresAt: "" });
       await load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create coupon");
+      setError(err instanceof Error ? err.message : t("createFailed"));
     } finally {
       setBusy(false);
     }
   };
 
   const onDelete = async (id: string) => {
-    if (!confirm("Deactivate this coupon? Existing bookings that used it are unaffected.")) return;
+    if (!confirm(t("deactivateConfirm"))) return;
     setError("");
     try {
       await deleteCoupon(id);
       await load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to delete coupon");
+      setError(err instanceof Error ? err.message : t("deactivateFailed"));
     }
   };
 
@@ -79,7 +80,7 @@ export default function CouponsPage() {
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Discount codes for the booking widget
+            {t("subtitle")}
           </p>
         </div>
 
@@ -89,7 +90,7 @@ export default function CouponsPage() {
         >
           <input
               required
-              placeholder="CODE"
+              placeholder={t("codePlaceholder")}
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
               className="h-11 rounded-lg border border-gray-300 px-3 text-sm uppercase dark:border-gray-700 dark:bg-gray-900 dark:text-white"
@@ -99,8 +100,8 @@ export default function CouponsPage() {
               onChange={(e) => setForm({ ...form, type: e.target.value as CouponType })}
               className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           >
-            <option value="PERCENT">Percent %</option>
-            <option value="AMOUNT">Fixed amount (cents)</option>
+            <option value="PERCENT">{t("percent")}</option>
+            <option value="AMOUNT">{t("fixedAmount")}</option>
           </select>
           <input
               type="number"
@@ -109,21 +110,21 @@ export default function CouponsPage() {
               value={form.value}
               onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
               className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-              placeholder={form.type === "PERCENT" ? "e.g. 10" : "e.g. 500"}
+              placeholder={t("valueExample", { value: form.type === "PERCENT" ? "10" : "500" })}
           />
           <input
               type="date"
               value={form.expiresAt}
               onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
               className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-              title="Optional expiry"
+              title={t("optionalExpiry")}
           />
           <button
               type="submit"
               disabled={busy}
               className="h-11 rounded-lg bg-brand-500 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-60"
           >
-            {busy ? "Creating…" : "Create coupon"}
+            {busy ? tc("loading") : t("create")}
           </button>
         </form>
 
@@ -141,7 +142,7 @@ export default function CouponsPage() {
                 <thead className="bg-gray-50 dark:bg-white/[0.03]">
                 <tr>
                   <th className="px-4 py-3">{t("code")}</th>
-                  <th className="px-4 py-3">Type</th>
+                  <th className="px-4 py-3">{t("type")}</th>
                   <th className="px-4 py-3">{t("value")}</th>
                   <th className="px-4 py-3">{t("active")}</th>
                   <th className="px-4 py-3">{t("redeemed")}</th>
@@ -153,21 +154,21 @@ export default function CouponsPage() {
                 {coupons.map((c) => (
                     <tr key={c.id} className="border-t border-gray-100 dark:border-gray-800">
                       <td className="px-4 py-3 font-mono font-medium">{c.code}</td>
-                      <td className="px-4 py-3">{c.type}</td>
+                      <td className="px-4 py-3">{c.type === "PERCENT" ? t("percent") : t("fixedAmount")}</td>
                       <td className="px-4 py-3">
-                        {c.type === "PERCENT" ? `${c.value}%` : `${c.value} cents`}
+                        {c.type === "PERCENT" ? `${c.value}%` : t("centsValue", { value: c.value })}
                       </td>
-                      <td className="px-4 py-3">{c.isActive ? "Yes" : "No"}</td>
+                      <td className="px-4 py-3">{c.isActive ? tc("yes") : tc("no")}</td>
                       <td className="px-4 py-3">{c.redeemedCount ?? 0}</td>
                       <td className="px-4 py-3 text-gray-500">
-                        {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "—"}
+                        {c.expiresAt ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(c.expiresAt)) : "—"}
                       </td>
                       <td className="px-4 py-3">
                         <RowActionsMenu
-                          label={`Actions for coupon ${c.code}`}
+                          label={t("actionsFor", { code: c.code })}
                           actions={
                             c.isActive
-                              ? [{ label: "Deactivate", variant: "danger" as const, onClick: () => onDelete(c.id) }]
+                              ? [{ label: t("deactivate"), variant: "danger" as const, onClick: () => onDelete(c.id) }]
                               : []
                           }
                         />

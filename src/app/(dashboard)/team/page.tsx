@@ -20,12 +20,6 @@ import { useAuth } from "@/app/auth/useAuth";
 import { listStaff, inviteStaff, updateStaffRole, removeStaff } from "@/app/api/staff.api";
 import { StaffMember, StaffRole, staffDisplayName } from "@/app/api/cleansera-types";
 
-const ROLE_LABEL: Record<StaffRole, string> = {
-  BUSINESS_OWNER: "Owner",
-  BUSINESS_MANAGER: "Manager",
-  ORG_ADMIN: "Org Admin",
-};
-
 const ROLE_COLOR: Record<StaffRole, "success" | "warning" | "light"> = {
   BUSINESS_OWNER: "success",
   BUSINESS_MANAGER: "light",
@@ -55,11 +49,11 @@ export default function TeamPage() {
       const data = await listStaff();
       setMembers(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load team");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -81,7 +75,7 @@ export default function TeamPage() {
       setForm({ firstName: "", lastName: "", email: "", phone: "", role: "BUSINESS_MANAGER" });
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send invite");
+      setError(err instanceof Error ? err.message : t("inviteFailed"));
     } finally {
       setSaving(false);
     }
@@ -93,7 +87,7 @@ export default function TeamPage() {
       await updateStaffRole(member.id, role);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update role");
+      setError(err instanceof Error ? err.message : t("updateRoleFailed"));
     }
   };
 
@@ -106,7 +100,7 @@ export default function TeamPage() {
       setShowRemoveModal(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove team member");
+      setError(err instanceof Error ? err.message : t("removeFailed"));
     } finally {
       setSaving(false);
     }
@@ -118,7 +112,7 @@ export default function TeamPage() {
         <div>
           <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            People who can manage this business — separate from your cleaner roster.
+            {t("subtitle")}
           </p>
         </div>
         {isOwnerOrOrgAdmin && <Button onClick={() => setShowInviteModal(true)}>{t("invite")}</Button>}
@@ -171,22 +165,22 @@ export default function TeamPage() {
                           <option value="ORG_ADMIN">{t("role.orgAdmin")}</option>
                         </select>
                       ) : (
-                        <Badge color={ROLE_COLOR[m.role]} size="sm">{ROLE_LABEL[m.role]}</Badge>
+                        <Badge color={ROLE_COLOR[m.role]} size="sm">{t(`role.${m.role}`)}</Badge>
                       )}
                     </TableCell>
                     <TableCell className="px-5 py-4">
                       <Badge color={m.isActive ? "success" : "light"} size="sm">
-                        {m.isActive ? (m.joinedAt ? "Active" : "Invited") : "Removed"}
+                        {m.isActive ? (m.joinedAt ? t("status.active") : t("status.invited")) : t("status.removed")}
                       </Badge>
                     </TableCell>
                     <TableCell className="px-5 py-4">
                       <RowActionsMenu
-                        label={`Actions for ${staffDisplayName(m)}`}
+                        label={t("actionsFor", { name: staffDisplayName(m) })}
                         actions={
                           isOwnerOrOrgAdmin && m.role !== "BUSINESS_OWNER" && m.isActive
                             ? [
                                 {
-                                  label: "Remove",
+                                  label: t("remove"),
                                   variant: "danger" as const,
                                   onClick: () => setShowRemoveModal(m),
                                 },
@@ -228,8 +222,8 @@ export default function TeamPage() {
             <Label>{t("columns.role")}</Label>
             <Select
               options={[
-                { value: "BUSINESS_MANAGER", label: "Manager — day-to-day access" },
-                { value: "ORG_ADMIN", label: "Org Admin — cross-location (franchise parents only)" },
+                { value: "BUSINESS_MANAGER", label: t("roleOptions.manager") },
+                { value: "ORG_ADMIN", label: t("roleOptions.orgAdmin") },
               ]}
               defaultValue={form.role}
               onChange={(value) => setForm({ ...form, role: value as StaffRole })}
@@ -245,14 +239,14 @@ export default function TeamPage() {
       {/* Remove modal */}
       <Modal isOpen={!!showRemoveModal} onClose={() => setShowRemoveModal(null)} className="max-w-md p-6">
         <h2 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
-          Remove {showRemoveModal ? staffDisplayName(showRemoveModal) : ""}?
+          {t("removeTitle", { name: showRemoveModal ? staffDisplayName(showRemoveModal) : "" })}
         </h2>
         <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          They&apos;ll immediately lose access to this business. This can be undone by inviting them again.
+          {t("removeHint")}
         </p>
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="outline" onClick={() => setShowRemoveModal(null)} type="button">{tc("cancel")}</Button>
-          <Button onClick={handleRemove} disabled={saving}>{saving ? "Removing…" : "Confirm Remove"}</Button>
+          <Button onClick={handleRemove} disabled={saving}>{saving ? t("removing") : t("confirmRemove")}</Button>
         </div>
       </Modal>
     </div>

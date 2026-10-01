@@ -20,6 +20,8 @@ type Props = {
   data?: SalesSeriesPoint[];
   /** Format y tooltip (default: raw number) */
   formatValue?: (n: number) => string;
+  viewMoreLabel?: string;
+  emptyMessage?: string;
   viewMoreHref?: string;
   height?: number;
 };
@@ -34,6 +36,8 @@ export default function MonthlySalesChart({
   seriesName = "Revenue",
   data,
   formatValue,
+  viewMoreLabel = "View more",
+  emptyMessage = "No data for this period.",
   viewMoreHref = "/reports",
   height = 180,
 }: Props) {
@@ -101,14 +105,14 @@ export default function MonthlySalesChart({
             href={viewMoreHref}
             className="text-sm font-medium text-brand-500 hover:text-brand-600"
           >
-            View more
+            {viewMoreLabel}
           </Link>
         )}
       </div>
 
       {empty ? (
         <div className="flex h-[180px] items-center justify-center text-sm text-gray-400">
-          No data for this period.
+          {emptyMessage}
         </div>
       ) : (
         <div className="max-w-full overflow-x-auto custom-scrollbar">

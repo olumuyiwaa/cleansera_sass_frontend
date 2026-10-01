@@ -30,14 +30,7 @@ import {
 } from "@/app/api/inventory.api";
 
 const ITEM_TYPES: InventoryItemType[] = ["SUPPLY", "CHEMICAL", "EQUIPMENT", "PPE", "OTHER"];
-const MOVEMENT_TYPES: { value: StockMovementType; label: string }[] = [
-    { value: "PURCHASE", label: "Purchase / Receive" },
-    { value: "USAGE", label: "Usage" },
-    { value: "TRANSFER", label: "Transfer" },
-    { value: "ADJUSTMENT", label: "Adjustment" },
-    { value: "RETURN", label: "Return" },
-    { value: "WRITE_OFF", label: "Write-off" },
-];
+const MOVEMENT_TYPES: StockMovementType[] = ["PURCHASE", "USAGE", "TRANSFER", "ADJUSTMENT", "RETURN", "WRITE_OFF"];
 
 const TYPE_COLOR: Record<InventoryItemType, "success" | "warning" | "error" | "light" | "info"> = {
     SUPPLY: "info",
@@ -103,11 +96,11 @@ export default function InventoryPage() {
             // shape the type declares, so the fallback is gone.
             setItems(data.items || []);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load items");
+            setError(err instanceof Error ? err.message : t("loadFailed"));
         } finally {
             setLoading(false);
         }
-    }, [typeFilter]);
+    }, [typeFilter, t]);
 
     const loadStock = useCallback(async () => {
         setLoading(true);
@@ -116,11 +109,11 @@ export default function InventoryPage() {
             const data = await getStock({ lowStock: lowStockOnly || undefined });
             setStock(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load stock");
+            setError(err instanceof Error ? err.message : t("loadFailed"));
         } finally {
             setLoading(false);
         }
-    }, [lowStockOnly]);
+    }, [lowStockOnly, t]);
 
     const loadLocations = useCallback(async () => {
         setLoading(true);
@@ -129,11 +122,11 @@ export default function InventoryPage() {
             const data = await listLocations();
             setLocations(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load locations");
+            setError(err instanceof Error ? err.message : t("loadFailed"));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         if (tab === "items") loadItems();
@@ -164,7 +157,7 @@ export default function InventoryPage() {
             setItemForm({ name: "", sku: "", type: "SUPPLY", unit: "each", reorderPoint: "", isHazardous: false, manufacturer: "" });
             await loadItems();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create item");
+            setError(err instanceof Error ? err.message : t("createFailed"));
         } finally {
             setSaving(false);
         }
@@ -184,7 +177,7 @@ export default function InventoryPage() {
             setLocationForm({ name: "", type: "WAREHOUSE", address: "" });
             await loadLocations();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create location");
+            setError(err instanceof Error ? err.message : t("createFailed"));
         } finally {
             setSaving(false);
         }
@@ -208,7 +201,7 @@ export default function InventoryPage() {
             if (tab === "stock") await loadStock();
             else await loadItems();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to record movement");
+            setError(err instanceof Error ? err.message : t("movementFailed"));
         } finally {
             setSaving(false);
         }
@@ -219,7 +212,7 @@ export default function InventoryPage() {
             await updateItem(item.id, { isActive: !item.isActive });
             await loadItems();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to update item");
+            setError(err instanceof Error ? err.message : t("updateFailed"));
         }
     };
 
@@ -229,12 +222,12 @@ export default function InventoryPage() {
                 <div>
                     <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Track supplies, chemicals, equipment and stock levels across locations.
+                        {t("subtitle")}
                     </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button variant="outline" onClick={() => setShowMovementModal(true)}>
-                        Record Movement
+                        {t("recordMovement")}
                     </Button>
                     {tab === "locations" ? (
                         <Button onClick={() => setShowLocationModal(true)}>{t("addLocation")}</Button>
@@ -252,17 +245,17 @@ export default function InventoryPage() {
 
             {/* Tabs */}
             <div className="mb-4 flex flex-wrap gap-2">
-                {(["items", "stock", "locations"] as const).map((t) => (
+                {(["items", "stock", "locations"] as const).map((tabKey) => (
                     <button
-                        key={t}
-                        onClick={() => setTab(t)}
+                        key={tabKey}
+                        onClick={() => setTab(tabKey)}
                         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                            tab === t
+                            tab === tabKey
                                 ? "bg-brand-500 text-white"
                                 : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300"
                         }`}
                     >
-                        {t === "items" ? "Items" : t === "stock" ? "Stock Levels" : "Locations"}
+                        {tabKey === "items" ? t("items") : tabKey === "stock" ? t("stockLevels") : t("locations")}
                     </button>
                 ))}
             </div>
@@ -270,17 +263,17 @@ export default function InventoryPage() {
             {/* Type filter (items tab) */}
             {tab === "items" && (
                 <div className="mb-4 flex flex-wrap gap-2">
-                    {(["ALL", ...ITEM_TYPES] as const).map((t) => (
+                    {(["ALL", ...ITEM_TYPES] as const).map((typeKey) => (
                         <button
-                            key={t}
-                            onClick={() => setTypeFilter(t)}
+                            key={typeKey}
+                            onClick={() => setTypeFilter(typeKey)}
                             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                                typeFilter === t
+                                typeFilter === typeKey
                                     ? "bg-brand-500 text-white"
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300"
                             }`}
                         >
-                            {t === "ALL" ? "All types" : t}
+                            {typeKey === "ALL" ? t("allTypes") : t(`itemTypes.${typeKey}`)}
                         </button>
                     ))}
                 </div>
@@ -296,7 +289,7 @@ export default function InventoryPage() {
                             onChange={(e) => setLowStockOnly(e.target.checked)}
                             className="rounded"
                         />
-                        Show low-stock items only
+                        {t("showLowStockOnly")}
                     </label>
                 </div>
             )}
@@ -309,11 +302,11 @@ export default function InventoryPage() {
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("name")}</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">SKU</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Unit</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Reorder</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("skuColumn")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("type")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("unit")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("reorderColumn")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("status")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{tc("actions")}</TableCell>
                                 </TableRow>
                             </TableHeader>
@@ -334,12 +327,12 @@ export default function InventoryPage() {
                                             <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                                                 {item.name}
                                                 {item.isHazardous && (
-                                                    <span className="ml-2 text-xs text-warning-500">⚠ Hazardous</span>
+                                                    <span className="ml-2 text-xs text-warning-500">⚠ {t("hazardous")}</span>
                                                 )}
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">{item.sku || "—"}</TableCell>
                                             <TableCell className="px-5 py-4">
-                                                <Badge color={TYPE_COLOR[item.type]} size="sm">{item.type}</Badge>
+                                                <Badge color={TYPE_COLOR[item.type]} size="sm">{t(`itemTypes.${item.type}`)}</Badge>
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">{item.unit}</TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
@@ -347,15 +340,15 @@ export default function InventoryPage() {
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
                                                 <Badge color={item.isActive ? "success" : "light"} size="sm">
-                                                    {item.isActive ? "Active" : "Inactive"}
+                                                    {item.isActive ? t("active") : t("inactive")}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
                                                 <RowActionsMenu
-                                                    label={`Actions for ${item.name}`}
+                                                    label={t("actionsFor", { name: item.name })}
                                                     actions={[
                                                         {
-                                                            label: item.isActive ? "Deactivate" : "Activate",
+                                                            label: item.isActive ? t("itemActions.deactivate") : t("itemActions.activate"),
                                                             variant: item.isActive ? "danger" as const : "default" as const,
                                                             onClick: () => toggleActive(item),
                                                         },
@@ -378,10 +371,10 @@ export default function InventoryPage() {
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("item")}</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Total Qty</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Reorder Pt</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("type")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("totalQuantity")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("reorderPointShort")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("status")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("locations")}</TableCell>
                                 </TableRow>
                             </TableHeader>
@@ -403,7 +396,7 @@ export default function InventoryPage() {
                                                 {item.name}
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
-                                                <Badge color={TYPE_COLOR[item.type]} size="sm">{item.type}</Badge>
+                                                <Badge color={TYPE_COLOR[item.type]} size="sm">{t(`itemTypes.${item.type}`)}</Badge>
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-800 dark:text-white/90">
                                                 {item.totalQuantity ?? 0} {item.unit}
@@ -415,7 +408,7 @@ export default function InventoryPage() {
                                                 {item.isLowStock ? (
                                                     <Badge color="error" size="sm">{t("lowStock")}</Badge>
                                                 ) : (
-                                                    <Badge color="success" size="sm">OK</Badge>
+                                                    <Badge color="success" size="sm">{t("ok")}</Badge>
                                                 )}
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
@@ -439,7 +432,7 @@ export default function InventoryPage() {
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("name")}</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("type")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("address")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("itemsInStock")}</TableCell>
                                 </TableRow>
@@ -461,7 +454,7 @@ export default function InventoryPage() {
                                             <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                                                 {loc.name}
                                             </TableCell>
-                                            <TableCell className="px-5 py-4 text-sm text-gray-500">{loc.type}</TableCell>
+                                            <TableCell className="px-5 py-4 text-sm text-gray-500">{t(loc.type.toLowerCase())}</TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">{loc.address || "—"}</TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
                                                 {loc.stockLevels?.length ?? 0}
@@ -489,7 +482,7 @@ export default function InventoryPage() {
                         </div>
                         <div>
                             <Label>{t("unit")}</Label>
-                            <Input value={itemForm.unit} onChange={(e) => setItemForm({ ...itemForm, unit: e.target.value })} placeholder="each, liter, box…" />
+                            <Input value={itemForm.unit} onChange={(e) => setItemForm({ ...itemForm, unit: e.target.value })} placeholder={t("unitExamples")} />
                         </div>
                     </div>
                     <div>
@@ -499,8 +492,8 @@ export default function InventoryPage() {
                             onChange={(e) => setItemForm({ ...itemForm, type: e.target.value as InventoryItemType })}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
-                            {ITEM_TYPES.map((t) => (
-                                <option key={t} value={t}>{t}</option>
+                            {ITEM_TYPES.map((typeKey) => (
+                                <option key={typeKey} value={typeKey}>{t(`itemTypes.${typeKey}`)}</option>
                             ))}
                         </select>
                     </div>
@@ -519,11 +512,11 @@ export default function InventoryPage() {
                             onChange={(e) => setItemForm({ ...itemForm, isHazardous: e.target.checked })}
                             className="rounded"
                         />
-                        Hazardous chemical (requires SDS)
+                        {t("hazardousHint")}
                     </label>
                     <div className="flex justify-end gap-3 pt-2">
                         <Button variant="outline" onClick={() => setShowItemModal(false)} type="button">{tc("cancel")}</Button>
-                        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
+                        <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("create")}</Button>
                     </div>
                 </form>
             </Modal>
@@ -534,7 +527,7 @@ export default function InventoryPage() {
                 <form onSubmit={handleCreateLocation} className="space-y-4">
                     <div>
                         <Label>{t("name")}</Label>
-                        <Input value={locationForm.name} onChange={(e) => setLocationForm({ ...locationForm, name: e.target.value })} required placeholder="Main Warehouse, Van 1…" />
+                        <Input value={locationForm.name} onChange={(e) => setLocationForm({ ...locationForm, name: e.target.value })} required placeholder={t("locationExamples")} />
                     </div>
                     <div>
                         <Label>{t("type")}</Label>
@@ -543,9 +536,9 @@ export default function InventoryPage() {
                             onChange={(e) => setLocationForm({ ...locationForm, type: e.target.value })}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
-                            <option value="WAREHOUSE">Warehouse</option>
-                            <option value="VEHICLE">Vehicle</option>
-                            <option value="SITE">Site</option>
+                            <option value="WAREHOUSE">{t("warehouse")}</option>
+                            <option value="VEHICLE">{t("vehicle")}</option>
+                            <option value="SITE">{t("site")}</option>
                         </select>
                     </div>
                     <div>
@@ -554,14 +547,14 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <Button variant="outline" onClick={() => setShowLocationModal(false)} type="button">{tc("cancel")}</Button>
-                        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
+                        <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("create")}</Button>
                     </div>
                 </form>
             </Modal>
 
             {/* ─── Movement Modal ────────────────────────────────── */}
             <Modal isOpen={showMovementModal} onClose={() => setShowMovementModal(false)} className="max-w-md p-6">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Record Stock Movement</h2>
+                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("recordStockMovement")}</h2>
                 <form onSubmit={handleCreateMovement} className="space-y-4">
                     <div>
                         <Label>{t("item")}</Label>
@@ -571,7 +564,7 @@ export default function InventoryPage() {
                             required
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
-                            <option value="">Select item…</option>
+                            <option value="">{t("selectItem")}</option>
                             {items.map((i) => (
                                 <option key={i.id} value={i.id}>{i.name}</option>
                             ))}
@@ -585,7 +578,7 @@ export default function InventoryPage() {
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
                             {MOVEMENT_TYPES.map((m) => (
-                                <option key={m.value} value={m.value}>{m.label}</option>
+                                <option key={m} value={m}>{t(`movementTypes.${m}`)}</option>
                             ))}
                         </select>
                     </div>
@@ -602,7 +595,7 @@ export default function InventoryPage() {
                                 required
                                 className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                             >
-                                <option value="">Select…</option>
+                                <option value="">{t("selectLocation")}</option>
                                 {locations.map((l) => (
                                     <option key={l.id} value={l.id}>{l.name}</option>
                                 ))}
@@ -611,14 +604,14 @@ export default function InventoryPage() {
                     )}
                     {["PURCHASE", "RETURN", "TRANSFER", "ADJUSTMENT"].includes(movementForm.type) && (
                         <div>
-                            <Label>To Location</Label>
+                            <Label>{t("toLocation")}</Label>
                             <select
                                 value={movementForm.toLocationId}
                                 onChange={(e) => setMovementForm({ ...movementForm, toLocationId: e.target.value })}
                                 required={movementForm.type !== "ADJUSTMENT"}
                                 className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                             >
-                                <option value="">Select…</option>
+                                <option value="">{t("selectLocation")}</option>
                                 {locations.map((l) => (
                                     <option key={l.id} value={l.id}>{l.name}</option>
                                 ))}
@@ -631,7 +624,7 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <Button variant="outline" onClick={() => setShowMovementModal(false)} type="button">{tc("cancel")}</Button>
-                        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Record"}</Button>
+                        <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("record")}</Button>
                     </div>
                 </form>
             </Modal>

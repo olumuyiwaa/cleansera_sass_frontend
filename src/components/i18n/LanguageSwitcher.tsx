@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { setLocale } from "@/i18n/setLocale";
 import { locales, type AppLocale } from "@/i18n/locales";
 
@@ -15,6 +15,7 @@ const LABELS: Record<AppLocale, string> = { en: "EN", nl: "NL" };
  */
 export function LanguageSwitcher({ className = "" }: { className?: string }) {
   const current = useLocale() as AppLocale;
+  const t = useTranslations("Dashboard.common");
   const [pending, startTransition] = useTransition();
   const [optimistic, setOptimistic] = useState<AppLocale | null>(null);
 
@@ -37,7 +38,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
     <div
       className={`inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 text-xs font-medium dark:border-gray-700 dark:bg-gray-900 ${className}`}
       role="group"
-      aria-label="Language"
+      aria-label={t("language")}
     >
       {locales.map((locale) => (
         <button

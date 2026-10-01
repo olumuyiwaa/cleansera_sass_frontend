@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { authFetch } from "@/app/api/authFetch";
 import SearchSelect from "@/components/SearchSelect/SearchSelect";
 import {useAuth} from "@/app/auth/useAuth";
@@ -23,11 +23,11 @@ type AuditLog = {
 
 // ─── Helpers ──────────────────────────────────────────────────
 
-function formatDateTime(value?: string | null) {
+function formatDateTime(value: string | null | undefined, locale: string) {
     if (!value) return "-";
     const date = new Date(value);
     if (isNaN(date.getTime())) return value;
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(date);
@@ -55,13 +55,13 @@ function getActionBadgeClass(action: string): string {
 }
 
 function getChangeLabel(log: AuditLog): string {
-    if (log.action === "LOGIN")  return "Signed in";
-    if (log.action === "LOGOUT") return "Signed out";
-    if (log.action === "UPLOAD") return "File uploaded";
-    if (log.newData && log.previousData) return "Record updated";
-    if (log.newData)      return "Record created";
-    if (log.previousData) return "Record deleted";
-    return "—";
+    if (log.action === "LOGIN") return "signedIn";
+    if (log.action === "LOGOUT") return "signedOut";
+    if (log.action === "UPLOAD") return "fileUploaded";
+    if (log.newData && log.previousData) return "recordUpdated";
+    if (log.newData) return "recordCreated";
+    if (log.previousData) return "recordDeleted";
+    return "notAvailable";
 }
 
 // ─── Page ─────────────────────────────────────────────────────
@@ -69,6 +69,11 @@ function getChangeLabel(log: AuditLog): string {
 export default function AuditTrailPage() {
   const t = useTranslations("Dashboard.auditTrail");
   const tc = useTranslations("Dashboard.common");
+        const locale = useLocale();
+    const actionLabel = (action: string) => {
+        const key = `actions.${action}`;
+        return t.has(key) ? t(key) : formatLabel(action);
+    };
     const [logs, setLogs]             = useState<AuditLog[]>([]);
     const [pagination, setPagination] = useState<any>(null);
     const [page, setPage]             = useState(1);
@@ -118,28 +123,28 @@ export default function AuditTrailPage() {
             if (!result.success) throw new Error(result.message);
             setLogs(result.data?.data || []);
             setPagination(result.data?.pagination || null);
-        } catch (err: any) {
-            setError(err.message || "Failed to load audit trail");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : t("loadFailed"));
         } finally {
             setIsLoading(false);
         }
-    }, [page, filters]);
+    }, [page, filters, t]);
 
     useEffect(() => { fetchAuditLogs(); }, [fetchAuditLogs]);
 
     // ── CSV export ────────────────────────────────────────────────
     const exportToCSV = () => {
         if (!logs.length) return;
-        const headers = ["Time", "User", "Role", "Action", "Resource", "Resource ID", "IP Address", "Details"];
+        const headers = [t("time"), t("user"), t("role"), t("action"), t("resource"), t("resourceId"), t("ipAddress"), t("details")];
         const rows = logs.map((log) => [
-            `"${formatDateTime(log.createdAt)}"`,
-            `"${log.user?.email || "System"}"`,
+            `"${formatDateTime(log.createdAt, locale)}"`,
+            `"${log.user?.email || t("system")}"`,
             `"${log.user?.role || ""}"`,
             `"${log.action}"`,
             `"${log.resource}"`,
             `"${log.resourceId || ""}"`,
             `"${log.ipAddress || ""}"`,
-            `"${getChangeLabel(log)}"`,
+            `"${t(getChangeLabel(log))}"`,
         ].join(","));
 
         const blob = new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -175,7 +180,7 @@ export default function AuditTrailPage() {
                         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
                             {t("title")}</h1>
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Immutable log of all platform activity.
+                            {t("subtitle")}
                         </p>
                     </div>
 
@@ -192,7 +197,7 @@ export default function AuditTrailPage() {
                                 <polyline points="7 10 12 15 17 10"/>
                                 <line x1="12" y1="15" x2="12" y2="3"/>
                             </svg>
-                            Export CSV
+                            {t("exportCsv")}
                         </button>
 
                         <button
@@ -201,7 +206,7 @@ export default function AuditTrailPage() {
                             disabled={isLoading}
                             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                         >
-                            {isLoading ? "Refreshing..." : "Refresh"}
+                            {isLoading ? t("refreshing") : tc("refresh")}
                         </button>
                     </div>
                 </div>
@@ -215,14 +220,14 @@ export default function AuditTrailPage() {
 
             {/* ── Filters ────────────────────────────────────────────── */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
-                <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Filters</h2>
+                <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{tc("filter")}</h2>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 
                     {/* From date */}
                     <div>
                         <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">
-                            From
+                            {tc("from")}
                         </label>
                         <input
                             type="date"
@@ -235,7 +240,7 @@ export default function AuditTrailPage() {
                     {/* To date */}
                     <div>
                         <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">
-                            To
+                            {tc("to")}
                         </label>
                         <input
                             type="date"
@@ -247,8 +252,8 @@ export default function AuditTrailPage() {
 
                     {/* User — SearchSelect instead of text input */}
                     <SearchSelect
-                        label="User"
-                        placeholder="Search by name or email..."
+                        label={t("user")}
+                        placeholder={t("searchUser")}
                         type="user"
                         onSelect={(id, hit) => {
                             setFilter("userId", id);
@@ -263,14 +268,14 @@ export default function AuditTrailPage() {
                     {/* Resource */}
                     <div>
                         <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Resource
+                            {t("resource")}
                         </label>
                         <select
                             value={filters.resource}
                             onChange={(e) => setFilter("resource", e.target.value)}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                         >
-                            <option value="">All Resources</option>
+                            <option value="">{t("allResources")}</option>
                             {["User","CleanerProfile","Shift","ShiftAssignment","Visit","Case","Business",
                                 "Credential","Invoice","Payout","Storage","Conversation"].map((r) => (
                                 <option key={r} value={r}>{r}</option>
@@ -281,17 +286,17 @@ export default function AuditTrailPage() {
                     {/* Action */}
                     <div>
                         <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">
-                            Action
+                            {t("action")}
                         </label>
                         <select
                             value={filters.action}
                             onChange={(e) => setFilter("action", e.target.value)}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                         >
-                            <option value="">All Actions</option>
+                            <option value="">{t("allActions")}</option>
                             {["CREATE","UPDATE","DELETE","LOGIN","LOGOUT","APPROVE","REJECT",
                                 "SUSPEND","RESTORE","UPLOAD","DOWNLOAD"].map((a) => (
-                                <option key={a} value={a}>{formatLabel(a)}</option>
+                                <option key={a} value={a}>{actionLabel(a)}</option>
                             ))}
                         </select>
                     </div>
@@ -304,7 +309,7 @@ export default function AuditTrailPage() {
                             disabled={!hasActiveFilters}
                             className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                         >
-                            Clear
+                            {t("clearFilters")}
                         </button>
                     </div>
                 </div>
@@ -313,23 +318,23 @@ export default function AuditTrailPage() {
                 {hasActiveFilters && (
                     <div className="mt-3 flex flex-wrap gap-2">
                         {filters.from && (
-                            <Chip label={`From: ${filters.from}`} onRemove={() => setFilter("from", "")} />
+                            <Chip label={t("fromChip", { value: filters.from })} onRemove={() => setFilter("from", "")} />
                         )}
                         {filters.to && (
-                            <Chip label={`To: ${filters.to}`} onRemove={() => setFilter("to", "")} />
+                            <Chip label={t("toChip", { value: filters.to })} onRemove={() => setFilter("to", "")} />
                         )}
                         {filters.userId && (
                             <Chip
-                                label={`User: ${selectedUserLabel || filters.userId.slice(0, 8) + "…"}`}
+                                label={t("userChip", { value: selectedUserLabel || filters.userId.slice(0, 8) + "…" })}
                                 onRemove={() => { setFilter("userId", ""); setSelectedUserLabel(""); }}
                                 colorClass="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                             />
                         )}
                         {filters.resource && (
-                            <Chip label={`Resource: ${filters.resource}`} onRemove={() => setFilter("resource", "")} colorClass="bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300" />
+                            <Chip label={t("resourceChip", { value: filters.resource })} onRemove={() => setFilter("resource", "")} colorClass="bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300" />
                         )}
                         {filters.action && (
-                            <Chip label={`Action: ${formatLabel(filters.action)}`} onRemove={() => setFilter("action", "")} colorClass={getActionBadgeClass(filters.action)} />
+                            <Chip label={t("actionChip", { value: actionLabel(filters.action) })} onRemove={() => setFilter("action", "")} colorClass={getActionBadgeClass(filters.action)} />
                         )}
                     </div>
                 )}
@@ -339,10 +344,10 @@ export default function AuditTrailPage() {
             <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
                     <h2 className="font-semibold text-gray-800 dark:text-white/90">
-                        Activity Log
+                        {t("activityLog")}
                         {pagination?.total != null && (
                             <span className="ml-2 text-sm font-normal text-gray-400">
-                ({pagination.total.toLocaleString()} records)
+                ({t("recordCount", { count: new Intl.NumberFormat(locale).format(pagination.total) })})
               </span>
                         )}
                     </h2>
@@ -354,11 +359,11 @@ export default function AuditTrailPage() {
                         <tr>
                             {/* expand toggle column */}
                             <th className="w-10 px-4 py-3" />
-                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Time</th>
-                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">User</th>
-                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Action</th>
-                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Resource</th>
-                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Details</th>
+                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("time")}</th>
+                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("user")}</th>
+                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("action")}</th>
+                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("resource")}</th>
+                            <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("details")}</th>
                         </tr>
                         </thead>
 
@@ -378,7 +383,7 @@ export default function AuditTrailPage() {
                         ) : logs.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    No audit records found.
+                                    {t("noRecords")}
                                 </td>
                             </tr>
                         ) : (
@@ -401,13 +406,13 @@ export default function AuditTrailPage() {
 
                                         {/* Time */}
                                         <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                            {formatDateTime(log.createdAt)}
+                                            {formatDateTime(log.createdAt, locale)}
                                         </td>
 
                                         {/* User */}
                                         <td className="px-5 py-4">
                                             <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                                                {log.user?.email || "System"}
+                                                {log.user?.email || t("system")}
                                             </p>
                                             {log.user?.role && (
                                                 <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
@@ -419,7 +424,7 @@ export default function AuditTrailPage() {
                                         {/* Action badge */}
                                         <td className="px-5 py-4">
                         <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${getActionBadgeClass(log.action)}`}>
-                          {formatLabel(log.action)}
+                          {actionLabel(log.action)}
                         </span>
                                         </td>
 
@@ -436,7 +441,7 @@ export default function AuditTrailPage() {
                                         {/* Details summary */}
                                         <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1.5">
-                          {getChangeLabel(log)}
+                          {t(getChangeLabel(log))}
                             {log.ipAddress && (
                                 <span className="font-mono text-xs text-gray-300 dark:text-gray-600">
                               · {log.ipAddress}
@@ -455,7 +460,7 @@ export default function AuditTrailPage() {
                                                         <div>
                                                             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
                                                                 <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
-                                                                Before
+                                                                {t("before")}
                                                             </p>
                                                             <pre className="max-h-60 overflow-auto rounded-lg border border-red-100 bg-white px-4 py-3 text-xs leading-relaxed text-gray-700 dark:border-red-500/20 dark:bg-gray-900 dark:text-gray-300">
                                   {JSON.stringify(log.previousData, null, 2)}
@@ -466,7 +471,7 @@ export default function AuditTrailPage() {
                                                         <div>
                                                             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-green-600 dark:text-green-400">
                                                                 <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-                                                                After
+                                                                {t("after")}
                                                             </p>
                                                             <pre className="max-h-60 overflow-auto rounded-lg border border-green-100 bg-white px-4 py-3 text-xs leading-relaxed text-gray-700 dark:border-green-500/20 dark:bg-gray-900 dark:text-gray-300">
                                   {JSON.stringify(log.newData, null, 2)}
@@ -476,25 +481,25 @@ export default function AuditTrailPage() {
                                                     {!log.previousData && !log.newData && (
                                                         <div className="rounded-lg border border-gray-100 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
                                                             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                                                                Event summary
+                                                                {t("eventSummary")}
                                                             </p>
                                                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                                {log.action === "LOGIN"   && "User authenticated successfully."}
-                                                                {log.action === "LOGOUT"  && "User session ended."}
-                                                                {log.action === "CREATE"  && `${formatLabel(log.resource)} record was created.`}
-                                                                {log.action === "DELETE"  && `${formatLabel(log.resource)} record was deleted.`}
-                                                                {log.action === "UPLOAD"  && "A file was uploaded."}
-                                                                {log.action === "APPROVE" && `${formatLabel(log.resource)} was approved.`}
-                                                                {log.action === "REJECT"  && `${formatLabel(log.resource)} was rejected.`}
-                                                                {log.action === "SUSPEND" && "User account was suspended."}
-                                                                {log.action === "RESTORE" && "User account was restored."}
+                                                                {log.action === "LOGIN" && t("summaries.userAuthenticated")}
+                                                                {log.action === "LOGOUT" && t("summaries.sessionEnded")}
+                                                                {log.action === "CREATE" && t("summaries.resourceCreated", { resource: formatLabel(log.resource) })}
+                                                                {log.action === "DELETE" && t("summaries.resourceDeleted", { resource: formatLabel(log.resource) })}
+                                                                {log.action === "UPLOAD" && t("summaries.fileUploaded")}
+                                                                {log.action === "APPROVE" && t("summaries.resourceApproved", { resource: formatLabel(log.resource) })}
+                                                                {log.action === "REJECT" && t("summaries.resourceRejected", { resource: formatLabel(log.resource) })}
+                                                                {log.action === "SUSPEND" && t("summaries.accountSuspended")}
+                                                                {log.action === "RESTORE" && t("summaries.accountRestored")}
                                                                 {!["LOGIN","LOGOUT","CREATE","DELETE","UPLOAD","APPROVE","REJECT","SUSPEND","RESTORE"].includes(log.action) && (
-                                                                    `${formatLabel(log.action)} performed on ${formatLabel(log.resource)}.`
+                                                                    t("summaries.actionOnResource", { action: actionLabel(log.action), resource: formatLabel(log.resource) })
                                                                 )}
                                                             </p>
                                                             {log.resourceId && (
                                                                 <p className="mt-1.5 font-mono text-xs text-gray-300 dark:text-gray-600">
-                                                                    Resource: {log.resourceId}
+                                                                    {t("resourceId")}: {log.resourceId}
                                                                 </p>
                                                             )}
                                                         </div>
@@ -514,7 +519,7 @@ export default function AuditTrailPage() {
                 {pagination && (
                     <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Page {page} of {pagination.totalPages} · {pagination.total.toLocaleString()} records
+                            {t("pageSummary", { page, totalPages: pagination.totalPages, count: new Intl.NumberFormat(locale).format(pagination.total) })}
                         </p>
                         <div className="flex gap-2">
                             <button
@@ -523,7 +528,7 @@ export default function AuditTrailPage() {
                                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
                                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                             >
-                                Previous
+                                {tc("back")}
                             </button>
                             <button
                                 type="button"
@@ -531,7 +536,7 @@ export default function AuditTrailPage() {
                                 onClick={() => setPage((p) => p + 1)}
                                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                             >
-                                Next
+                                {tc("next")}
                             </button>
                         </div>
                     </div>

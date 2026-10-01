@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -25,11 +25,12 @@ import {
 } from "@/app/api/businesses.api";
 import { Business } from "@/app/api/cleansera-types";
 import StripeConnectOptionalCard from "@/components/business/StripeConnectOptionalCard";
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_COUNT = 7;
 
 export default function BusinessSettingsPage() {
   const t = useTranslations("Dashboard.settings");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [business, setBusiness] = useState<Business | null>(null);
   const [branding, setBranding] = useState<BusinessBranding | null>(null);
   const [hours, setHours] = useState<BusinessHours[]>([]);
@@ -52,7 +53,7 @@ export default function BusinessSettingsPage() {
       const [b, br, h] = await Promise.all([getBusiness(), getBranding(), listHours()]);
       setBusiness(b);
       setBranding(br);
-      setHours(h.length ? h : DAYS.map((_, i) => ({ dayOfWeek: i, openTime: "08:00", closeTime: "18:00", isClosed: i === 0 })));
+      setHours(h.length ? h : Array.from({ length: DAY_COUNT }, (_, i) => ({ dayOfWeek: i, openTime: "08:00", closeTime: "18:00", isClosed: i === 0 })));
       setNameForm({ name: b.name, timezone: b.timezone, customDomain: b.customDomain || "" });
       setTaxForm({
         legalName: b.legalName || "",
@@ -64,11 +65,11 @@ export default function BusinessSettingsPage() {
       setBrandForm({ tagline: br.tagline || "", primaryColor: br.primaryColor || "", accentColor: br.accentColor || "" });
       setAreas(await listServiceAreas());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load business settings");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -81,9 +82,9 @@ export default function BusinessSettingsPage() {
     setSaved("");
     try {
       await updateBusiness(nameForm);
-      setSaved("Business info saved");
+      setSaved(t("businessInfoSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+      setError(err instanceof Error ? err.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -102,9 +103,9 @@ export default function BusinessSettingsPage() {
         invoiceIban: taxForm.invoiceIban,
         vatRateBps: Number(taxForm.vatRateBps),
       });
-      setSaved("Invoicing details saved");
+      setSaved(t("invoicingSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save invoicing details");
+      setError(err instanceof Error ? err.message : t("invoicingSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -117,9 +118,9 @@ export default function BusinessSettingsPage() {
     setSaved("");
     try {
       await updateBranding(brandForm);
-      setSaved("Branding saved");
+      setSaved(t("brandingSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save branding");
+      setError(err instanceof Error ? err.message : t("brandingSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -131,9 +132,9 @@ export default function BusinessSettingsPage() {
     setSaved("");
     try {
       await updateHours(hours);
-      setSaved("Business hours saved");
+      setSaved(t("hoursSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save hours");
+      setError(err instanceof Error ? err.message : t("hoursSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -163,7 +164,7 @@ export default function BusinessSettingsPage() {
       const { url } = await startStripeConnectOnboarding();
       window.location.href = url; // Stripe hosted onboarding
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start Stripe onboarding");
+      setError(e instanceof Error ? e.message : t("stripeStartFailed"));
     } finally {
       setStripeLoading(false);
     }
@@ -175,7 +176,7 @@ export default function BusinessSettingsPage() {
     const lng = parseFloat(areaForm.centerLng);
     const radius = parseInt(areaForm.radiusMeters, 10);
     if (!areaForm.name.trim() || Number.isNaN(lat) || Number.isNaN(lng) || Number.isNaN(radius)) {
-      setError("Enter a name, valid latitude/longitude, and a radius for the service area");
+      setError(t("serviceAreaValidation"));
       return;
     }
     setAreaSaving(true);
@@ -185,22 +186,22 @@ export default function BusinessSettingsPage() {
       const created = await createServiceArea({ name: areaForm.name.trim(), centerLat: lat, centerLng: lng, radiusMeters: radius });
       setAreas((prev) => [...prev, created]);
       setAreaForm({ name: "", centerLat: "", centerLng: "", radiusMeters: "10000" });
-      setSaved("Service area added");
+      setSaved(t("serviceAreaAdded"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add service area");
+      setError(err instanceof Error ? err.message : t("serviceAreaAddFailed"));
     } finally {
       setAreaSaving(false);
     }
   };
 
   const removeServiceArea = async (id: string) => {
-    if (!confirm("Remove this service area? Bookings outside it will no longer be accepted by the widget.")) return;
+    if (!confirm(t("removeServiceAreaConfirm"))) return;
     setError("");
     try {
       await deleteServiceArea(id);
       setAreas((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove service area");
+      setError(err instanceof Error ? err.message : t("serviceAreaRemoveFailed"));
     }
   };
 
@@ -211,9 +212,9 @@ export default function BusinessSettingsPage() {
       <div>
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Your booking widget lives at{" "}
+          {t("widgetAddressIntro")}{" "}
           <span className="font-medium">{business?.subdomain}.cleansera.com</span>
-          {business?.customDomain ? <> or your custom domain <span className="font-medium">{business.customDomain}</span></> : null}.
+          {business?.customDomain ? <> {t("orCustomDomain")} <span className="font-medium">{business.customDomain}</span></> : null}.
         </p>
       </div>
 
@@ -278,12 +279,12 @@ export default function BusinessSettingsPage() {
               onChange={(e) => setTaxForm({ ...taxForm, vatRateBps: e.target.value })}
               className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700"
             >
-              <option value="2100">21% (standard)</option>
-              <option value="900">9% (reduced)</option>
+              <option value="2100">21% ({t("standardRate")})</option>
+              <option value="900">9% ({t("reducedRate")})</option>
               <option value="0">0%</option>
             </select>
           </div>
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save invoicing details"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? t("saving") : t("saveInvoicing")}</Button>
         </form>
       </section>
 
@@ -325,7 +326,9 @@ export default function BusinessSettingsPage() {
         <div className="space-y-3">
           {hours.map((h, i) => (
             <div key={h.dayOfWeek} className="flex items-center gap-4">
-              <span className="w-24 text-sm text-gray-600 dark:text-gray-300">{DAYS[h.dayOfWeek]}</span>
+              <span className="w-24 text-sm text-gray-600 dark:text-gray-300">
+                {new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2023, 0, h.dayOfWeek + 1)))}
+              </span>
               <label className="flex items-center gap-2 text-xs text-gray-500">
                 <input
                   type="checkbox"
@@ -336,7 +339,7 @@ export default function BusinessSettingsPage() {
                     setHours(next);
                   }}
                 />
-                Open
+                {t("open")}
               </label>
               {!h.isClosed && (
                 <>
@@ -350,7 +353,7 @@ export default function BusinessSettingsPage() {
                     }}
                     className="rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   />
-                  <span className="text-gray-400">to</span>
+                  <span className="text-gray-400">{tc("to")}</span>
                   <input
                     type="time"
                     value={h.closeTime}
@@ -366,14 +369,14 @@ export default function BusinessSettingsPage() {
             </div>
           ))}
         </div>
-        <Button className="mt-4" onClick={saveHours} disabled={saving}>{saving ? "Saving…" : "Save Hours"}</Button>
+        <Button className="mt-4" onClick={saveHours} disabled={saving}>{saving ? t("saving") : t("saveHours")}</Button>
       </section>
 
       {/* Service Areas */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("serviceArea")}</h2>
         <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-          The widget only accepts bookings whose address falls inside one of these areas. Add at least one before going live.
+          {t("serviceAreaHint")}
         </p>
 
         {areas.length > 0 && (
@@ -381,14 +384,14 @@ export default function BusinessSettingsPage() {
             {areas.map((a) => (
               <li key={a.id} className="flex items-center justify-between py-2 text-sm">
                 <span className="text-gray-700 dark:text-gray-200">
-                  {a.name} — {a.centerLat.toFixed(4)}, {a.centerLng.toFixed(4)} · {(a.radiusMeters / 1000).toFixed(1)}km radius
+                  {a.name} — {a.centerLat.toFixed(4)}, {a.centerLng.toFixed(4)} · {(a.radiusMeters / 1000).toFixed(1)} {t("kilometerRadius")}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeServiceArea(a.id)}
                   className="text-xs font-medium text-red-600 hover:underline"
                 >
-                  Remove
+                  {tc("delete")}
                 </button>
               </li>
             ))}
@@ -413,7 +416,7 @@ export default function BusinessSettingsPage() {
             <Input type="number" value={areaForm.centerLng} onChange={(e) => setAreaForm({ ...areaForm, centerLng: e.target.value })} placeholder="3.3792" />
           </div>
           <div className="sm:col-span-2">
-            <Button type="submit" disabled={areaSaving}>{areaSaving ? "Adding…" : "Add Service Area"}</Button>
+            <Button type="submit" disabled={areaSaving}>{areaSaving ? t("adding") : t("addServiceArea")}</Button>
           </div>
         </form>
       </section>

@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg, EventContentArg } from "@fullcalendar/core";
+import nlLocale from "@fullcalendar/core/locales/nl";
 
 import { useModal } from "@/hooks/useModal";
 import { Modal } from "@/components/ui/modal";
@@ -24,11 +25,11 @@ const EVENT_TYPE_CONFIG: Record<
     { label: string; badgeClass: string }
 > = {
     BOOKING: {
-        label: "Booking",
+        label: "booking",
         badgeClass: "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
     },
     RECURRING: {
-        label: "Recurring",
+        label: "recurring",
         badgeClass: "bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300",
     },
 };
@@ -40,57 +41,67 @@ function formatLabel(value?: string | null) {
     return value.replace(/_/g, " ");
 }
 
-function formatDateTime(value?: string | null) {
+function formatDateTime(value: string | null | undefined, locale: string) {
     if (!value) return "—";
     const d = new Date(value);
     if (isNaN(d.getTime())) return value;
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(d);
 }
 
-function EventDetailRows({ event }: { event: BackendCalendarEvent }) {
-    const { meta, type, status } = event;
+function DetailRow({ label, value }: { label: string; value?: string | null }) {
+    if (!value) return null;
+    return (
+        <div className="grid grid-cols-[140px_1fr] gap-2 border-b border-gray-100 py-2 last:border-0 dark:border-gray-800">
+            <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                {label}
+            </span>
+            <span className="break-words text-sm text-gray-800 dark:text-white/90">{value}</span>
+        </div>
+    );
+}
 
-    const Row = ({ label, value }: { label: string; value?: string | null }) =>
-        value ? (
-            <div className="grid grid-cols-[140px_1fr] gap-2 border-b border-gray-100 py-2 last:border-0 dark:border-gray-800">
-        <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          {label}
-        </span>
-                <span className="break-words text-sm text-gray-800 dark:text-white/90">{value}</span>
-            </div>
-        ) : null;
+function EventDetailRows({
+    event,
+    labels,
+    locale,
+}: {
+    event: BackendCalendarEvent;
+    labels: Record<string, string>;
+    locale: string;
+}) {
+    const { meta, type, status } = event;
 
     if (type === "BOOKING") {
         return (
             <>
-                <Row label="Service" value={meta.serviceName} />
-                <Row label="Customer" value={meta.customerName} />
-                <Row label="Address" value={meta.address} />
-                <Row label="Cleaners" value={meta.cleaners?.length ? meta.cleaners.join(", ") : undefined} />
-                <Row label="Status" value={formatLabel(status)} />
-                <Row label="Payment" value={formatLabel(meta.paymentStatus)} />
-                <Row
-                    label="Quoted"
+                <DetailRow label={labels.service} value={meta.serviceName} />
+                <DetailRow label={labels.customer} value={meta.customerName} />
+                <DetailRow label={labels.address} value={meta.address} />
+                <DetailRow label={labels.cleaners} value={meta.cleaners?.length ? meta.cleaners.join(", ") : undefined} />
+                <DetailRow label={labels.status} value={formatLabel(status)} />
+                <DetailRow label={labels.payment} value={formatLabel(meta.paymentStatus)} />
+                <DetailRow
+                    label={labels.quoted}
                     value={
                         meta.quotedPriceCents != null ? formatMoney(meta.quotedPriceCents) : undefined
                     }
                 />
-                {meta.cancelReason && <Row label="Cancel reason" value={meta.cancelReason} />}
+                {meta.cancelReason && <DetailRow label={labels.cancelReason} value={meta.cancelReason} />}
             </>
         );
     }
 
     return (
         <>
-            <Row label="Service" value={meta.serviceName} />
-            <Row label="Customer" value={meta.customerName} />
-            <Row label="Frequency" value={formatLabel(meta.frequency)} />
-            <Row label="Start time" value={meta.startTime} />
-            <Row label="Next run" value={formatDateTime(meta.nextRunDate)} />
-            <Row label="Status" value={formatLabel(status)} />
+            <DetailRow label={labels.service} value={meta.serviceName} />
+            <DetailRow label={labels.customer} value={meta.customerName} />
+            <DetailRow label={labels.frequency} value={formatLabel(meta.frequency)} />
+            <DetailRow label={labels.startTime} value={meta.startTime} />
+            <DetailRow label={labels.nextRun} value={formatDateTime(meta.nextRunDate, locale)} />
+            <DetailRow label={labels.status} value={formatLabel(status)} />
         </>
     );
 }
@@ -98,6 +109,7 @@ function EventDetailRows({ event }: { event: BackendCalendarEvent }) {
 const Calendar: React.FC = () => {
     const t = useTranslations("Dashboard.calendar");
     const tc = useTranslations("Dashboard.common");
+    const locale = useLocale();
     const calendarRef = useRef<FullCalendar>(null);
     const { isOpen, openModal, closeModal } = useModal();
 
@@ -152,12 +164,12 @@ const Calendar: React.FC = () => {
 
                 successCallback(formatted);
             } catch (err) {
-                const message = err instanceof Error ? err.message : "Failed to load calendar events";
+                const message = err instanceof Error ? err.message : t("loadFailed");
                 setLoadError(message);
                 failureCallback(err instanceof Error ? err : new Error(message));
             }
         },
-        [activeTypes]
+        [activeTypes, t]
     );
 
     const handleEventClick = (clickInfo: EventClickArg) => {
@@ -213,7 +225,7 @@ const Calendar: React.FC = () => {
                                         : "border-gray-300 bg-transparent text-gray-400 dark:border-gray-700 dark:text-gray-600",
                                 ].join(" ")}
                             >
-                                {cfg.label}
+                                {t(`eventTypes.${cfg.label}`)}
                             </button>
                         );
                     })}
@@ -225,14 +237,14 @@ const Calendar: React.FC = () => {
                         }}
                         className="ml-auto text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400"
                     >
-                        Reset
+                        {t("reset")}
                     </button>
                 </div>
             </div>
 
             {loadError && (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
-                    Failed to load events: {loadError}
+                    {t("loadEventsFailed", { error: loadError })}
                 </div>
             )}
 
@@ -242,6 +254,13 @@ const Calendar: React.FC = () => {
                         ref={calendarRef}
                         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                         initialView="dayGridMonth"
+                        locale={locale === "nl" ? nlLocale : "en"}
+                        buttonText={{
+                            today: t("today"),
+                            month: t("month"),
+                            week: t("week"),
+                            day: t("day"),
+                        }}
                         headerToolbar={{
                             left: "prev,next today",
                             center: "title",
@@ -257,7 +276,7 @@ const Calendar: React.FC = () => {
                         height="auto"
                         selectable={false}
                         dayMaxEvents={4}
-                        moreLinkContent={(args) => `+${args.num} more`}
+                        moreLinkContent={(args) => t("moreCount", { count: args.num })}
                     />
                 </div>
             </div>
@@ -270,16 +289,16 @@ const Calendar: React.FC = () => {
                 <span
                     className={`mb-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${typeConfig.badgeClass}`}
                 >
-                  {typeConfig.label}
+                  {t(`eventTypes.${typeConfig.label}`)}
                 </span>
                                 <h2 className="break-words text-lg font-semibold leading-snug text-gray-800 dark:text-white/90">
                                     {selectedEvent.title}
                                 </h2>
                                 {selectedEvent.start && (
                                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        {formatDateTime(selectedEvent.start)}
+                                        {formatDateTime(selectedEvent.start, locale)}
                                         {selectedEvent.end && !selectedEvent.allDay && (
-                                            <> — {formatDateTime(selectedEvent.end)}</>
+                                            <> — {formatDateTime(selectedEvent.end, locale)}</>
                                         )}
                                     </p>
                                 )}
@@ -291,7 +310,23 @@ const Calendar: React.FC = () => {
                         </div>
 
                         <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 px-4 dark:divide-gray-800 dark:border-gray-800">
-                            <EventDetailRows event={selectedEvent} />
+                            <EventDetailRows
+                                event={selectedEvent}
+                                locale={locale}
+                                labels={{
+                                    service: t("details.service"),
+                                    customer: t("details.customer"),
+                                    address: t("details.address"),
+                                    cleaners: t("details.cleaners"),
+                                    status: t("details.status"),
+                                    payment: t("details.payment"),
+                                    quoted: t("details.quoted"),
+                                    cancelReason: t("details.cancelReason"),
+                                    frequency: t("details.frequency"),
+                                    startTime: t("details.startTime"),
+                                    nextRun: t("details.nextRun"),
+                                }}
+                            />
                         </div>
 
                         <p className="break-all font-mono text-xs text-gray-400 dark:text-gray-600">
@@ -304,7 +339,7 @@ const Calendar: React.FC = () => {
                                 onClick={handleCloseModal}
                                 className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                             >
-                                Close
+                                {tc("close")}
                             </button>
                         </div>
                     </div>

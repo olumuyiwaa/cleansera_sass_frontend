@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import {
@@ -27,6 +27,7 @@ const STATUS_COLOR: Record<string, "success" | "warning" | "error" | "light"> = 
 export default function SubscriptionPage() {
   const t = useTranslations("Dashboard.subscription");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subscription, setSubscription] = useState<BusinessSubscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,11 +46,11 @@ export default function SubscriptionPage() {
       setPlans(Array.isArray(p) ? p : []);
       setSubscription(s);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load subscription info");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -63,7 +64,7 @@ export default function SubscriptionPage() {
       // Hand over to Stripe Checkout; it returns here with ?checkout=success.
       window.location.href = checkoutUrl;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start subscription");
+      setError(err instanceof Error ? err.message : t("startFailed"));
       setBusy(null);
     }
   };
@@ -75,7 +76,7 @@ export default function SubscriptionPage() {
       const { url } = await openBillingPortal();
       window.location.href = url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not open billing settings");
+      setError(err instanceof Error ? err.message : t("billingPortalFailed"));
       setBusy(null);
     }
   };
@@ -85,7 +86,7 @@ export default function SubscriptionPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("checkout") !== "success") return;
-    setNotice("Payment method saved — activating your plan…");
+    setNotice(t("activatingPlan"));
     let tries = 0;
     const timer = window.setInterval(async () => {
       tries += 1;
@@ -93,13 +94,11 @@ export default function SubscriptionPage() {
       if (tries >= 6) window.clearInterval(timer);
     }, 3000);
     return () => window.clearInterval(timer);
-  }, [load]);
+  }, [load, t]);
 
   const handleCancel = async () => {
     if (
-        !confirm(
-            "Cancel your CleanSera subscription? This only affects your CleanSera billing — customer payments for jobs are unaffected."
-        )
+        !confirm(t("cancelConfirm"))
     ) {
       return;
     }
@@ -109,7 +108,7 @@ export default function SubscriptionPage() {
       await cancelSubscription();
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to cancel subscription");
+      setError(err instanceof Error ? err.message : t("cancelFailed"));
     } finally {
       setBusy(null);
     }
@@ -122,8 +121,7 @@ export default function SubscriptionPage() {
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            This is your business&apos;s CleanSera billing only — job payments from your customers
-            happen via Stripe Connect and are unaffected by this plan.
+            {t("billingScopeHint")}
           </p>
         </div>
 
@@ -145,37 +143,37 @@ export default function SubscriptionPage() {
             <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Current plan</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("currentPlan")}</p>
                   <p className="text-lg font-semibold text-gray-800 dark:text-white/90">
-                    {subscription.plan?.name ?? "Unknown plan"}
+                    {subscription.plan?.name ?? t("unknownPlan")}
                   </p>
                 </div>
                 <Badge color={STATUS_COLOR[subscription.status] || "light"}>
-                  {subscription.status}
+                  {t(`statuses.${subscription.status}`)}
                 </Badge>
               </div>
               {subscription.trialEndsAt && subscription.status === "TRIALING" && (
                   <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-                    Trial ends {new Date(subscription.trialEndsAt).toLocaleDateString()}
+                    {t("trialEnds", { date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(subscription.trialEndsAt)) })}
                   </p>
               )}
               {subscription.currentPeriodEnd && subscription.status !== "CANCELED" && (
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                    {t("renews", { date: new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(subscription.currentPeriodEnd)) })}
                   </p>
               )}
               {subscription.plan?.maxCleaners != null && (
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Up to {subscription.plan.maxCleaners} cleaners
+                    {t("upToCleaners", { count: subscription.plan.maxCleaners })}
                   </p>
               )}
               {subscription.status !== "CANCELED" && (
                   <div className="mt-4 flex flex-wrap gap-3">
                     <Button variant="outline" onClick={handleManageBilling} disabled={busy === "portal"}>
-                      {busy === "portal" ? "Opening…" : "Manage billing"}
+                      {busy === "portal" ? t("opening") : t("manageBilling")}
                     </Button>
                     <Button variant="outline" onClick={handleCancel} disabled={busy === "cancel"}>
-                      {busy === "cancel" ? "Cancelling…" : "Cancel Subscription"}
+                      {busy === "cancel" ? t("cancelling") : t("cancelSubscription")}
                     </Button>
                   </div>
               )}
@@ -183,7 +181,7 @@ export default function SubscriptionPage() {
         ) : (
             <div className="mb-8 rounded-xl border border-dashed border-gray-300 p-6 text-center dark:border-gray-700">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                No active subscription yet — pick a plan below to get started.
+                {t("noActiveSubscription")}
               </p>
             </div>
         )}
@@ -191,11 +189,11 @@ export default function SubscriptionPage() {
         {showPlans && (
             <>
               <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Available Plans
+                {t("availablePlans")}
               </h2>
               {plans.length === 0 ? (
                   <p className="text-sm text-gray-500">
-                    No plans available.
+                    {t("noPlans")}
                   </p>
               ) : (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -209,11 +207,11 @@ export default function SubscriptionPage() {
                           </h3>
                           <p className="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                             {formatMoney(plan.monthlyPriceCents)}
-                            <span className="text-sm font-normal text-gray-500"> /mo</span>
+                            <span className="text-sm font-normal text-gray-500"> {t("perMonth")}</span>
                           </p>
                           {plan.maxCleaners != null && (
                               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Up to {plan.maxCleaners} cleaners
+                                {t("upToCleaners", { count: plan.maxCleaners })}
                               </p>
                           )}
                           <Button
@@ -221,7 +219,7 @@ export default function SubscriptionPage() {
                               onClick={() => handleSubscribe(plan.id)}
                               disabled={busy === plan.id}
                           >
-                            {busy === plan.id ? "Starting…" : "Choose Plan"}
+                            {busy === plan.id ? t("starting") : t("choosePlan")}
                           </Button>
                         </div>
                     ))}

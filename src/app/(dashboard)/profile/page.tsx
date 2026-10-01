@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/app/auth/useAuth";
 import { useRouter } from "next/navigation";
 import { Disable2FAModal } from "@/components/modals/twoFactorModal/Disable2FAModal";
@@ -14,25 +14,18 @@ import {
     type CurrentUserProfile,
 } from "@/app/api/profile.api";
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
     if (!value) return "—";
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(new Date(value));
 }
 
-function formatRole(role?: string | null) {
-    if (!role) return "—";
-    return role
-        .split("_")
-        .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-        .join(" ");
-}
-
 export default function ProfilePage() {
-  const t = useTranslations("Dashboard.profile");
+    const t = useTranslations("Dashboard.profile");
   const tc = useTranslations("Dashboard.common");
+        const locale = useLocale();
     const { user, setUser, logout } = useAuth();
     const router = useRouter();
 
@@ -75,11 +68,11 @@ export default function ProfilePage() {
             setLastName(data.lastName || "");
             setPhone(data.phone || "");
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Failed to load profile");
+            setError(err instanceof Error ? err.message : t("loadFailed"));
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         fetchProfile();
@@ -92,13 +85,13 @@ export default function ProfilePage() {
         try {
             const updated = await updateMe({ firstName, lastName, phone: phone || null });
             setProfile(updated);
-            setSuccess("Profile updated successfully.");
+            setSuccess(t("profileUpdated"));
             // Keep auth context in sync if shape matches
             if (setUser && user) {
                 setUser({ ...user, firstName: updated.firstName, lastName: updated.lastName, phone: updated.phone } as typeof user);
             }
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Failed to update profile");
+            setError(err instanceof Error ? err.message : t("profileUpdateFailed"));
         } finally {
             setIsSaving(false);
         }
@@ -110,11 +103,11 @@ export default function ProfilePage() {
         setSuccess("");
         try {
             await changePassword({ currentPassword, newPassword });
-            setSuccess("Password changed. You may need to sign in again on other devices.");
+            setSuccess(t("passwordChanged"));
             setCurrentPassword("");
             setNewPassword("");
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Failed to change password");
+            setError(err instanceof Error ? err.message : t("passwordChangeFailed"));
         } finally {
             setIsChangingPassword(false);
         }
@@ -130,7 +123,7 @@ export default function ProfilePage() {
             setShow2FASetup(true);
             setTotpCode("");
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Failed to start 2FA setup");
+            setError(err instanceof Error ? err.message : t("twoFactorStartFailed"));
         } finally {
             setTwoFaBusy(false);
         }
@@ -143,10 +136,10 @@ export default function ProfilePage() {
         try {
             await verifyEnable2FA(totpCode.trim());
             setShow2FASetup(false);
-            setSuccess("Two-factor authentication enabled.");
+            setSuccess(t("twoFactorEnabledSuccess"));
             await fetchProfile();
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Invalid code");
+            setError(err instanceof Error ? err.message : t("invalidCode"));
         } finally {
             setTwoFaBusy(false);
         }
@@ -161,7 +154,7 @@ export default function ProfilePage() {
     if (isLoading) {
         return (
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-                Loading profile…
+                {t("loadingProfile")}
             </div>
         );
     }
@@ -184,7 +177,7 @@ export default function ProfilePage() {
                         <div className="mt-2 flex flex-wrap gap-2">
                             {profile?.businessRole && (
                                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-                  {formatRole(profile.businessRole)}
+                  {t(`roles.${profile.businessRole}`)}
                 </span>
                             )}
                             {profile?.business?.name && (
@@ -199,7 +192,7 @@ export default function ProfilePage() {
                                         : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
                                 }`}
                             >
-                {profile?.isEmailVerified ? "Email verified" : "Email not verified"}
+                {profile?.isEmailVerified ? t("emailVerified") : t("emailNotVerified")}
               </span>
                         </div>
                     </div>
@@ -220,7 +213,7 @@ export default function ProfilePage() {
             {/* Personal info */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                    Personal information
+                    {t("personalInformation")}
                 </h2>
                 <div className="grid gap-4 md:grid-cols-2">
                     <input
@@ -253,20 +246,20 @@ export default function ProfilePage() {
                     disabled={isSaving}
                     className="mt-5 rounded-lg bg-brand-500 px-5 py-3 text-white hover:bg-brand-600 disabled:opacity-60"
                 >
-                    {isSaving ? "Saving…" : "Save changes"}
+                    {isSaving ? tc("loading") : t("saveChanges")}
                 </button>
             </div>
 
             {/* Account */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                    Account
+                    {t("account")}
                 </h2>
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Info label="Role" value={formatRole(profile?.businessRole)} />
-                    <Info label="Business" value={profile?.business?.name} />
-                    <Info label="Timezone" value={profile?.business?.timezone} />
-                    <Info label="Member since" value={formatDate(profile?.createdAt)} />
+                    <Info label={t("role")} value={profile?.businessRole ? t(`roles.${profile.businessRole}`) : "—"} />
+                    <Info label={t("business")} value={profile?.business?.name} />
+                    <Info label={t("timezone")} value={profile?.business?.timezone} />
+                    <Info label={t("memberSince")} value={formatDate(profile?.createdAt, locale)} />
                 </div>
 
                 <div className="mt-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -274,7 +267,7 @@ export default function ProfilePage() {
                         <div>
                             <p className="text-xs uppercase text-gray-500">{t("twoFactor")}</p>
                             <p className="mt-1 font-medium text-gray-900 dark:text-white">
-                                {profile?.twoFactorEnabled ? "Enabled" : "Disabled"}
+                                {profile?.twoFactorEnabled ? t("enabled") : t("disabled")}
                             </p>
                         </div>
                         {profile?.twoFactorEnabled ? (
@@ -284,7 +277,7 @@ export default function ProfilePage() {
                                 disabled={twoFaBusy}
                                 className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400"
                             >
-                                Disable
+                                {t("disable")}
                             </button>
                         ) : (
                             <button
@@ -293,7 +286,7 @@ export default function ProfilePage() {
                                 disabled={twoFaBusy}
                                 className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
                             >
-                                {twoFaBusy ? "…" : "Enable"}
+                                {twoFaBusy ? "…" : t("enable")}
                             </button>
                         )}
                     </div>
@@ -311,7 +304,7 @@ export default function ProfilePage() {
                     {show2FASetup && (
                         <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 dark:border-gray-800">
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Add this secret to your authenticator app, then enter a 6-digit code to confirm.
+                                {t("twoFactorInstructions")}
                             </p>
                             {base32 && (
                                 <p className="break-all rounded-lg bg-gray-50 p-3 font-mono text-xs dark:bg-gray-900">
@@ -325,7 +318,7 @@ export default function ProfilePage() {
                                 <input
                                     value={totpCode}
                                     onChange={(e) => setTotpCode(e.target.value)}
-                                    placeholder="6-digit code"
+                                    placeholder={t("codePlaceholder")}
                                     className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                                 />
                                 <button
@@ -334,14 +327,14 @@ export default function ProfilePage() {
                                     disabled={twoFaBusy || !totpCode.trim()}
                                     className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
                                 >
-                                    Confirm & enable
+                                    {t("confirmEnable")}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setShow2FASetup(false)}
                                     className="rounded-lg border px-4 py-2 text-sm text-gray-600 dark:border-gray-700"
                                 >
-                                    Cancel
+                                    {tc("cancel")}
                                 </button>
                             </div>
                         </div>
@@ -352,7 +345,7 @@ export default function ProfilePage() {
             {/* Password */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                    Change password
+                    {t("changePassword")}
                 </h2>
                 <div className="grid max-w-md gap-4">
                     <input
@@ -375,7 +368,7 @@ export default function ProfilePage() {
                         disabled={isChangingPassword || !currentPassword || newPassword.length < 8}
                         className="rounded-lg bg-brand-500 px-5 py-3 text-white hover:bg-brand-600 disabled:opacity-60"
                     >
-                        {isChangingPassword ? "Updating…" : "Change password"}
+                        {isChangingPassword ? t("updating") : t("changePassword")}
                     </button>
                 </div>
             </div>

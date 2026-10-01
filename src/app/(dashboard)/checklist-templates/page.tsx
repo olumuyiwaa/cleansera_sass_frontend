@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
     listChecklistTemplates,
@@ -28,21 +28,21 @@ export default function ChecklistTemplatesPage() {
     const [items, setItems] = useState<ChecklistItem[]>(emptyItems());
     const [saving, setSaving] = useState(false);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         setError("");
         try {
             setTemplates(await listChecklistTemplates());
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to load");
+            setError(e instanceof Error ? e.message : t("loadFailed"));
         } finally {
             setLoading(false);
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         load();
-    }, []);
+    }, [load]);
 
     const resetForm = () => {
         setName("");
@@ -101,20 +101,20 @@ export default function ChecklistTemplatesPage() {
             resetForm();
             load();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to save");
+            setError(e instanceof Error ? e.message : t("saveFailed"));
         } finally {
             setSaving(false);
         }
     };
 
     const onDelete = async (id: string) => {
-        if (!confirm("Delete this checklist template?")) return;
+        if (!confirm(t("deleteConfirm"))) return;
         setError("");
         try {
             await deleteChecklistTemplate(id);
             load();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to delete");
+            setError(e instanceof Error ? e.message : t("deleteFailed"));
         }
     };
 
@@ -125,15 +125,14 @@ export default function ChecklistTemplatesPage() {
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
                         {t("title")}</h1>
                     <p className="mt-1 text-sm text-gray-500">
-                        Reusable job checklists cleaners complete on-site — applied
-                        per booking.
+                        {t("subtitle")}
                     </p>
                 </div>
                 <button
                     onClick={showForm ? resetForm : startNew}
                     className="h-10 rounded-lg bg-gray-900 px-4 text-sm font-medium text-white dark:bg-white/10"
                 >
-                    {showForm ? "Cancel" : "New template"}
+                    {showForm ? tc("cancel") : t("new")}
                 </button>
             </div>
 
@@ -150,7 +149,7 @@ export default function ChecklistTemplatesPage() {
                 >
                     <input
                         required
-                        placeholder="Template name (e.g. Deep Clean Checklist)"
+                        placeholder={t("namePlaceholder")}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="h-11 w-full rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
@@ -160,7 +159,7 @@ export default function ChecklistTemplatesPage() {
                         {items.map((it, idx) => (
                             <div key={idx} className="flex items-center gap-2">
                                 <input
-                                    placeholder={`Step ${idx + 1}`}
+                                    placeholder={t("stepPlaceholder", { number: idx + 1 })}
                                     value={it.label}
                                     onChange={(e) =>
                                         updateItemLabel(idx, e.target.value)
@@ -173,7 +172,7 @@ export default function ChecklistTemplatesPage() {
                                     disabled={items.length === 1}
                                     className="text-xs font-medium text-red-600 disabled:opacity-30"
                                 >
-                                    Remove
+                                    {tc("delete")}
                                 </button>
                             </div>
                         ))}
@@ -184,7 +183,7 @@ export default function ChecklistTemplatesPage() {
                         onClick={addItem}
                         className="text-sm font-medium text-gray-600 dark:text-gray-300"
                     >
-                        + Add step
+                        + {t("addStep")}
                     </button>
 
                     <div>
@@ -194,10 +193,10 @@ export default function ChecklistTemplatesPage() {
                             className="h-11 rounded-lg bg-gray-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-white/10"
                         >
                             {saving
-                                ? "Saving…"
+                                ? tc("loading")
                                 : editingId
-                                ? "Save changes"
-                                : "Create template"}
+                                ? t("saveChanges")
+                                : t("create")}
                         </button>
                     </div>
                 </form>
@@ -226,13 +225,13 @@ export default function ChecklistTemplatesPage() {
                                     onClick={() => startEdit(t)}
                                     className="font-medium text-gray-600 dark:text-gray-300"
                                 >
-                                    Edit
+                                    {tc("edit")}
                                 </button>
                                 <button
                                     onClick={() => onDelete(t.id)}
                                     className="font-medium text-red-600"
                                 >
-                                    Delete
+                                    {tc("delete")}
                                 </button>
                             </div>
                         </div>

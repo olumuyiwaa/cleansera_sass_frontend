@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import {authFetch} from "@/app/api/authFetch";
 import {NotificationItem, Pagination} from "@/app/api/types";
@@ -9,19 +9,19 @@ import {useAuth} from "@/app/auth/useAuth";
 import {useRouter} from "next/navigation";
 import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
-function getErrorMessage(error: unknown) {
+function getErrorMessage(error: unknown, fallback: string) {
     if (error instanceof Error) return error.message;
 
-    return "Something went wrong.";
+    return fallback;
 }
 
-function formatDateTime(value?: string | null) {
+function formatDateTime(value: string | null | undefined, locale: string) {
     if (!value) return "-";
 
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return value;
 
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(date);
@@ -32,6 +32,23 @@ function formatLabel(value?: string | null) {
 
     return value.replaceAll("_", " ");
 }
+
+const NOTIFICATION_TYPE_KEYS: Record<string, string> = {
+    CREDENTIAL_APPROVED: "credentialApproved",
+    BOOKING_CONFIRMATION: "bookingConfirmation",
+    CREDENTIAL_REJECTED: "credentialRejected",
+    SHIFT_CANCELLED: "shiftCancelled",
+    CREDENTIAL_EXPIRY: "credentialExpiry",
+    PAYMENT_ALERT: "paymentAlert",
+    NEW_MESSAGE: "newMessage",
+};
+
+const CHANNEL_KEYS: Record<string, string> = {
+    IN_APP: "inApp",
+    EMAIL: "email",
+    SMS: "sms",
+    PUSH: "push",
+};
 
 function getNotificationBadgeClass(type: string) {
     switch (type) {
@@ -58,6 +75,7 @@ function getNotificationBadgeClass(type: string) {
 export default function NotificationsPage() {
   const t = useTranslations("Dashboard.notifications");
   const tc = useTranslations("Dashboard.common");
+        const locale = useLocale();
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
 
@@ -107,17 +125,17 @@ export default function NotificationsPage() {
             );
 
             if (!result.success) {
-                throw new Error(result.message || "Unable to load notifications.");
+                throw new Error(result.message || t("loadFailed"));
             }
 
             setNotifications(result.data || []);
             setPagination(result.pagination || null);
         } catch (err) {
-            setError(getErrorMessage(err));
+            setError(getErrorMessage(err, tc("errorGeneric")));
         } finally {
             setIsLoading(false);
         }
-    }, [queryString]);
+    }, [queryString, t, tc]);
 
     useEffect(() => {
         fetchNotifications();
@@ -137,10 +155,10 @@ export default function NotificationsPage() {
             );
 
             if (!result.success) {
-                throw new Error(result.message || "Unable to mark notification as read.");
+                throw new Error(result.message || t("markReadFailed"));
             }
 
-            setSuccessMessage(result.message || "Notification marked as read.");
+            setSuccessMessage(t("markedRead"));
 
             setNotifications((previous) =>
                 previous.map((notification) =>
@@ -158,7 +176,7 @@ export default function NotificationsPage() {
                 await fetchNotifications();
             }
         } catch (err) {
-            setError(getErrorMessage(err));
+            setError(getErrorMessage(err, tc("errorGeneric")));
         } finally {
             setMarkingId("");
         }
@@ -178,10 +196,10 @@ export default function NotificationsPage() {
             );
 
             if (!result.success) {
-                throw new Error(result.message || "Unable to mark all notifications as read.");
+                throw new Error(result.message || t("markAllReadFailed"));
             }
 
-            setSuccessMessage(result.message || "All notifications marked as read.");
+            setSuccessMessage(t("allMarkedRead"));
 
             if (unreadOnly) {
                 setNotifications([]);
@@ -208,7 +226,7 @@ export default function NotificationsPage() {
 
             await fetchNotifications();
         } catch (err) {
-            setError(getErrorMessage(err));
+            setError(getErrorMessage(err, tc("errorGeneric")));
         } finally {
             setIsMarkingAllRead(false);
         }
@@ -222,7 +240,7 @@ export default function NotificationsPage() {
                         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
                             {t("title")}</h1>
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Review and manage your system notifications.
+                            {t("subtitle")}
                         </p>
                     </div>
 
@@ -233,7 +251,7 @@ export default function NotificationsPage() {
                             disabled={isMarkingAllRead || notifications.length === 0}
                             className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {isMarkingAllRead ? "Saving..." : "Mark All Read"}
+                            {isMarkingAllRead ? tc("loading") : t("markAllRead")}
                         </button>
 
                         <button
@@ -242,7 +260,7 @@ export default function NotificationsPage() {
                             disabled={isLoading}
                             className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                         >
-                            {isLoading ? "Refreshing..." : "Refresh"}
+                            {isLoading ? t("refreshing") : tc("refresh")}
                         </button>
                     </div>
                 </div>
@@ -271,11 +289,11 @@ export default function NotificationsPage() {
                                 setUnreadOnly(event.target.checked);
                             }}
                         />
-                        Show unread only
+                        {t("unreadOnly")}
                     </label>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Total: {pagination?.total ?? notifications.length}
+                        {t("totalCount", { count: pagination?.total ?? notifications.length })}
                     </p>
                 </div>
 
@@ -285,22 +303,22 @@ export default function NotificationsPage() {
                             <thead className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
                             <tr>
                                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                                    Notification
+                                    {t("notification")}
                                 </th>
                                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                                    Type
+                                    {t("type")}
                                 </th>
                                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                                    Channel
+                                    {t("channel")}
                                 </th>
                                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                                    Status
+                                    {tc("status")}
                                 </th>
                                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                                    Created
+                                    {t("created")}
                                 </th>
                                 <th className="px-5 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                                    Actions
+                                    {tc("actions")}
                                 </th>
                             </tr>
                             </thead>
@@ -309,13 +327,13 @@ export default function NotificationsPage() {
                             {isLoading ? (
                                 <tr>
                                     <td colSpan={6} className="px-5 py-8 text-center text-sm text-gray-500">
-                                        Loading notifications...
+                                        {tc("loading")}
                                     </td>
                                 </tr>
                             ) : notifications.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-5 py-8 text-center text-sm text-gray-500">
-                                        {t("empty")} found.
+                                        {t("empty")}
                                     </td>
                                 </tr>
                             ) : (
@@ -333,7 +351,7 @@ export default function NotificationsPage() {
                                             </p>
                                             {notification.readAt ? (
                                                 <p className="mt-1 text-xs text-gray-400">
-                                                    Read: {formatDateTime(notification.readAt)}
+                                                    {t("readAt", { date: formatDateTime(notification.readAt, locale) })}
                                                 </p>
                                             ) : null}
                                         </td>
@@ -344,33 +362,37 @@ export default function NotificationsPage() {
                                 notification.type,
                             )}`}
                         >
-                          {formatLabel(notification.type)}
+                          {NOTIFICATION_TYPE_KEYS[notification.type]
+                              ? t(`types.${NOTIFICATION_TYPE_KEYS[notification.type]}`)
+                              : formatLabel(notification.type)}
                         </span>
                                         </td>
 
                                         <td className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                            {formatLabel(notification.channel)}
+                                            {CHANNEL_KEYS[notification.channel]
+                                                ? t(`channels.${CHANNEL_KEYS[notification.channel]}`)
+                                                : formatLabel(notification.channel)}
                                         </td>
 
                                         <td className="px-5 py-4">
                                             {notification.isRead ? (
                                                 <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:bg-white/[0.06] dark:text-gray-300">
-                            Read
+                            {t("read")}
                           </span>
                                             ) : (
                                                 <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-600 dark:bg-brand-500/10 dark:text-brand-300">
-                            Unread
+                            {t("unread")}
                           </span>
                                             )}
                                         </td>
 
                                         <td className="px-5 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                            {formatDateTime(notification.createdAt)}
+                                            {formatDateTime(notification.createdAt, locale)}
                                         </td>
 
                                         <td className="px-5 py-4">
                                             <RowActionsMenu
-                                                label={`Actions for notification: ${notification.title}`}
+                                                label={t("actionsFor", { title: notification.title })}
                                                 actions={
                                                     notification.isRead
                                                         ? []
@@ -378,8 +400,8 @@ export default function NotificationsPage() {
                                                               {
                                                                   label:
                                                                       markingId === notification.id
-                                                                          ? "Saving…"
-                                                                          : "Mark Read",
+                                                                          ? t("saving")
+                                                                          : t("markRead"),
                                                                   disabled: markingId === notification.id,
                                                                   onClick: () =>
                                                                       markNotificationAsRead(notification.id),
@@ -398,7 +420,7 @@ export default function NotificationsPage() {
 
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Page {pagination?.page ?? page} of {pagination?.totalPages ?? 1}
+                        {t("pageSummary", { page: pagination?.page ?? page, totalPages: pagination?.totalPages ?? 1 })}
                     </p>
 
                     <div className="flex gap-2">
@@ -408,7 +430,7 @@ export default function NotificationsPage() {
                             onClick={() => setPage((previous) => Math.max(previous - 1, 1))}
                             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                         >
-                            Previous
+                            {tc("back")}
                         </button>
 
                         <button
@@ -417,7 +439,7 @@ export default function NotificationsPage() {
                             onClick={() => setPage((previous) => previous + 1)}
                             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
                         >
-                            Next
+                            {tc("next")}
                         </button>
                     </div>
                 </div>

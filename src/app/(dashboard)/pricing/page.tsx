@@ -71,11 +71,11 @@ export default function PricingSettingsPage() {
         feeValue: p.cancellationFeeValue != null ? String(p.cancellationFeeValue) : "",
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load pricing settings");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -91,9 +91,9 @@ export default function PricingSettingsPage() {
         perSqftCents: majorToCents(rates.perSqft),
         perRoomCents: majorToCents(rates.perRoom),
       });
-      setSaved("Rates saved");
+      setSaved(t("ratesSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save rates");
+      setError(err instanceof Error ? err.message : t("ratesSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -111,9 +111,9 @@ export default function PricingSettingsPage() {
         if (v.trim() !== "") discounts[f] = Number(v) / 100;
       }
       await updatePricing({ frequencyDiscounts: discounts });
-      setSaved("Frequency discounts saved");
+      setSaved(t("discountsSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save frequency discounts");
+      setError(err instanceof Error ? err.message : t("discountsSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -129,9 +129,9 @@ export default function PricingSettingsPage() {
         depositType: deposit.type || null,
         depositValue: deposit.value.trim() !== "" ? Number(deposit.value) : null,
       });
-      setSaved("Deposit policy saved");
+      setSaved(t("depositSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save deposit policy");
+      setError(err instanceof Error ? err.message : t("depositSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -148,9 +148,9 @@ export default function PricingSettingsPage() {
         cancellationFeeType: cancellation.feeType || null,
         cancellationFeeValue: cancellation.feeValue.trim() !== "" ? Number(cancellation.feeValue) : null,
       });
-      setSaved("Cancellation policy saved");
+      setSaved(t("cancellationSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save cancellation policy");
+      setError(err instanceof Error ? err.message : t("cancellationSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -163,8 +163,7 @@ export default function PricingSettingsPage() {
       <div>
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          These rates and policies apply to your business only — other businesses on CleanSera set their own.
-          Leave a rate blank to use the platform default instead.
+          {t("businessOnlyHint")}
         </p>
       </div>
 
@@ -182,47 +181,47 @@ export default function PricingSettingsPage() {
       {/* PER_SQFT / PER_ROOM rates */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Per-Sqft / Per-Room Rates
+          {t("sizeBasedRates")}
         </h2>
         <p className="mb-4 text-xs text-gray-400">
-          Used by any service whose pricing model is &quot;Per Sqft&quot; or &quot;Per Room&quot;.
+          {t("sizeBasedRatesHint")}
         </p>
         <form onSubmit={saveRates} className="space-y-4 max-w-md">
           <div>
-            <Label>Rate per square foot ({currencySymbol()})</Label>
+            <Label>{t("ratePerSquareFoot", { currency: currencySymbol() })}</Label>
             <Input
               type="number"
               step={0.01}
               min="0"
-              placeholder="Platform default (0.10)"
+              placeholder={t("platformDefault", { amount: "0.10" })}
               value={rates.perSqft}
               onChange={(e) => setRates({ ...rates, perSqft: e.target.value })}
             />
           </div>
           <div>
-            <Label>Rate per room ({currencySymbol()})</Label>
+            <Label>{t("ratePerRoom", { currency: currencySymbol() })}</Label>
             <Input
               type="number"
               step={0.01}
               min="0"
-              placeholder="Platform default (15.00)"
+              placeholder={t("platformDefault", { amount: "15.00" })}
               value={rates.perRoom}
               onChange={(e) => setRates({ ...rates, perRoom: e.target.value })}
             />
           </div>
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Rates"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("saveRates")}</Button>
         </form>
       </section>
 
       {/* Frequency discounts */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Recurring Frequency Discounts
+          {t("frequencyDiscounts")}
         </h2>
         <form onSubmit={saveFrequency} className="space-y-4 max-w-md">
           {FREQUENCIES.map((f) => (
             <div key={f}>
-              <Label>{f} discount (%)</Label>
+              <Label>{t("frequencyDiscountLabel", { frequency: t(`frequency.${f}`) })}</Label>
               <Input
                 type="number"
                 step={1}
@@ -234,16 +233,16 @@ export default function PricingSettingsPage() {
               />
             </div>
           ))}
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Discounts"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("saveDiscounts")}</Button>
         </form>
       </section>
 
       {/* Deposit policy */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Deposit Policy
+          {t("depositPolicy")}
         </h2>
-        <p className="mb-4 text-xs text-gray-400">Collected from the customer at booking time, before scheduling.</p>
+        <p className="mb-4 text-xs text-gray-400">{t("depositPolicyHint")}</p>
         <form onSubmit={saveDeposit} className="space-y-4 max-w-md">
           <div>
             <Label>{t("depositType")}</Label>
@@ -259,7 +258,7 @@ export default function PricingSettingsPage() {
           </div>
           {deposit.type && (
             <div>
-              <Label>{deposit.type === "PERCENT" ? "Deposit percent (0-100)" : "Deposit amount (cents)"}</Label>
+              <Label>{deposit.type === "PERCENT" ? t("depositPercent") : t("depositAmount")}</Label>
               <Input
                 type="number"
                 min="0"
@@ -268,17 +267,17 @@ export default function PricingSettingsPage() {
               />
             </div>
           )}
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Deposit Policy"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("saveDepositPolicy")}</Button>
         </form>
       </section>
 
       {/* Cancellation policy */}
       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Cancellation Policy
+          {t("cancellationPolicy")}
         </h2>
         <p className="mb-4 text-xs text-gray-400">
-          A fee applies when a customer cancels inside the window below. Leave blank for free cancellation anytime.
+          {t("cancellationPolicyHint")}
         </p>
         <form onSubmit={saveCancellation} className="space-y-4 max-w-md">
           <div>
@@ -305,7 +304,7 @@ export default function PricingSettingsPage() {
           </div>
           {cancellation.feeType && (
             <div>
-              <Label>{cancellation.feeType === "PERCENT" ? "Fee percent (0-100)" : "Fee amount (cents)"}</Label>
+              <Label>{cancellation.feeType === "PERCENT" ? t("feePercent") : t("feeAmount")}</Label>
               <Input
                 type="number"
                 min="0"
@@ -314,7 +313,7 @@ export default function PricingSettingsPage() {
               />
             </div>
           )}
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Cancellation Policy"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("saveCancellationPolicy")}</Button>
         </form>
       </section>
     </div>

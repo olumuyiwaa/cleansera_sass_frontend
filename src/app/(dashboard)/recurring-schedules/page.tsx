@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import React, { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
     listRecurringSchedules,
     createRecurringSchedule,
@@ -19,19 +19,10 @@ import {
     Service,
 } from "@/app/api/cleansera-types";
 
-const DAYS = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-];
-
 export default function RecurringSchedulesPage() {
   const t = useTranslations("Dashboard.recurringSchedules");
   const tc = useTranslations("Dashboard.common");
+    const locale = useLocale();
     const [schedules, setSchedules] = useState<RecurringSchedule[]>([]);
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [services, setServices] = useState<Service[]>([]);
@@ -48,7 +39,7 @@ export default function RecurringSchedulesPage() {
         startTime: "09:00",
     });
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         setError("");
         try {
@@ -61,15 +52,15 @@ export default function RecurringSchedulesPage() {
             setCustomers(c || []);
             setServices(sv || []);
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to load");
+            setError(e instanceof Error ? e.message : t("loadFailed"));
         } finally {
             setLoading(false);
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         load();
-    }, []);
+    }, [load]);
 
     const onCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,7 +78,7 @@ export default function RecurringSchedulesPage() {
             setShowForm(false);
             load();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to create");
+            setError(e instanceof Error ? e.message : t("createFailed"));
         }
     };
 
@@ -98,7 +89,7 @@ export default function RecurringSchedulesPage() {
             await fn();
             await load();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Action failed");
+            setError(e instanceof Error ? e.message : t("actionFailed"));
         } finally {
             setBusyId(null);
         }
@@ -111,15 +102,14 @@ export default function RecurringSchedulesPage() {
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
                         {t("title")}</h1>
                     <p className="mt-1 text-sm text-gray-500">
-                        Standing cleanings that automatically create new bookings on
-                        their cadence.
+                        {t("subtitle")}
                     </p>
                 </div>
                 <button
                     onClick={() => setShowForm((v) => !v)}
                     className="h-10 rounded-lg bg-gray-900 px-4 text-sm font-medium text-white dark:bg-white/10"
                 >
-                    {showForm ? "Cancel" : "New recurring schedule"}
+                    {showForm ? tc("cancel") : t("new")}
                 </button>
             </div>
 
@@ -142,7 +132,7 @@ export default function RecurringSchedulesPage() {
                         }
                         className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                     >
-                        <option value="">Customer…</option>
+                        <option value="">{t("customerPlaceholder")}</option>
                         {customers.map((c) => (
                             <option key={c.id} value={c.id}>
                                 {c.firstName} {c.lastName}
@@ -157,7 +147,7 @@ export default function RecurringSchedulesPage() {
                         }
                         className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                     >
-                        <option value="">Service…</option>
+                        <option value="">{t("servicePlaceholder")}</option>
                         {services.map((s) => (
                             <option key={s.id} value={s.id}>
                                 {s.name}
@@ -175,7 +165,7 @@ export default function RecurringSchedulesPage() {
                         className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                     >
                         <option value="WEEKLY">{t("weekly")}</option>
-                        <option value="BIWEEKLY">Every 2 weeks</option>
+                        <option value="BIWEEKLY">{t("biweekly")}</option>
                         <option value="MONTHLY">{t("monthly")}</option>
                     </select>
                     <select
@@ -185,9 +175,9 @@ export default function RecurringSchedulesPage() {
                         }
                         className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                     >
-                        {DAYS.map((d, i) => (
-                            <option key={d} value={i}>
-                                {d}
+                        {Array.from({ length: 7 }, (_, i) => (
+                            <option key={i} value={i}>
+                                {new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2023, 0, i + 1)))}
                             </option>
                         ))}
                     </select>
@@ -204,7 +194,7 @@ export default function RecurringSchedulesPage() {
                         type="submit"
                         className="col-span-full h-11 rounded-lg bg-gray-900 text-sm font-medium text-white dark:bg-white/10"
                     >
-                        Create schedule
+                        {t("createSchedule")}
                     </button>
                 </form>
             )}
@@ -225,14 +215,14 @@ export default function RecurringSchedulesPage() {
                         {loading && (
                             <tr>
                                 <td colSpan={6} className="p-4 text-center text-gray-400">
-                                    Loading…
+                                    {tc("loading")}
                                 </td>
                             </tr>
                         )}
                         {!loading && schedules.length === 0 && (
                             <tr>
                                 <td colSpan={6} className="p-4 text-center text-gray-400">
-                                    No recurring schedules yet.
+                                    {t("empty")}
                                 </td>
                             </tr>
                         )}
@@ -251,14 +241,14 @@ export default function RecurringSchedulesPage() {
                                 </td>
                                 <td className="p-3">
                                     {s.frequency === "WEEKLY"
-                                        ? "Weekly"
+                                        ? t("weekly")
                                         : s.frequency === "BIWEEKLY"
-                                        ? "Every 2 weeks"
-                                        : "Monthly"}{" "}
-                                    · {DAYS[s.dayOfWeek]} {s.startTime}
+                                        ? t("biweekly")
+                                        : t("monthly")}{" "}
+                                    · {new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2023, 0, s.dayOfWeek + 1)))} {s.startTime}
                                 </td>
                                 <td className="p-3">
-                                    {new Date(s.nextRunDate).toLocaleDateString()}
+                                    {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(s.nextRunDate))}
                                 </td>
                                 <td className="p-3">
                                     <span
@@ -271,20 +261,20 @@ export default function RecurringSchedulesPage() {
                                         }`}
                                     >
                                         {s.status === "ACTIVE"
-                                            ? "Active"
+                                            ? t("active")
                                             : s.status === "PAUSED"
-                                            ? "Paused"
-                                            : "Cancelled"}
+                                            ? t("paused")
+                                            : t("cancelled")}
                                     </span>
                                 </td>
                                 <td className="p-3 text-right">
                                     <RowActionsMenu
-                                        label={`Actions for recurring schedule ${s.id}`}
+                                        label={t("actionsFor", { id: s.id })}
                                         actions={[
                                             ...(s.status === "ACTIVE"
                                                 ? [
                                                       {
-                                                          label: "Pause",
+                                                          label: t("pause"),
                                                           disabled: busyId === s.id,
                                                           onClick: () =>
                                                               withBusy(s.id, () => pauseRecurringSchedule(s.id)),
@@ -294,7 +284,7 @@ export default function RecurringSchedulesPage() {
                                             ...(s.status === "PAUSED"
                                                 ? [
                                                       {
-                                                          label: "Resume",
+                                                          label: t("resume"),
                                                           disabled: busyId === s.id,
                                                           onClick: () =>
                                                               withBusy(s.id, () => resumeRecurringSchedule(s.id)),
@@ -304,13 +294,13 @@ export default function RecurringSchedulesPage() {
                                             ...(s.status !== "CANCELLED"
                                                 ? [
                                                       {
-                                                          label: "Cancel",
+                                                          label: t("cancel"),
                                                           variant: "danger" as const,
                                                           disabled: busyId === s.id,
                                                           onClick: () => {
                                                               if (
                                                                   !confirm(
-                                                                      "Cancel this recurring schedule? This can't be undone — you'll need to create a new schedule to restart it."
+                                                                      t("cancelConfirm")
                                                                   )
                                                               )
                                                                   return;

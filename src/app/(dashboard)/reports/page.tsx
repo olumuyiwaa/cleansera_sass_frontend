@@ -60,11 +60,11 @@ export default function ReportsPage() {
       setRevenue(r);
       setCleaners(c);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load reports");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, [range.from, range.to]);
+  }, [range.from, range.to, t]);
 
   useEffect(() => {
     load();
@@ -72,16 +72,16 @@ export default function ReportsPage() {
 
   const cards = kpis
     ? [
-        { label: "Revenue", value: formatMoney(kpis.revenueCents) },
-        { label: "Collected", value: formatMoney(kpis.collectedCents) },
-        { label: "Avg ticket", value: formatMoney(kpis.avgTicketCents) },
-        { label: "Jobs", value: String(kpis.total) },
-        { label: "Completed", value: `${kpis.completed} (${kpis.completionRate}%)` },
-        { label: "Cancelled", value: `${kpis.cancelled} (${kpis.cancelRate}%)` },
-        { label: "No-shows", value: String(kpis.noShows) },
-        { label: "Utilization", value: `${kpis.utilizationPct}%` },
-        { label: "Active cleaners", value: String(kpis.activeCleaners) },
-        { label: "Customers", value: String(kpis.totalCustomers) },
+        { label: t("revenue"), value: formatMoney(kpis.revenueCents) },
+        { label: t("collected"), value: formatMoney(kpis.collectedCents) },
+        { label: t("averageTicket"), value: formatMoney(kpis.avgTicketCents) },
+        { label: t("jobs"), value: String(kpis.total) },
+        { label: t("completed"), value: `${kpis.completed} (${kpis.completionRate}%)` },
+        { label: t("cancelled"), value: `${kpis.cancelled} (${kpis.cancelRate}%)` },
+        { label: t("noShows"), value: String(kpis.noShows) },
+        { label: t("utilization"), value: `${kpis.utilizationPct}%` },
+        { label: t("activeCleaners"), value: String(kpis.activeCleaners) },
+        { label: t("customers"), value: String(kpis.totalCustomers) },
       ]
     : [];
 
@@ -91,7 +91,7 @@ export default function ReportsPage() {
         <div>
           <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Revenue, utilization, and cleaner performance.
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
@@ -100,10 +100,10 @@ export default function ReportsPage() {
             <Input type="date" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} />
           </div>
           <div>
-            <Label>To</Label>
+            <Label>{tc("to")}</Label>
             <Input type="date" value={range.to} onChange={(e) => setRange({ ...range, to: e.target.value })} />
           </div>
-          <Button onClick={load} disabled={loading}>{loading ? "Loading…" : "Refresh"}</Button>
+          <Button onClick={load} disabled={loading}>{loading ? tc("loading") : tc("refresh")}</Button>
         </div>
       </div>
 
@@ -114,7 +114,8 @@ export default function ReportsPage() {
       )}
         <MonthlySalesChart
             title={t("revenueByDay")}
-            seriesName="Revenue"
+            seriesName={t("revenue")}
+            emptyMessage={t("noDataForPeriod")}
             data={revenue.map((d) => ({
                 label: d.date.slice(5),
                 value: (d.revenueCents || 0) / 100,
@@ -139,12 +140,13 @@ export default function ReportsPage() {
       <div className="mb-8 grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
           <StatisticsChart
-            title="Revenue trend"
-            subtitle={t("revenueByDay")}
+            title={t("revenueTrend")}
+            subtitle={t("revenueTrendSubtitle")}
+            emptyMessage={t("noStatisticsForRange")}
             categories={revenue.map((d) => d.date.slice(5))}
             series={[
               {
-                name: "Revenue",
+                name: t("revenue"),
                 data: revenue.map((d) => (d.revenueCents || 0) / 100),
               },
             ]}
@@ -153,7 +155,7 @@ export default function ReportsPage() {
           />
         </div>
         <MonthlyTarget
-          title="Completion rate"
+          title={t("completionRate")}
           progressPct={
             kpis
               ? kpis.completionRate <= 1
@@ -161,11 +163,12 @@ export default function ReportsPage() {
                 : kpis.completionRate
               : 0
           }
-          targetLabel="Completed"
+          targetLabel={t("completed")}
           targetValue={kpis ? String(kpis.completed) : "—"}
-          revenueLabel="Revenue"
+          revenueLabel={t("revenue")}
           revenueValue={kpis ? formatMoney(kpis.revenueCents) : "—"}
-          todayLabel="Utilization"
+          todayLabel={t("utilization")}
+          detailsLabel={tc("view")}
           todayValue={kpis ? `${Math.round(kpis.utilizationPct)}%` : "—"}
           viewMoreHref={undefined}
         />
@@ -199,7 +202,7 @@ export default function ReportsPage() {
               {!loading && cleaners.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="px-5 py-8 text-center text-sm text-gray-500">
-                    No cleaner data for this range.
+                    {t("noCleanerData")}
                   </TableCell>
                 </TableRow>
               )}

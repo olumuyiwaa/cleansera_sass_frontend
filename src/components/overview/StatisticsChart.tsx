@@ -15,6 +15,8 @@ type Props = {
   subtitle?: string;
   categories?: string[];
   series?: StatsSeries[];
+  viewMoreLabel?: string;
+  emptyMessage?: string;
   viewMoreHref?: string;
   height?: number;
   formatY?: (n: number) => string;
@@ -30,6 +32,8 @@ export default function StatisticsChart({
   subtitle = "Jobs and revenue over time",
   categories,
   series,
+  viewMoreLabel = "View reports",
+  emptyMessage = "No statistics for this period.",
   viewMoreHref = "/reports",
   height = 310,
   formatY,
@@ -120,14 +124,14 @@ export default function StatisticsChart({
             href={viewMoreHref}
             className="shrink-0 text-sm font-medium text-brand-500 hover:text-brand-600"
           >
-            View reports
+            {viewMoreLabel}
           </Link>
         )}
       </div>
 
       {empty ? (
         <div className="flex h-[280px] items-center justify-center text-sm text-gray-400">
-          No statistics for this period.
+          {emptyMessage}
         </div>
       ) : (
         <div className="max-w-full overflow-x-auto custom-scrollbar">

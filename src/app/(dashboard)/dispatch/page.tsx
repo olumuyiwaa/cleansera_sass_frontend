@@ -2,7 +2,7 @@
 
 import { isoDateInTimeZone } from "@/app/services/currency";
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import {
@@ -20,6 +20,7 @@ import { Booking, Cleaner, cleanerDisplayName } from "@/app/api/cleansera-types"
 export default function DispatchPage() {
   const t = useTranslations("Dashboard.dispatch");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [needsAssignment, setNeedsAssignment] = useState<Booking[]>([]);
   const [assignments, setAssignments] = useState<DispatchAssignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,7 @@ export default function DispatchPage() {
       const r = await getCleanerDayRoute(routeCleanerId, routeDate);
       setRoute(r);
     } catch (err) {
-      setRouteError(err instanceof Error ? err.message : "Failed to check route");
+      setRouteError(err instanceof Error ? err.message : t("routeCheckFailed"));
     } finally {
       setRouteLoading(false);
     }
@@ -70,11 +71,11 @@ export default function DispatchPage() {
       setActiveCleaners(cleaners);
       void inProgress; // already covered via assignments' nested booking.status
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load dispatch board");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -88,7 +89,7 @@ export default function DispatchPage() {
       const cleaners = await suggestCleaners(bookingId);
       setSuggestions(cleaners);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to suggest cleaners");
+      setError(err instanceof Error ? err.message : t("suggestFailed"));
     }
   };
 
@@ -100,7 +101,7 @@ export default function DispatchPage() {
       setSuggestingFor(null);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to assign");
+      setError(err instanceof Error ? err.message : t("assignFailed"));
     } finally {
       setAssigning(null);
     }
@@ -111,7 +112,7 @@ export default function DispatchPage() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Assign confirmed bookings to a cleaner, or let CleanSera suggest the best fit by service area and availability.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -123,12 +124,10 @@ export default function DispatchPage() {
 
       <div className="mb-8 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Day route check
+          {t("dayRoute")}
         </h2>
         <p className="mb-3 text-xs text-gray-400">
-          Doesn&apos;t reorder anyone&apos;s schedule — each job keeps its own booked time. This
-          just walks a cleaner&apos;s day in order and flags any back-to-back jobs where the drive
-          between them is longer than the gap they&apos;ve been given.
+          {t("dayRouteHint")}
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div>
@@ -154,7 +153,7 @@ export default function DispatchPage() {
             />
           </div>
           <Button size="sm" onClick={checkRoute} disabled={!routeCleanerId || routeLoading}>
-            {routeLoading ? "Checking…" : "Check route"}
+            {routeLoading ? t("checking") : t("checkRoute")}
           </Button>
         </div>
 
@@ -163,7 +162,7 @@ export default function DispatchPage() {
         {route && (
           <div className="mt-4">
             {route.stops.length === 0 ? (
-              <p className="text-sm text-gray-500">No jobs scheduled for this cleaner on {route.date}.</p>
+              <p className="text-sm text-gray-500">{t("noJobsForCleaner", { date: route.date })}</p>
             ) : (
               <ol className="space-y-2">
                 {route.stops.map((stop, i) => {
@@ -179,18 +178,19 @@ export default function DispatchPage() {
                           }`}
                         >
                           {leg.distanceMeters != null
-                            ? `~${(leg.distanceMeters / 1000).toFixed(1)} km, ~${Math.round(
-                                (leg.estimatedDriveSeconds || 0) / 60
-                              )} min drive`
-                            : "Distance unknown (missing coordinates)"}
+                            ? t("driveSummary", {
+                                distance: (leg.distanceMeters / 1000).toFixed(1),
+                                minutes: Math.round((leg.estimatedDriveSeconds || 0) / 60),
+                              })
+                            : t("distanceUnknown")}
                           {" — "}
-                          {Math.round(leg.gapSeconds / 60)} min scheduled between jobs
-                          {leg.isTight && " — tight, may run late"}
+                          {t("scheduledGap", { minutes: Math.round(leg.gapSeconds / 60) })}
+                          {leg.isTight && ` — ${t("tightRoute")}`}
                         </div>
                       )}
                       <div className="rounded-lg border border-gray-200 px-3 py-2 text-sm dark:border-gray-800">
                         <span className="font-medium text-gray-800 dark:text-white/90">
-                          {new Date(stop.scheduledStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          {new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(new Date(stop.scheduledStart))}
                         </span>
                         <span className="ml-2 text-gray-500 dark:text-gray-400">{stop.address}</span>
                       </div>
@@ -204,7 +204,7 @@ export default function DispatchPage() {
       </div>
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-        Needs assignment ({needsAssignment.length})
+        {t("needsAssignmentCount", { count: needsAssignment.length })}
       </h2>
       <div className="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">
         <div className="max-w-full overflow-x-auto">
@@ -231,7 +231,7 @@ export default function DispatchPage() {
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{b.service?.name || "—"}</TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(b.scheduledStart).toLocaleString()}
+                    {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(b.scheduledStart))}
                   </TableCell>
                   <TableCell className="px-5 py-4">
                     {suggestingFor === b.id ? (
@@ -254,9 +254,9 @@ export default function DispatchPage() {
                       </div>
                     ) : (
                       <div className="flex gap-3">
-                        <Button size="sm" onClick={() => openSuggestions(b.id)}>Suggest cleaner</Button>
+                        <Button size="sm" onClick={() => openSuggestions(b.id)}>{t("suggestCleaner")}</Button>
                         <Button size="sm" variant="outline" disabled={assigning === b.id} onClick={() => assign(b.id)}>
-                          {assigning === b.id ? "Assigning…" : "Auto-assign"}
+                          {assigning === b.id ? t("assigning") : t("autoAssign")}
                         </Button>
                       </div>
                     )}
@@ -269,7 +269,7 @@ export default function DispatchPage() {
       </div>
 
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-        In progress ({assignments.length})
+        {t("inProgressCount", { count: assignments.length })}
       </h2>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.02]">
         <div className="max-w-full overflow-x-auto">
@@ -279,7 +279,7 @@ export default function DispatchPage() {
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("customer")}</TableCell>
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("cleaner")}</TableCell>
                 <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{t("scheduled")}</TableCell>
-                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
+                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500 dark:text-gray-400">{tc("status")}</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -295,7 +295,7 @@ export default function DispatchPage() {
                     {a.cleaner ? cleanerDisplayName(a.cleaner) : "—"}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {a.booking ? new Date(a.booking.scheduledStart).toLocaleString() : "—"}
+                    {a.booking ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(a.booking.scheduledStart)) : "—"}
                   </TableCell>
                   <TableCell className="px-5 py-4">
                     <Badge color={a.booking?.status === "IN_PROGRESS" ? "warning" : "info"} size="sm">

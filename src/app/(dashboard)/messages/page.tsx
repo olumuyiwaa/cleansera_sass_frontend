@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, {
     FormEvent,
     useCallback,
@@ -24,39 +24,42 @@ import {
     type Pagination,
 } from "@/app/api/messaging.api";
 
-function formatTime(value?: string | null) {
+function formatTime(value: string | null | undefined, locale: string) {
     if (!value) return "";
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(locale, {
         hour: "numeric",
         minute: "2-digit",
     }).format(d);
 }
 
-function formatDateTime(value?: string | null) {
+function formatDateTime(value: string | null | undefined, locale: string) {
     if (!value) return "—";
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(d);
 }
 
-function conversationTitle(c: ConversationListItem) {
+function conversationTitle(c: ConversationListItem, subjectTypeLabel: string) {
     if (c.subject?.name) return c.subject.name;
-    return `${c.subjectType} · ${c.subjectId.slice(0, 8)}`;
+    return `${subjectTypeLabel} · ${c.subjectId.slice(0, 8)}`;
 }
 
-function conversationSubtitle(c: ConversationListItem) {
-    if (c.subject?.email) return `${c.subjectType} · ${c.subject.email}`;
-    return c.subjectType;
+function conversationSubtitle(c: ConversationListItem, subjectTypeLabel: string) {
+    if (c.subject?.email) return `${subjectTypeLabel} · ${c.subject.email}`;
+    return subjectTypeLabel;
 }
 
 export default function MessagesPage() {
     const t = useTranslations("Dashboard.messages");
     const tc = useTranslations("Dashboard.common");
+    const locale = useLocale();
+    const subjectTypeLabel = (subjectType: string) =>
+        subjectType === "CLEANER" ? t("subjectTypes.cleaner") : t("subjectTypes.customer");
     const { user } = useAuth();
     const router = useRouter();
     const currentUserId = useMemo(() => user?.id || "", [user]);
@@ -110,11 +113,11 @@ export default function MessagesPage() {
             setConversations(result.data);
             setConvPagination(result.pagination || null);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load conversations");
+            setError(err instanceof Error ? err.message : t("loadConversationsFailed"));
         } finally {
             setLoadingConvos(false);
         }
-    }, [convPage]);
+    }, [convPage, t]);
 
     useEffect(() => {
         fetchConvos();
@@ -139,11 +142,11 @@ export default function MessagesPage() {
                 }
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load messages");
+            setError(err instanceof Error ? err.message : t("loadMessagesFailed"));
         } finally {
             setLoadingMessages(false);
         }
-    }, [currentUserId]);
+    }, [currentUserId, t]);
 
     async function handleSelect(c: ConversationListItem) {
         setSelected(c);
@@ -177,7 +180,7 @@ export default function MessagesPage() {
     async function handleStartConversation(e: FormEvent) {
         e.preventDefault();
         if (!selectedRecipient) {
-            setError("Select a cleaner or customer first.");
+            setError(t("selectRecipientFirst"));
             return;
         }
         setStarting(true);
@@ -187,7 +190,7 @@ export default function MessagesPage() {
                 subjectType: selectedRecipient.subjectType,
                 subjectId: selectedRecipient.subjectId,
             });
-            setSuccess("Conversation ready.");
+            setSuccess(t("conversationReady"));
             setSelectedRecipient(null);
             setRecipientSearch("");
             setRecipients([]);
@@ -206,7 +209,7 @@ export default function MessagesPage() {
             setSelected(item);
             await fetchMsgs(conv.id, 1);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to start conversation");
+            setError(err instanceof Error ? err.message : t("startConversationFailed"));
         } finally {
             setStarting(false);
         }
@@ -230,7 +233,7 @@ export default function MessagesPage() {
                 50
             );
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to send");
+            setError(err instanceof Error ? err.message : t("sendFailed"));
         } finally {
             setSending(false);
         }
@@ -306,7 +309,7 @@ export default function MessagesPage() {
                         </div>
                         {selectedRecipient && (
                             <p className="mt-2 text-xs text-brand-600 dark:text-brand-300">
-                                Selected: {selectedRecipient.name} ({selectedRecipient.subjectType})
+                                {t("selectedRecipient", { name: selectedRecipient.name, type: subjectTypeLabel(selectedRecipient.subjectType) })}
                             </p>
                         )}
                         <button
@@ -314,7 +317,7 @@ export default function MessagesPage() {
                             disabled={starting || !selectedRecipient}
                             className="mt-3 w-full rounded-lg bg-brand-500 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-60"
                         >
-                            {starting ? "Starting…" : "Start"}
+                            {starting ? t("starting") : t("start")}
                         </button>
                     </form>
 
@@ -338,13 +341,13 @@ export default function MessagesPage() {
                                         }`}
                                     >
                                         <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">
-                                            {conversationTitle(c)}
+                                            {conversationTitle(c, subjectTypeLabel(c.subjectType))}
                                         </p>
                                         <p className="mt-0.5 truncate text-xs text-gray-500">
-                                            {c.lastMessage?.body || conversationSubtitle(c)}
+                                            {c.lastMessage?.body || conversationSubtitle(c, subjectTypeLabel(c.subjectType))}
                                         </p>
                                         <p className="mt-1 text-[10px] text-gray-400">
-                                            {formatDateTime(c.lastMessageAt)}
+                                            {formatDateTime(c.lastMessageAt, locale)}
                                         </p>
                                     </button>
                                 );
@@ -360,7 +363,7 @@ export default function MessagesPage() {
                                 onClick={() => setConvPage((p) => Math.max(1, p - 1))}
                                 className="rounded border px-2 py-1 text-xs disabled:opacity-40"
                             >
-                                Prev
+                                {tc("back")}
                             </button>
                             <span className="text-xs text-gray-500">
                 {convPagination.page}/{convPagination.totalPages}
@@ -371,7 +374,7 @@ export default function MessagesPage() {
                                 onClick={() => setConvPage((p) => p + 1)}
                                 className="rounded border px-2 py-1 text-xs disabled:opacity-40"
                             >
-                                Next
+                                {tc("next")}
                             </button>
                         </div>
                     )}
@@ -383,9 +386,9 @@ export default function MessagesPage() {
                         <>
                             <div className="border-b border-gray-200 bg-white px-5 py-3 dark:border-gray-800 dark:bg-gray-900">
                                 <h2 className="text-sm font-bold text-gray-900 dark:text-white">
-                                    {conversationTitle(selected)}
+                                    {conversationTitle(selected, subjectTypeLabel(selected.subjectType))}
                                 </h2>
-                                <p className="text-xs text-gray-500">{conversationSubtitle(selected)}</p>
+                                <p className="text-xs text-gray-500">{conversationSubtitle(selected, subjectTypeLabel(selected.subjectType))}</p>
                             </div>
 
                             <div className="flex-1 space-y-3 overflow-y-auto p-5">
@@ -398,7 +401,7 @@ export default function MessagesPage() {
                                         const isMe = msg.senderUserId === currentUserId;
                                         const name = msg.sender
                                             ? `${msg.sender.firstName} ${msg.sender.lastName}`.trim()
-                                            : "User";
+                                            : t("userFallback");
                                         return (
                                             <div
                                                 key={msg.id}
@@ -420,8 +423,8 @@ export default function MessagesPage() {
                                                             isMe ? "text-white/70" : "text-gray-400"
                                                         }`}
                                                     >
-                                                        {formatTime(msg.createdAt)}
-                                                        {isMe && msg.readAt ? " · Read" : ""}
+                                                        {formatTime(msg.createdAt, locale)}
+                                                        {isMe && msg.readAt ? ` · ${t("read")}` : ""}
                                                     </p>
                                                 </div>
                                             </div>
@@ -451,6 +454,7 @@ export default function MessagesPage() {
                   />
                                     <button
                                         type="submit"
+                                        aria-label={t("send")}
                                         disabled={sending || !messageText.trim()}
                                         className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600 text-white disabled:bg-gray-300 dark:disabled:bg-gray-700"
                                     >
@@ -458,18 +462,17 @@ export default function MessagesPage() {
                                     </button>
                                 </div>
                                 <p className="mt-1 text-center text-[10px] text-gray-400">
-                                    Enter to send · Shift+Enter for new line
+                                    {t("keyboardHint")}
                                 </p>
                             </form>
                         </>
                     ) : (
                         <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                Team messages
+                                {t("threadEmptyTitle")}
                             </h2>
                             <p className="mt-2 max-w-sm text-sm text-gray-500">
-                                Start a thread with a cleaner or customer from the sidebar, or open an existing
-                                conversation.
+                                {t("threadEmptyHint")}
                             </p>
                         </div>
                     )}

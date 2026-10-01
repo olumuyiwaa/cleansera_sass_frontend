@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -43,6 +43,7 @@ export default function CleanersPage() {
   const tc = useTranslations("Dashboard.common");
   const ts = useTranslations("Dashboard.cleaners.status");
   const ta = useTranslations("Dashboard.cleaners.actions");
+  const locale = useLocale();
 
   const [cleaners, setCleaners] = useState<Cleaner[]>([]);
   const [statusFilter, setStatusFilter] = useState<CleanerStatus | "ALL">("ALL");
@@ -181,7 +182,7 @@ export default function CleanersPage() {
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{c.user.email}</TableCell>
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{c.user.phone || "—"}</TableCell>
                     <TableCell className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                      {c.hireDate ? new Date(c.hireDate).toLocaleDateString() : "—"}
+                      {c.hireDate ? new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(c.hireDate)) : "—"}
                     </TableCell>
                     <TableCell className="px-5 py-4">
                       <Badge color={STATUS_COLOR[c.status]} size="sm">{ts(STATUS_I18N[c.status])}</Badge>

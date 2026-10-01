@@ -1,22 +1,16 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { listWaitlist, cancelWaitlistEntry, type WaitlistEntry, type WaitlistStatus } from "@/app/api/waitlist.api";
 import RowActionsMenu from "@/components/tables/RowActionsMenu";
 
-const STATUS_OPTIONS: { value: WaitlistStatus | ""; label: string }[] = [
-  { value: "", label: "All" },
-  { value: "WAITING", label: "Waiting" },
-  { value: "NOTIFIED", label: "Notified" },
-  { value: "CONVERTED", label: "Converted" },
-  { value: "EXPIRED", label: "Expired" },
-  { value: "CANCELLED", label: "Cancelled" },
-];
+const STATUS_OPTIONS: (WaitlistStatus | "")[] = ["", "WAITING", "NOTIFIED", "CONVERTED", "EXPIRED", "CANCELLED"];
 
 export default function WaitlistPage() {
   const t = useTranslations("Dashboard.waitlist");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [status, setStatus] = useState<WaitlistStatus | "">("WAITING");
   const [loading, setLoading] = useState(true);
@@ -29,25 +23,25 @@ export default function WaitlistPage() {
       const res = await listWaitlist(status || undefined);
       setEntries((res.data as WaitlistEntry[]) || []);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to load waitlist");
+      setError(e instanceof Error ? e.message : t("loadFailed"));
       setEntries([]);
     } finally {
       setLoading(false);
     }
-  }, [status]);
+  }, [status, t]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   const onCancel = async (id: string) => {
-    if (!confirm("Remove this customer from the waitlist?")) return;
+    if (!confirm(t("removeConfirm"))) return;
     setError("");
     try {
       await cancelWaitlistEntry(id);
       await load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to cancel waitlist entry");
+      setError(err instanceof Error ? err.message : t("removeFailed"));
     }
   };
 
@@ -57,8 +51,7 @@ export default function WaitlistPage() {
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Customers who couldn&apos;t find an open slot in the booking widget. When a booking is cancelled, the
-            first few matching entries are notified automatically.
+            {t("subtitle")}
           </p>
         </div>
         <select
@@ -66,9 +59,9 @@ export default function WaitlistPage() {
           onChange={(e) => setStatus(e.target.value as WaitlistStatus | "")}
           className="h-11 rounded-lg border border-gray-300 px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"
         >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
+          {STATUS_OPTIONS.map((statusKey) => (
+            <option key={statusKey || "ALL"} value={statusKey}>
+              {statusKey ? t(`statuses.${statusKey}`) : t("allStatuses")}
             </option>
           ))}
         </select>
@@ -102,18 +95,18 @@ export default function WaitlistPage() {
                     {w.customer ? `${w.customer.firstName} ${w.customer.lastName}` : w.contactName || "—"}
                     <div className="text-xs text-gray-500">{w.contactEmail || w.contactPhone}</div>
                   </td>
-                  <td className="px-4 py-3">{w.service?.name || "Any service"}</td>
+                  <td className="px-4 py-3">{w.service?.name || t("anyService")}</td>
                   <td className="px-4 py-3 text-gray-500">
-                    {new Date(w.desiredStart).toLocaleString()} – {new Date(w.desiredEnd).toLocaleString()}
+                    {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(w.desiredStart))} – {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(w.desiredEnd))}
                   </td>
-                  <td className="px-4 py-3">{w.status}</td>
-                  <td className="px-4 py-3 text-gray-500">{new Date(w.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">{t(`statuses.${w.status}`)}</td>
+                  <td className="px-4 py-3 text-gray-500">{new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(w.createdAt))}</td>
                   <td className="px-4 py-3">
                     <RowActionsMenu
-                      label={`Actions for waitlist entry ${w.contactName || w.id}`}
+                      label={t("actionsFor", { name: w.contactName || w.id })}
                       actions={
                         w.status === "WAITING" || w.status === "NOTIFIED"
-                          ? [{ label: "Remove", variant: "danger" as const, onClick: () => onCancel(w.id) }]
+                          ? [{ label: t("remove"), variant: "danger" as const, onClick: () => onCancel(w.id) }]
                           : []
                       }
                     />
@@ -123,7 +116,7 @@ export default function WaitlistPage() {
               {!entries.length && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                    No one on the waitlist
+                    {t("empty")}
                   </td>
                 </tr>
               )}

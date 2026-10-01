@@ -2,7 +2,7 @@
 
 import { isoDateInTimeZone } from "@/app/services/currency";
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/button/Button";
 import Badge from "@/components/ui/badge/Badge";
 import { Modal } from "@/components/ui/modal";
@@ -41,19 +41,10 @@ const DOC_TYPES: ComplianceDocType[] = [
     "OTHER",
 ];
 
-const DOC_TYPE_LABEL: Record<ComplianceDocType, string> = {
-    SDS: "Safety Data Sheet",
-    RISK_ASSESSMENT: "Risk Assessment",
-    COSHH_ASSESSMENT: "COSHH Assessment",
-    TRAINING_RECORD: "Training Record",
-    INSPECTION_REPORT: "Inspection Report",
-    CERTIFICATE: "Certificate",
-    OTHER: "Other",
-};
-
 export default function CompliancePage() {
   const t = useTranslations("Dashboard.compliance");
   const tc = useTranslations("Dashboard.common");
+    const locale = useLocale();
     const [tab, setTab] = useState<"documents" | "audits" | "training">("documents");
     const [docs, setDocs] = useState<ComplianceDocument[]>([]);
     const [audits, setAudits] = useState<ComplianceAudit[]>([]);
@@ -94,11 +85,11 @@ export default function CompliancePage() {
             });
             setDocs(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load documents");
+            setError(err instanceof Error ? err.message : t("loadDocumentsFailed"));
         } finally {
             setLoading(false);
         }
-    }, [typeFilter, expiringSoon]);
+    }, [typeFilter, expiringSoon, t]);
 
     const loadAudits = useCallback(async () => {
         setLoading(true);
@@ -107,11 +98,11 @@ export default function CompliancePage() {
             const data = await listAudits();
             setAudits(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load audits");
+            setError(err instanceof Error ? err.message : t("loadAuditsFailed"));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     const loadAcks = useCallback(async () => {
         setLoading(true);
@@ -120,11 +111,11 @@ export default function CompliancePage() {
             const data = await listTrainingAcks();
             setAcks(data);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load training records");
+            setError(err instanceof Error ? err.message : t("loadTrainingFailed"));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         if (tab === "documents") loadDocs();
@@ -137,7 +128,7 @@ export default function CompliancePage() {
         setSaving(true);
         setError("");
         try {
-            if (!docFile) throw new Error("Choose a PDF or image to upload");
+            if (!docFile) throw new Error(t("chooseFile"));
             // Upload first; the API only accepts a storageKey it issued for this business
             // (the old free-text key / "pending/…" placeholder is rejected).
             const uploaded = await uploadDocumentFile(docFile);
@@ -156,19 +147,19 @@ export default function CompliancePage() {
             setDocForm({ type: "SDS", title: "", version: "", expiresAt: "", notes: "" });
             await loadDocs();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create document");
+            setError(err instanceof Error ? err.message : t("createDocumentFailed"));
         } finally {
             setSaving(false);
         }
     };
 
     const handleDeleteDoc = async (id: string) => {
-        if (!confirm("Delete this document? Linked inventory items will lose their SDS reference.")) return;
+        if (!confirm(t("deleteDocumentConfirm"))) return;
         try {
             await deleteDocument(id);
             await loadDocs();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to delete");
+            setError(err instanceof Error ? err.message : t("deleteDocumentFailed"));
         }
     };
 
@@ -188,7 +179,7 @@ export default function CompliancePage() {
             setAuditForm({ title: "", type: "INTERNAL", conductedAt: isoDateInTimeZone(new Date()), score: "", notes: "" });
             await loadAudits();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create audit");
+            setError(err instanceof Error ? err.message : t("createAuditFailed"));
         } finally {
             setSaving(false);
         }
@@ -199,7 +190,7 @@ export default function CompliancePage() {
             await updateAudit(audit.id, { status: "CLOSED" });
             await loadAudits();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to update audit");
+            setError(err instanceof Error ? err.message : t("updateAuditFailed"));
         }
     };
 
@@ -222,7 +213,7 @@ export default function CompliancePage() {
                 <div>
                     <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        SDS library, chemical training acknowledgements, and compliance audits.
+                        {t("subtitle")}
                     </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -243,17 +234,17 @@ export default function CompliancePage() {
 
             {/* Tabs */}
             <div className="mb-4 flex flex-wrap gap-2">
-                {(["documents", "audits", "training"] as const).map((t) => (
+                {(["documents", "audits", "training"] as const).map((tabKey) => (
                     <button
-                        key={t}
-                        onClick={() => setTab(t)}
+                        key={tabKey}
+                        onClick={() => setTab(tabKey)}
                         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                            tab === t
+                            tab === tabKey
                                 ? "bg-brand-500 text-white"
                                 : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300"
                         }`}
                     >
-                        {t === "documents" ? "Documents / SDS" : t === "audits" ? "Audits" : "Training Acks"}
+                        {tabKey === "documents" ? t("documentsTab") : tabKey === "audits" ? t("auditsTab") : t("trainingTab")}
                     </button>
                 ))}
             </div>
@@ -261,17 +252,17 @@ export default function CompliancePage() {
             {/* Document filters */}
             {tab === "documents" && (
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                    {(["ALL", ...DOC_TYPES] as const).map((t) => (
+                    {(["ALL", ...DOC_TYPES] as const).map((typeKey) => (
                         <button
-                            key={t}
-                            onClick={() => setTypeFilter(t)}
+                            key={typeKey}
+                            onClick={() => setTypeFilter(typeKey)}
                             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                                typeFilter === t
+                                typeFilter === typeKey
                                     ? "bg-brand-500 text-white"
                                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300"
                             }`}
                         >
-                            {t === "ALL" ? "All" : DOC_TYPE_LABEL[t]}
+                            {typeKey === "ALL" ? t("allTypes") : t(`docTypes.${typeKey}`)}
                         </button>
                     ))}
                     <label className="ml-2 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -281,7 +272,7 @@ export default function CompliancePage() {
                             onChange={(e) => setExpiringSoon(e.target.checked)}
                             className="rounded"
                         />
-                        Expiring in 30 days
+                        {t("expiringSoonFilter")}
                     </label>
                 </div>
             )}
@@ -294,7 +285,7 @@ export default function CompliancePage() {
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("titleField")}</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("type")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("version")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("expires")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("actions")}</TableCell>
@@ -318,7 +309,7 @@ export default function CompliancePage() {
                                                 {doc.title}
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
-                                                {DOC_TYPE_LABEL[doc.type] || doc.type}
+                                                {t(`docTypes.${doc.type}`)}
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">{doc.version || "—"}</TableCell>
                                             <TableCell className="px-5 py-4 text-sm">
@@ -330,9 +321,9 @@ export default function CompliancePage() {
                                                                 ? "text-warning-500"
                                                                 : "text-gray-500"
                                                     }>
-                            {new Date(doc.expiresAt).toLocaleDateString()}
-                                                        {isExpired(doc.expiresAt) && " (expired)"}
-                                                        {isExpiringSoon(doc.expiresAt) && " (soon)"}
+                            {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(doc.expiresAt))}
+                                                        {isExpired(doc.expiresAt) && ` (${t("expired")})`}
+                                                        {isExpiringSoon(doc.expiresAt) && ` (${t("soon")})`}
                           </span>
                                                 ) : (
                                                     <span className="text-gray-400">—</span>
@@ -340,10 +331,10 @@ export default function CompliancePage() {
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
                                                 <RowActionsMenu
-                                                    label={`Actions for ${doc.title}`}
+                                                    label={t("actionsFor", { title: doc.title })}
                                                     actions={[
                                                         {
-                                                            label: "Delete",
+                                                            label: tc("delete"),
                                                             variant: "danger" as const,
                                                             onClick: () => handleDeleteDoc(doc.id),
                                                         },
@@ -366,10 +357,10 @@ export default function CompliancePage() {
                             <TableHeader className="border-b border-gray-100 dark:border-gray-800">
                                 <TableRow>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("titleField")}</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Type</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("type")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("date")}</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Score</TableCell>
-                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Status</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("score")}</TableCell>
+                                    <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("status")}</TableCell>
                                     <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">{t("actions")}</TableCell>
                                 </TableRow>
                             </TableHeader>
@@ -390,9 +381,9 @@ export default function CompliancePage() {
                                             <TableCell className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                                                 {a.title}
                                             </TableCell>
-                                            <TableCell className="px-5 py-4 text-sm text-gray-500">{a.type}</TableCell>
+                                            <TableCell className="px-5 py-4 text-sm text-gray-500">{t(`auditTypes.${a.type}`)}</TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
-                                                {new Date(a.conductedAt).toLocaleDateString()}
+                                                {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(a.conductedAt))}
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
                                                 {a.score != null ? `${a.score}/100` : "—"}
@@ -402,15 +393,15 @@ export default function CompliancePage() {
                                                     color={a.status === "CLOSED" ? "success" : a.status === "IN_PROGRESS" ? "warning" : "info"}
                                                     size="sm"
                                                 >
-                                                    {a.status}
+                                                    {t(`auditStatus.${a.status}`)}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="px-5 py-4">
                                                 <RowActionsMenu
-                                                    label={`Actions for ${a.title}`}
+                                                    label={t("actionsFor", { title: a.title })}
                                                     actions={
                                                         a.status !== "CLOSED"
-                                                            ? [{ label: "Close", onClick: () => closeAudit(a) }]
+                                                            ? [{ label: t("closeAudit"), onClick: () => closeAudit(a) }]
                                                             : []
                                                     }
                                                 />
@@ -445,7 +436,7 @@ export default function CompliancePage() {
                                 {!loading && acks.length === 0 && (
                                     <TableRow>
                                         <TableCell className="px-5 py-6 text-center text-gray-500" colSpan={4}>
-                                            No training acknowledgements yet. Cleaners can acknowledge SDS docs from the mobile app.
+                                            {t("trainingEmpty")}
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -461,7 +452,7 @@ export default function CompliancePage() {
                                                 {ack.documentId.slice(0, 12)}…
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">
-                                                {new Date(ack.acknowledgedAt).toLocaleString()}
+                                                {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(ack.acknowledgedAt))}
                                             </TableCell>
                                             <TableCell className="px-5 py-4 text-sm text-gray-500">{ack.notes || "—"}</TableCell>
                                         </TableRow>
@@ -477,20 +468,20 @@ export default function CompliancePage() {
                 <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("addDocument")}</h2>
                 <form onSubmit={handleCreateDoc} className="space-y-4">
                     <div>
-                        <Label>Type</Label>
+                        <Label>{t("type")}</Label>
                         <select
                             value={docForm.type}
                             onChange={(e) => setDocForm({ ...docForm, type: e.target.value as ComplianceDocType })}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
-                            {DOC_TYPES.map((t) => (
-                                <option key={t} value={t}>{DOC_TYPE_LABEL[t]}</option>
+                            {DOC_TYPES.map((docType) => (
+                                <option key={docType} value={docType}>{t(`docTypes.${docType}`)}</option>
                             ))}
                         </select>
                     </div>
                     <div>
                         <Label>{t("titleField")}</Label>
-                        <Input value={docForm.title} onChange={(e) => setDocForm({ ...docForm, title: e.target.value })} required placeholder="e.g. SDS – All-Purpose Cleaner" />
+                        <Input value={docForm.title} onChange={(e) => setDocForm({ ...docForm, title: e.target.value })} required placeholder={t("fileExample")} />
                     </div>
                     <div>
                         <Label>{t("fileLabel")}</Label>
@@ -505,7 +496,7 @@ export default function CompliancePage() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label>{t("version")}</Label>
-                            <Input value={docForm.version} onChange={(e) => setDocForm({ ...docForm, version: e.target.value })} placeholder="2025-03" />
+                            <Input value={docForm.version} onChange={(e) => setDocForm({ ...docForm, version: e.target.value })} placeholder={t("versionExample")} />
                         </div>
                         <div>
                             <Label>{t("expires")}</Label>
@@ -518,7 +509,7 @@ export default function CompliancePage() {
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <Button variant="outline" onClick={() => setShowDocModal(false)} type="button">{tc("cancel")}</Button>
-                        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
+                        <Button type="submit" disabled={saving}>{saving ? t("saving") : t("create")}</Button>
                     </div>
                 </form>
             </Modal>
@@ -529,19 +520,19 @@ export default function CompliancePage() {
                 <form onSubmit={handleCreateAudit} className="space-y-4">
                     <div>
                         <Label>{t("titleField")}</Label>
-                        <Input value={auditForm.title} onChange={(e) => setAuditForm({ ...auditForm, title: e.target.value })} required placeholder="Q1 Internal SDS Review" />
+                        <Input value={auditForm.title} onChange={(e) => setAuditForm({ ...auditForm, title: e.target.value })} required placeholder={t("auditTitleExample")} />
                     </div>
                     <div>
-                        <Label>Type</Label>
+                        <Label>{t("type")}</Label>
                         <select
                             value={auditForm.type}
                             onChange={(e) => setAuditForm({ ...auditForm, type: e.target.value })}
                             className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
                         >
                             <option value="INTERNAL">{t("internal")}</option>
-                            <option value="OSHA_INSPECTION">OSHA Inspection</option>
+                            <option value="OSHA_INSPECTION">{t("oshaInspection")}</option>
                             <option value="CLIENT">{t("clientAudit")}</option>
-                            <option value="SDS_REVIEW">SDS Review</option>
+                            <option value="SDS_REVIEW">{t("sdsReview")}</option>
                         </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -550,7 +541,7 @@ export default function CompliancePage() {
                             <Input type="date" value={auditForm.conductedAt} onChange={(e) => setAuditForm({ ...auditForm, conductedAt: e.target.value })} required />
                         </div>
                         <div>
-                            <Label>Score (0–100)</Label>
+                            <Label>{t("scoreRange")}</Label>
                             <Input type="number" min="0" max="100" value={auditForm.score} onChange={(e) => setAuditForm({ ...auditForm, score: e.target.value })} />
                         </div>
                     </div>
@@ -560,7 +551,7 @@ export default function CompliancePage() {
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <Button variant="outline" onClick={() => setShowAuditModal(false)} type="button">{tc("cancel")}</Button>
-                        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create"}</Button>
+                        <Button type="submit" disabled={saving}>{saving ? t("saving") : t("create")}</Button>
                     </div>
                 </form>
             </Modal>

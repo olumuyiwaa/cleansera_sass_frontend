@@ -18,12 +18,6 @@ import {
   ThemeStyle,
 } from "@/app/api/businesses.api";
 
-const SECTION_LABELS: Record<"about" | "testimonials" | "gallery" | "faq", string> = {
-  about: "About",
-  testimonials: "Testimonials",
-  gallery: "Gallery",
-  faq: "FAQ",
-};
 const SECTION_KEYS: Array<"about" | "testimonials" | "gallery" | "faq"> = [
   "about",
   "testimonials",
@@ -87,11 +81,11 @@ export default function WebsitePage() {
         order: b.sectionsEnabled?.order?.length ? b.sectionsEnabled.order : SECTION_KEYS,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load website settings");
+      setError(err instanceof Error ? err.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -104,9 +98,9 @@ export default function WebsitePage() {
       const { key } = await uploadBrandingImage("logo", file);
       const updated = await updateBranding({ logoKey: key });
       setBranding(updated);
-      setSaved("Logo updated");
+      setSaved(t("logoUpdated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Logo upload failed");
+      setError(err instanceof Error ? err.message : t("logoUploadFailed"));
     } finally {
       setUploadingLogo(false);
     }
@@ -119,9 +113,9 @@ export default function WebsitePage() {
       const { key } = await uploadBrandingImage("hero", file);
       const updated = await updateBranding({ heroImageKey: key });
       setBranding(updated);
-      setSaved("Hero image updated");
+      setSaved(t("heroUpdated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Hero image upload failed");
+      setError(err instanceof Error ? err.message : t("heroUploadFailed"));
     } finally {
       setUploadingHero(false);
     }
@@ -137,9 +131,9 @@ export default function WebsitePage() {
       const uploaded = await Promise.all(toUpload.map((f) => uploadBrandingImage("gallery", f)));
       const updated = await updateBranding({ galleryImageKeys: [...currentKeys, ...uploaded.map((u) => u.key)] });
       setBranding(updated);
-      setSaved("Gallery updated");
+      setSaved(t("galleryUpdated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gallery upload failed");
+      setError(err instanceof Error ? err.message : t("galleryUploadFailed"));
     } finally {
       setUploadingGallery(false);
     }
@@ -153,7 +147,7 @@ export default function WebsitePage() {
       });
       setBranding(updated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove image");
+      setError(err instanceof Error ? err.message : t("removeImageFailed"));
     }
   };
 
@@ -183,9 +177,9 @@ export default function WebsitePage() {
         sectionsEnabled: sections,
       });
       setBranding(updated);
-      setSaved("Website content saved");
+      setSaved(t("contentSaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save website content");
+      setError(err instanceof Error ? err.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -200,9 +194,7 @@ export default function WebsitePage() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Everything here feeds your public booking site and widget. Colors, logo shape, and your
-          subdomain still live under Business Settings — this page is the content: images, story,
-          testimonials, and which sections show up.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -220,7 +212,7 @@ export default function WebsitePage() {
       {/* Logo + Hero image */}
       <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Images
+          {t("images")}
         </h2>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
@@ -228,10 +220,10 @@ export default function WebsitePage() {
             <div className="flex items-center gap-4">
               {branding?.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={branding.logoUrl} alt="Logo" className="h-16 w-16 rounded-lg border border-gray-200 object-contain dark:border-gray-700" />
+                <img src={branding.logoUrl} alt={t("logo")} className="h-16 w-16 rounded-lg border border-gray-200 object-contain dark:border-gray-700" />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 dark:border-gray-700">
-                  None
+                  {t("none")}
                 </div>
               )}
               <input
@@ -242,7 +234,7 @@ export default function WebsitePage() {
                 onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
               />
               <Button variant="outline" type="button" onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo}>
-                {uploadingLogo ? "Uploading…" : "Upload logo"}
+                {uploadingLogo ? t("uploading") : t("uploadLogo")}
               </Button>
             </div>
           </div>
@@ -251,10 +243,10 @@ export default function WebsitePage() {
             <div className="flex items-center gap-4">
               {branding?.heroImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={branding.heroImageUrl} alt="Hero" className="h-16 w-24 rounded-lg border border-gray-200 object-cover dark:border-gray-700" />
+                <img src={branding.heroImageUrl} alt={t("heroImage")} className="h-16 w-24 rounded-lg border border-gray-200 object-cover dark:border-gray-700" />
               ) : (
                 <div className="flex h-16 w-24 items-center justify-center rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 dark:border-gray-700">
-                  None
+                  {t("none")}
                 </div>
               )}
               <input
@@ -265,7 +257,7 @@ export default function WebsitePage() {
                 onChange={(e) => e.target.files?.[0] && handleHeroUpload(e.target.files[0])}
               />
               <Button variant="outline" type="button" onClick={() => heroInputRef.current?.click()} disabled={uploadingHero}>
-                {uploadingHero ? "Uploading…" : "Upload image"}
+                {uploadingHero ? t("uploading") : t("uploadImage")}
               </Button>
             </div>
           </div>
@@ -276,14 +268,14 @@ export default function WebsitePage() {
         {/* Theme style */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            Theme style
+            {t("themeStyle")}
           </h2>
           <div className="max-w-xs">
             <Select
               options={[
-                { value: "MODERN", label: "Modern — clean sans-serif" },
-                { value: "CLASSIC", label: "Classic — serif headings" },
-                { value: "BOLD", label: "Bold — heavy, high-contrast" },
+                { value: "MODERN", label: t("themes.modern") },
+                { value: "CLASSIC", label: t("themes.classic") },
+                { value: "BOLD", label: t("themes.bold") },
               ]}
               defaultValue={themeStyle}
               onChange={(v) => setThemeStyle(v as ThemeStyle)}
@@ -311,7 +303,7 @@ export default function WebsitePage() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("testimonials")}</h2>
             <Button variant="outline" type="button" onClick={() => setTestimonials([...testimonials, { name: "", quote: "" }])}>
-              Add testimonial
+              {t("addTestimonial")}
             </Button>
           </div>
           <div className="space-y-4">
@@ -333,7 +325,7 @@ export default function WebsitePage() {
                   onClick={() => setTestimonials(testimonials.filter((_, j) => j !== i))}
                   className="text-sm font-medium text-error-500 hover:text-error-600"
                 >
-                  Remove
+                  {tc("delete")}
                 </button>
               </div>
             ))}
@@ -343,9 +335,9 @@ export default function WebsitePage() {
         {/* FAQ */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">FAQ</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("faq")}</h2>
             <Button variant="outline" type="button" onClick={() => setFaqItems([...faqItems, { question: "", answer: "" }])}>
-              Add question
+              {t("addQuestion")}
             </Button>
           </div>
           <div className="space-y-4">
@@ -363,7 +355,7 @@ export default function WebsitePage() {
                     onClick={() => setFaqItems(faqItems.filter((_, j) => j !== i))}
                     className="whitespace-nowrap text-sm font-medium text-error-500 hover:text-error-600"
                   >
-                    Remove
+                    {tc("delete")}
                   </button>
                 </div>
                 <TextArea
@@ -398,8 +390,7 @@ export default function WebsitePage() {
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.02]">
           <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("sections")}</h2>
           <p className="mb-4 text-xs text-gray-400">
-            Show, hide, and order the optional sections. A section with no content stays hidden even
-            when turned on.
+            {t("sectionsHint")}
           </p>
           <div className="space-y-2">
             {sections.order.map((key, i) => (
@@ -410,7 +401,7 @@ export default function WebsitePage() {
                     checked={sections[key]}
                     onChange={(e) => setSections({ ...sections, [key]: e.target.checked })}
                   />
-                  {SECTION_LABELS[key]}
+                  {t(`sectionLabels.${key}`)}
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -448,7 +439,7 @@ export default function WebsitePage() {
               onChange={(e) => e.target.files && e.target.files.length > 0 && handleGalleryUpload(e.target.files)}
             />
             <Button variant="outline" type="button" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery}>
-              {uploadingGallery ? "Uploading…" : "Add photos"}
+              {uploadingGallery ? t("uploading") : t("addPhotos")}
             </Button>
           </div>
           {(branding?.galleryImageUrls || []).length === 0 ? (
@@ -473,7 +464,7 @@ export default function WebsitePage() {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Website Content"}</Button>
+          <Button type="submit" disabled={saving}>{saving ? tc("loading") : t("saveContent")}</Button>
         </div>
       </form>
     </div>

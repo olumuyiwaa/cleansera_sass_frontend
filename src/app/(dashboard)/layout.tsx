@@ -7,6 +7,7 @@ import { DashboardCurrency } from "@/components/common/DashboardCurrency";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
 import React, { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { getOnboardingStatus } from "@/app/api/businesses.api";
 import { useAuth } from "@/app/auth/useAuth";
@@ -21,6 +22,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const tc = useTranslations("Dashboard.common");
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const pathname = usePathname();
   const router = useRouter();
@@ -81,7 +83,7 @@ export default function AdminLayout({
     : "lg:ml-[90px]";
 
   if (authLoading || !isAuthenticated || !user || checkingOnboarding) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">Loading…</div>;
+    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">{tc("loading")}</div>;
   }
 
   return (

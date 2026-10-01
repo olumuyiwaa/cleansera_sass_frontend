@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   listServices,
@@ -14,13 +14,7 @@ import {
 import { PricingModel, Service, ServiceAddOn, formatMoney } from "@/app/api/cleansera-types";
 import { currencySymbol } from "@/app/services/currency";
 
-const PRICING_MODELS: { value: PricingModel; label: string; hint: string }[] = [
-  { value: "FLAT", label: "Flat rate", hint: "One price regardless of size" },
-  // The old hints quoted "$0.10 per sqft" / "$15 per room": wrong currency and not the rates actually configured under Pricing.
-  { value: "PER_SQFT", label: "Per square foot", hint: "Base price + your per-square-foot rate (set under Pricing) × size entered at booking" },
-  { value: "PER_ROOM", label: "Per room", hint: "Base price + your per-room rate (set under Pricing) × rooms entered at booking" },
-  { value: "HOURLY", label: "Hourly", hint: "Base price is treated as the hourly rate" },
-];
+const PRICING_MODELS: PricingModel[] = ["FLAT", "PER_SQFT", "PER_ROOM", "HOURLY"];
 
 const emptyForm = {
   name: "",
@@ -32,10 +26,6 @@ const emptyForm = {
 
 const inputCls =
   "h-11 w-full rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
-
-function centsToDisplay(cents: number) {
-  return (cents / 100).toFixed(2);
-}
 
 export default function ServicesPage() {
   const t = useTranslations("Dashboard.services");
@@ -52,22 +42,22 @@ export default function ServicesPage() {
   const [addOnForm, setAddOnForm] = useState({ name: "", price: "" as string | number, extraMinutes: "" as string | number });
   const [addOnBusy, setAddOnBusy] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const data = await listServices();
       setServices(data);
     } catch (e: any) {
-      setError(e.message || "Failed to load services");
+      setError(e.message || t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +75,7 @@ export default function ServicesPage() {
       setShowCreate(false);
       load();
     } catch (e: any) {
-      setError(e.message || "Failed to create service");
+      setError(e.message || t("createFailed"));
     } finally {
       setSaving(false);
     }
@@ -96,17 +86,17 @@ export default function ServicesPage() {
       await updateService(s.id, { isActive: !s.isActive });
       load();
     } catch (e: any) {
-      setError(e.message || "Failed to update service");
+      setError(e.message || t("updateFailed"));
     }
   };
 
   const removeService = async (id: string) => {
-    if (!confirm("Delete this service? Existing bookings that reference it are unaffected, but it will no longer be bookable.")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     try {
       await deleteService(id);
       load();
     } catch (e: any) {
-      setError(e.message || "Failed to delete service");
+      setError(e.message || t("deleteFailed"));
     }
   };
 
@@ -122,7 +112,7 @@ export default function ServicesPage() {
       setAddOnForm({ name: "", price: "", extraMinutes: "" });
       load();
     } catch (e: any) {
-      setError(e.message || "Failed to add add-on");
+      setError(e.message || t("addAddonFailed"));
     } finally {
       setAddOnBusy(false);
     }
@@ -133,7 +123,7 @@ export default function ServicesPage() {
       await deleteServiceAddOn(serviceId, addOnId);
       load();
     } catch (e: any) {
-      setError(e.message || "Failed to delete add-on");
+      setError(e.message || t("deleteAddonFailed"));
     }
   };
 
@@ -143,7 +133,7 @@ export default function ServicesPage() {
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            What your business sells — pricing, duration, and add-ons. This is what customers see on your booking widget.
+            {t("subtitle")}
           </p>
         </div>
         <button
@@ -179,11 +169,11 @@ export default function ServicesPage() {
               className={inputCls}
             >
               {PRICING_MODELS.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
+                <option key={p} value={p}>{t(`pricingModels.${p}.label`)}</option>
               ))}
             </select>
             <p className="mt-1 text-xs text-gray-400">
-              {PRICING_MODELS.find((p) => p.value === form.pricingModel)?.hint}
+              {t(`pricingModels.${form.pricingModel}.hint`)}
             </p>
           </div>
           <input
@@ -191,7 +181,7 @@ export default function ServicesPage() {
             type="number"
             min="0"
             step="0.01"
-            placeholder={form.pricingModel === "HOURLY" ? `Hourly rate (${currencySymbol()})` : `Base price (${currencySymbol()})`}
+            placeholder={form.pricingModel === "HOURLY" ? t("hourlyRatePlaceholder", { currency: currencySymbol() }) : t("basePricePlaceholder", { currency: currencySymbol() })}
             value={form.basePrice}
             onChange={(e) => setForm({ ...form, basePrice: e.target.value })}
             className={inputCls}
@@ -211,7 +201,7 @@ export default function ServicesPage() {
             disabled={saving}
             className="h-11 rounded-lg bg-brand-500 text-sm font-medium text-white disabled:opacity-60 sm:col-span-2"
           >
-            {saving ? "Creating…" : "Create service"}
+            {saving ? tc("loading") : t("createService")}
           </button>
         </form>
       )}
@@ -231,21 +221,21 @@ export default function ServicesPage() {
                     <span className="font-medium text-gray-800 dark:text-white/90">{s.name}</span>
                     {!s.isActive && (
                       <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-800">
-                        Inactive
+                        {t("inactive")}
                       </span>
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-gray-500">
-                    {PRICING_MODELS.find((p) => p.value === s.pricingModel)?.label} · ${centsToDisplay(s.basePriceCents)} base ·{" "}
-                    {s.estimatedMinutes} min · {s.addOns?.length || 0} add-on{s.addOns?.length === 1 ? "" : "s"}
+                    {t(`pricingModels.${s.pricingModel}.label`)} · {formatMoney(s.basePriceCents)} {t("basePriceLabel")} ·{" "}
+                    {t("serviceSummary", { minutes: s.estimatedMinutes, count: s.addOns?.length || 0 })}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 text-sm" onClick={(e) => e.stopPropagation()}>
                   <button type="button" onClick={() => toggleActive(s)} className="text-gray-500 hover:underline">
-                    {s.isActive ? "Deactivate" : "Activate"}
+                    {s.isActive ? t("deactivate") : t("activate")}
                   </button>
                   <button type="button" onClick={() => removeService(s.id)} className="text-red-600 hover:underline">
-                    Delete
+                    {tc("delete")}
                   </button>
                 </div>
               </div>
@@ -266,7 +256,7 @@ export default function ServicesPage() {
                             onClick={() => removeAddOn(s.id, a.id)}
                             className="text-red-600 hover:underline"
                           >
-                            Remove
+                            {tc("delete")}
                           </button>
                         </span>
                       </div>
@@ -286,7 +276,7 @@ export default function ServicesPage() {
                       type="number"
                       min="0"
                       step="0.01"
-                      placeholder={`Price (${currencySymbol()})`}
+                      placeholder={t("pricePlaceholder", { currency: currencySymbol() })}
                       value={addOnForm.price}
                       onChange={(e) => setAddOnForm({ ...addOnForm, price: e.target.value })}
                       className={`${inputCls} max-w-[120px]`}
@@ -304,7 +294,7 @@ export default function ServicesPage() {
                       disabled={addOnBusy}
                       className="h-11 rounded-lg border px-4 text-sm disabled:opacity-60 dark:border-gray-700"
                     >
-                      {addOnBusy ? "Adding…" : "Add"}
+                      {addOnBusy ? tc("loading") : tc("add")}
                     </button>
                   </form>
                 </div>
@@ -313,7 +303,7 @@ export default function ServicesPage() {
           ))}
           {!services.length && (
             <div className="rounded-xl border p-8 text-center text-sm text-gray-500 dark:border-gray-800">
-              No services yet — create your first one above so customers can start booking.
+              {t("emptyHint")}
             </div>
           )}
         </div>

@@ -12,6 +12,7 @@ import SearchModal from "@/components/header/SearchModal";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth/useAuth";
 import { getUserRole } from "@/app/api/types";
+import { useTranslations } from "next-intl";
 
 const AppHeader: React.FC = () => {
   const router = useRouter();
@@ -21,6 +22,7 @@ const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const { user } = useAuth();
+  const t = useTranslations("Dashboard.common");
 
   const userRole = getUserRole(user);
   const handleToggle = () => {
@@ -59,7 +61,7 @@ const AppHeader: React.FC = () => {
           <button
             className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
             onClick={handleToggle}
-            aria-label="Toggle Sidebar"
+            aria-label={t("toggleSidebar")}
           >
             {isMobileOpen ? (
               <svg

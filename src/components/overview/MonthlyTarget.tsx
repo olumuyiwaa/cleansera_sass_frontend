@@ -18,6 +18,7 @@ type Props = {
   revenueValue?: string;
   todayLabel?: string;
   todayValue?: string;
+  detailsLabel?: string;
   footerNote?: string;
   viewMoreHref?: string;
 };
@@ -32,6 +33,7 @@ export default function MonthlyTarget({
   revenueValue = "—",
   todayLabel = "Today",
   todayValue = "—",
+  detailsLabel = "Details",
   footerNote,
   viewMoreHref = "/reports",
 }: Props) {
@@ -92,7 +94,7 @@ export default function MonthlyTarget({
               href={viewMoreHref}
               className="text-sm font-medium text-brand-500 hover:text-brand-600"
             >
-              Details
+              {detailsLabel}
             </Link>
           )}
         </div>

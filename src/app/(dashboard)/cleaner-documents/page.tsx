@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import React, { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   listDocuments,
   getUploadUrl,
@@ -17,6 +17,7 @@ const DOC_TYPES = ["ID_CARD", "BACKGROUND_CHECK", "CERTIFICATION", "CONTRACT", "
 export default function CleanerDocumentsPage() {
   const t = useTranslations("Dashboard.cleanerDocuments");
   const tc = useTranslations("Dashboard.common");
+  const locale = useLocale();
   const [docs, setDocs] = useState<any[]>([]);
   const [cleaners, setCleaners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,22 +29,22 @@ export default function CleanerDocumentsPage() {
     file: null as File | null,
   });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const [d, c] = await Promise.all([listDocuments(), authFetch("/cleaners")]);
       if (d.success) setDocs(d.data || []);
       if (c.success) setCleaners(Array.isArray(c.data) ? c.data : c.data?.data || []);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const onUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,8 +70,8 @@ export default function CleanerDocumentsPage() {
       if (!createRes.success) throw new Error(createRes.message);
       setForm({ cleanerId: "", title: "", type: "OTHER", file: null });
       load();
-    } catch (err: any) {
-      setError(err.message || "Upload failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("uploadFailed"));
     }
   };
 
@@ -78,7 +79,7 @@ export default function CleanerDocumentsPage() {
     <div className="space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">{t("title")}</h1>
-        <p className="mt-1 text-sm text-gray-500">IDs, background checks, certifications, contracts</p>
+        <p className="mt-1 text-sm text-gray-500">{t("subtitle")}</p>
       </div>
 
       <form onSubmit={onUpload} className="grid gap-3 rounded-2xl border p-5 sm:grid-cols-2 lg:grid-cols-5 dark:border-gray-800">
@@ -88,7 +89,7 @@ export default function CleanerDocumentsPage() {
           onChange={(e) => setForm({ ...form, cleanerId: e.target.value })}
           className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
         >
-          <option value="">Select cleaner</option>
+          <option value="">{t("selectCleaner")}</option>
           {cleaners.map((c) => (
             <option key={c.id} value={c.id}>
               {c.user?.firstName} {c.user?.lastName}
@@ -97,7 +98,7 @@ export default function CleanerDocumentsPage() {
         </select>
         <input
           required
-          placeholder="Title"
+          placeholder={t("titlePlaceholder")}
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
@@ -107,9 +108,9 @@ export default function CleanerDocumentsPage() {
           onChange={(e) => setForm({ ...form, type: e.target.value })}
           className="h-11 rounded-lg border px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
         >
-          {DOC_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t.replace(/_/g, " ")}
+          {DOC_TYPES.map((documentType) => (
+            <option key={documentType} value={documentType}>
+              {t(`types.${documentType}`)}
             </option>
           ))}
         </select>
@@ -122,7 +123,7 @@ export default function CleanerDocumentsPage() {
           />
         </div>
         <button type="submit" className="h-11 rounded-lg bg-brand-500 text-sm font-medium text-white">
-          Upload
+          {t("upload")}
         </button>
       </form>
 
@@ -134,10 +135,10 @@ export default function CleanerDocumentsPage() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-gray-50 dark:bg-white/[0.03]">
               <tr>
-                <th className="px-4 py-3">Cleaner</th>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Uploaded</th>
+                <th className="px-4 py-3">{t("cleaner")}</th>
+                <th className="px-4 py-3">{t("titleColumn")}</th>
+                <th className="px-4 py-3">{t("type")}</th>
+                <th className="px-4 py-3">{t("uploaded")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -148,21 +149,21 @@ export default function CleanerDocumentsPage() {
                     {d.cleaner?.user?.firstName} {d.cleaner?.user?.lastName}
                   </td>
                   <td className="px-4 py-3">{d.title}</td>
-                  <td className="px-4 py-3">{d.type}</td>
-                  <td className="px-4 py-3">{new Date(d.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">{t(`types.${d.type}`)}</td>
+                  <td className="px-4 py-3">{new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(d.createdAt))}</td>
                   <td className="px-4 py-3">
                     <RowActionsMenu
-                      label={`Actions for ${d.title}`}
+                      label={t("actionsFor", { title: d.title })}
                       actions={[
                         {
-                          label: "Download",
+                          label: t("download"),
                           onClick: async () => {
                             const res = await getDownloadUrl(d.id);
                             if (res.success && res.data?.downloadUrl) window.open(res.data.downloadUrl, "_blank");
                           },
                         },
                         {
-                          label: "Delete",
+                          label: tc("delete"),
                           variant: "danger" as const,
                           onClick: async () => {
                             await deleteDocument(d.id);
