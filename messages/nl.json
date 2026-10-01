@@ -1569,8 +1569,11 @@
     },
     "rescheduleModal": {
       "title": "Verzetten",
-      "description": "Kies een nieuwe datum en tijd. We controleren de beschikbaarheid.",
-      "save": "Nieuwe tijd opslaan"
+      "description": "Kies een nieuwe datum en daarna een van de beschikbare tijden.",
+      "save": "Nieuwe tijd opslaan",
+      "dateLabel": "Nieuwe datum",
+      "timeLabel": "Beschikbare tijden",
+      "contactBusiness": "Deze boeking kan niet online worden verzet. Neem contact op met het bedrijf."
     },
     "reviewModal": {
       "title": "Beoordeel uw schoonmaak",
@@ -1597,6 +1600,7 @@
       "reviewFailed": "Beoordeling versturen is mislukt",
       "tipFailed": "Fooi geven is mislukt",
       "couldNotStartTipCheckout": "Kon de fooi-betaling niet starten",
+      "failedToLoadSlots": "Beschikbare tijden konden niet worden geladen",
       "sessionExpired": "Je sessie is verlopen. Log opnieuw in."
     },
     "success": {

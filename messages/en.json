@@ -1569,8 +1569,11 @@
     },
     "rescheduleModal": {
       "title": "Reschedule",
-      "description": "Choose a new date and time. We'll check availability for that slot.",
-      "save": "Save new time"
+      "description": "Pick a new date, then one of the available times.",
+      "save": "Save new time",
+      "dateLabel": "New date",
+      "timeLabel": "Available times",
+      "contactBusiness": "This booking can't be rescheduled online. Please contact the business."
     },
     "reviewModal": {
       "title": "Rate your cleaning",
@@ -1597,6 +1600,7 @@
       "reviewFailed": "Review failed",
       "tipFailed": "Tip failed",
       "couldNotStartTipCheckout": "Could not start tip checkout",
+      "failedToLoadSlots": "Couldn't load available times",
       "sessionExpired": "Your session expired. Please sign in again."
     },
     "success": {

@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { getStorefront, type StorefrontCancellationPolicy } from "@/app/api/widget.api";
-import { setActiveCurrency } from "@/app/services/currency";
+import { getSlots, getStorefront, type Slot, type StorefrontCancellationPolicy } from "@/app/api/widget.api";
+import { isoDateInTimeZone, setActiveCurrency } from "@/app/services/currency";
 import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
@@ -43,6 +43,8 @@ export default function CustomerPortalPage() {
     const locale = useLocale();
     const t = useTranslations("Portal");
     const tStatus = useTranslations("Portal.status");
+    // Reuse the booking wizard's wording for the slot picker states.
+    const tSchedule = useTranslations("Booking.schedule");
 
     // Business timezone + cancellation policy come from the same storefront
     // call that already supplies the currency.
@@ -103,7 +105,12 @@ export default function CustomerPortalPage() {
 
     const [detail, setDetail] = useState<PortalBooking | null>(null);
     const [rescheduleId, setRescheduleId] = useState<string | null>(null);
+    // rescheduleStart is the ISO start of a slot the backend offered - never free text.
     const [rescheduleStart, setRescheduleStart] = useState("");
+    const [rescheduleDate, setRescheduleDate] = useState("");
+    const [slots, setSlots] = useState<Slot[]>([]);
+    const [slotsLoading, setSlotsLoading] = useState(false);
+    const [slotsError, setSlotsError] = useState("");
     const [reviewId, setReviewId] = useState<string | null>(null);
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
@@ -245,6 +252,79 @@ export default function CustomerPortalPage() {
 
     const logout = () => clearSession();
 
+    // "YYYY-MM-DD" of an instant in the business timezone (browser tz if unknown/invalid).
+    const dayInBusinessTz = useCallback(
+        (d: Date) => {
+            try {
+                return isoDateInTimeZone(d, timezone);
+            } catch {
+                return isoDateInTimeZone(d);
+            }
+        },
+        [timezone]
+    );
+
+    const pickRescheduleDate = (date: string) => {
+        setRescheduleDate(date);
+        setRescheduleStart("");
+        setSlots([]);
+        setSlotsError("");
+        setSlotsLoading(!!date);
+    };
+
+    const openReschedule = (b: PortalBooking) => {
+        const today = dayInBusinessTz(new Date());
+        const current = dayInBusinessTz(new Date(b.scheduledStart));
+        setRescheduleId(b.id);
+        pickRescheduleDate(current >= today ? current : today);
+    };
+
+    const rescheduleServiceId = useMemo(
+        () => bookings.find((b) => b.id === rescheduleId)?.service?.id ?? null,
+        [bookings, rescheduleId]
+    );
+
+    // Offer only slots the business can actually serve (same endpoint as the
+    // booking wizard) instead of letting the customer type any date/time and
+    // hoping the backend rejects the bad ones.
+    const canLoadSlots = !!rescheduleId && !!rescheduleDate && !!rescheduleServiceId;
+
+    useEffect(() => {
+        if (!canLoadSlots || !rescheduleServiceId) return;
+        let cancelled = false;
+        // The loading flag and list reset happen in the handlers that change the
+        // date (openReschedule / pickRescheduleDate) so this effect only syncs
+        // with the network.
+        getSlots(slug, { serviceId: rescheduleServiceId, date: rescheduleDate })
+            .then((r) => {
+                if (cancelled) return;
+                setSlots(r.slots ?? []);
+                setSlotsLoading(false);
+            })
+            .catch((e) => {
+                if (cancelled) return;
+                setSlots([]);
+                setSlotsError(e instanceof Error ? e.message : t("errors.failedToLoadSlots"));
+                setSlotsLoading(false);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [slug, canLoadSlots, rescheduleDate, rescheduleServiceId, t]);
+
+
+    const formatSlotTime = useCallback(
+        (iso: string) => {
+            const opts: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
+            try {
+                return new Date(iso).toLocaleTimeString(locale, { ...opts, timeZone: timezone });
+            } catch {
+                return new Date(iso).toLocaleTimeString(locale, opts);
+            }
+        },
+        [locale, timezone]
+    );
+
     const handleCancel = async (id: string) => {
         if (!token) return;
         if (!confirm(t("confirmCancel"))) {
@@ -269,12 +349,7 @@ export default function CustomerPortalPage() {
         setLoading(true);
         setError("");
         try {
-            await reschedulePortalBooking(
-                slug,
-                token,
-                rescheduleId,
-                new Date(rescheduleStart).toISOString()
-            );
+            await reschedulePortalBooking(slug, token, rescheduleId, rescheduleStart);
             setRescheduleId(null);
             await loadBookings(token);
             setMsg(t("success.bookingRescheduled"));
@@ -678,10 +753,7 @@ export default function CustomerPortalPage() {
                                                 {canModify(b) && (
                                                     <>
                                                         <ActionBtn
-                                                            onClick={() => {
-                                                                setRescheduleId(b.id);
-                                                                setRescheduleStart("");
-                                                            }}
+                                                            onClick={() => openReschedule(b)}
                                                         >
                                                             {t("card.reschedule")}
                                                         </ActionBtn>
@@ -782,12 +854,66 @@ export default function CustomerPortalPage() {
                     <p className="mb-4 text-sm text-gray-600">
                         {t("rescheduleModal.description")}
                     </p>
-                    <input
-                        type="datetime-local"
-                        className="mb-5 h-12 w-full rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
-                        value={rescheduleStart}
-                        onChange={(e) => setRescheduleStart(e.target.value)}
-                    />
+                    {!rescheduleServiceId ? (
+                        <p className="mb-5 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                            {t("rescheduleModal.contactBusiness")}
+                        </p>
+                    ) : (
+                        <>
+                            <label
+                                htmlFor="reschedule-date"
+                                className="mb-1.5 block text-xs font-medium text-gray-500"
+                            >
+                                {t("rescheduleModal.dateLabel")}
+                            </label>
+                            <input
+                                id="reschedule-date"
+                                type="date"
+                                min={dayInBusinessTz(new Date())}
+                                className="mb-4 h-12 w-full rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+                                value={rescheduleDate}
+                                onChange={(e) => pickRescheduleDate(e.target.value)}
+                            />
+                            <p className="mb-1.5 text-xs font-medium text-gray-500">
+                                {t("rescheduleModal.timeLabel")}
+                            </p>
+                            <div className="mb-5 min-h-[3rem]">
+                                {slotsLoading && (
+                                    <p className="text-sm text-gray-500">{tSchedule("loadingTimes")}</p>
+                                )}
+                                {!slotsLoading && slotsError && (
+                                    <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">
+                                        {slotsError}
+                                    </p>
+                                )}
+                                {!slotsLoading && !slotsError && rescheduleDate && slots.length === 0 && (
+                                    <p className="text-sm text-gray-500">{tSchedule("noTimesAvailable")}</p>
+                                )}
+                                {!slotsLoading && slots.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                                        {slots.map((slot) => {
+                                            const active = rescheduleStart === slot.start;
+                                            return (
+                                                <button
+                                                    key={slot.start}
+                                                    type="button"
+                                                    aria-pressed={active}
+                                                    onClick={() => setRescheduleStart(slot.start)}
+                                                    className={`rounded-xl border px-2 py-2.5 text-sm font-medium transition ${
+                                                        active
+                                                            ? "border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-500/20"
+                                                            : "border-gray-200 text-gray-700 hover:border-gray-300"
+                                                    }`}
+                                                >
+                                                    {formatSlotTime(slot.start)}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                     <ModalActions
                         onClose={() => setRescheduleId(null)}
                         onConfirm={handleReschedule}
