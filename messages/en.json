@@ -80,7 +80,7 @@
       "firstName": "First name",
       "lastName": "Last name",
       "phone": "Phone",
-      "phonePlaceholder": "+1 555 000 0000",
+      "phonePlaceholder": "+31 6 12345678",
       "email": "Email",
       "emailPlaceholder": "Optional — for receipts & reminders",
       "specialInstructions": "Special instructions",
@@ -1509,7 +1509,7 @@
       "heading": "Sign in with your phone",
       "description": "Use the number from your booking. We'll text or email a one-time code — no password needed.",
       "phoneLabel": "Phone number",
-      "phonePlaceholder": "+1 555 000 0000",
+      "phonePlaceholder": "+31 6 12345678",
       "sending": "Sending…",
       "sendCode": "Send access code"
     },
@@ -1585,7 +1585,8 @@
       "title": "Leave a tip",
       "description": "100% goes to the business / cleaner. You'll pay securely via Stripe.",
       "customAmount": "Custom amount ({currency})",
-      "tipButton": "Tip {amount}"
+      "tipButton": "Tip {amount}",
+      "minimum": "Minimum tip is {amount}."
     },
     "confirmCancel": "Cancel this booking? A cancellation fee may apply if it's close to the scheduled time, based on the business policy.",
     "cancelModal": {

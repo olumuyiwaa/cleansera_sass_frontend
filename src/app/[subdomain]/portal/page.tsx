@@ -123,6 +123,22 @@ export default function CustomerPortalPage() {
     );
     const [tipId, setTipId] = useState<string | null>(null);
     const [tipCents, setTipCents] = useState(500);
+    // The custom-amount field keeps what the customer typed. Clamping on every
+    // keystroke made it impossible to clear the field or type "2" on the way to
+    // "2.50", because each change was re-rendered as toFixed(2) with a floor.
+    const [tipInput, setTipInput] = useState("5.00");
+
+    const MIN_TIP_CENTS = 50;
+    const selectTipPreset = (cents: number) => {
+        setTipCents(cents);
+        setTipInput((cents / 100).toFixed(2));
+    };
+    const typeTipAmount = (raw: string) => {
+        setTipInput(raw);
+        // Accept a decimal comma too ("2,50"), which is what Dutch keyboards type.
+        const n = Number(raw.trim().replace(",", "."));
+        setTipCents(raw.trim() !== "" && Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0);
+    };
 
     // Only an expired/invalid token (401) should end the session. Any other
     // failure - a network blip, a 5xx - used to wipe the token and bounce the
@@ -405,7 +421,7 @@ export default function CustomerPortalPage() {
     };
 
     const handleTip = async () => {
-        if (!token || !tipId || tipCents < 50) return;
+        if (!token || !tipId || tipCents < MIN_TIP_CENTS) return;
         setLoading(true);
         setError("");
         try {
@@ -587,6 +603,8 @@ export default function CustomerPortalPage() {
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
                                         placeholder={t("phoneStep.phonePlaceholder")}
+                                        type="tel"
+                                        inputMode="tel"
                                         autoComplete="tel"
                                         required
                                     />
@@ -808,7 +826,7 @@ export default function CustomerPortalPage() {
                                                     <ActionBtn
                                                         onClick={() => {
                                                             setTipId(b.id);
-                                                            setTipCents(500);
+                                                            selectTipPreset(500);
                                                         }}
                                                     >
                                                         {t("card.tip")}
@@ -1033,7 +1051,7 @@ export default function CustomerPortalPage() {
                             <button
                                 key={c}
                                 type="button"
-                                onClick={() => setTipCents(c)}
+                                onClick={() => selectTipPreset(c)}
                                 className={`rounded-xl border py-2.5 text-sm font-semibold transition ${
                                     tipCents === c
                                         ? "border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-500/20"
@@ -1048,20 +1066,27 @@ export default function CustomerPortalPage() {
                         {t("tipModal.customAmount", { currency })}
                     </label>
                     <input
-                        type="number"
-                        min={0.5}
-                        step={0.5}
-                        className="mb-5 h-12 w-full rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
-                        value={(tipCents / 100).toFixed(2)}
-                        onChange={(e) =>
-                            setTipCents(Math.max(50, Math.round(Number(e.target.value) * 100)))
-                        }
+                        type="text"
+                        inputMode="decimal"
+                        className="mb-1.5 h-12 w-full rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+                        value={tipInput}
+                        onChange={(e) => typeTipAmount(e.target.value)}
+                        aria-invalid={tipInput.trim() !== "" && tipCents < MIN_TIP_CENTS}
                     />
+                    <p
+                        className={`mb-5 min-h-[1.25rem] text-xs ${
+                            tipInput.trim() !== "" && tipCents < MIN_TIP_CENTS
+                                ? "text-red-600"
+                                : "text-gray-400"
+                        }`}
+                    >
+                        {t("tipModal.minimum", { amount: money(MIN_TIP_CENTS) })}
+                    </p>
                     <ModalActions
                         onClose={() => setTipId(null)}
                         onConfirm={handleTip}
-                        confirmLabel={t("tipModal.tipButton", { amount: money(tipCents) })}
-                        disabled={loading || tipCents < 50}
+                        confirmLabel={t("tipModal.tipButton", { amount: money(Math.max(tipCents, 0)) })}
+                        disabled={loading || tipCents < MIN_TIP_CENTS}
                         loading={loading}
                     />
                 </Modal>

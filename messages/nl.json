@@ -1585,7 +1585,8 @@
       "title": "Geef een fooi",
       "description": "100% gaat naar het bedrijf / de schoonmaker. U betaalt veilig via Stripe.",
       "customAmount": "Aangepast bedrag ({currency})",
-      "tipButton": "Fooi geven van {amount}"
+      "tipButton": "Fooi geven van {amount}",
+      "minimum": "Minimale fooi is {amount}."
     },
     "confirmCancel": "Deze boeking annuleren? Er kan een annuleringsvergoeding gelden als de afspraak dichtbij is, afhankelijk van het beleid van het bedrijf.",
     "cancelModal": {
