@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isReservedSlug } from "@/lib/reservedSlugs";
 
 /**
  * Host-based multi-tenancy.
@@ -36,32 +37,20 @@ const ROOT_DOMAIN = (process.env.NEXT_PUBLIC_STOREFRONT_ROOT_DOMAIN || "").toLow
 
 const API_BASE_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
-// Keep in sync with the backend's reserved-slug check on business
-// registration (see prisma-schema-additions.md). A business must never be
-// able to register a subdomain that collides with a top-level app route.
-const RESERVED_SUBDOMAINS = new Set([
-  "www",
-  "app",
-  "api",
-  "admin",
-  "auth",
-  "dashboard",
-  "book-now",
-  "widget",
-  "static",
-  "assets",
-  "mail",
-  "support",
-  "about",
-  "pricing",
-  "how-it-works",
-  "for-businesses",
-  "for-cleaners",
-  "privacy",
-  "terms",
-]);
+// "/book-now/" is a real top-level route (the embeddable widget page), so it is
+// served as-is on tenant hosts too. Rewriting it to /{tenant}/book-now/... 404s.
+const BYPASS_PREFIXES = [
+  "/_next",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/api/",
+  "/book-now/",
+];
 
-const BYPASS_PREFIXES = ["/_next", "/favicon.ico", "/robots.txt", "/sitemap.xml", "/api/"];
+// Hostnames only. Anything else (junk Host headers) is rejected before it can
+// touch the cache or trigger a backend lookup.
+const HOSTNAME_RE = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?(:\d{1,5})?$/;
 
 // In-memory edge cache for custom-domain lookups. Middleware runs per
 // request on every hit to the domain, so without this every page view on a
@@ -70,6 +59,13 @@ const BYPASS_PREFIXES = ["/_next", "/favicon.ico", "/robots.txt", "/sitemap.xml"
 // minute (matches the domainVerificationWorker poll interval).
 const domainCache = new Map<string, { subdomain: string | null; expires: number }>();
 const CACHE_TTL_MS = 60_000;
+const CACHE_MAX_ENTRIES = 5_000;
+
+function cacheSet(host: string, subdomain: string | null) {
+  // Host is attacker-controlled, so the map must not grow without bound.
+  if (domainCache.size >= CACHE_MAX_ENTRIES) domainCache.clear();
+  domainCache.set(host, { subdomain, expires: Date.now() + CACHE_TTL_MS });
+}
 
 async function resolveCustomDomain(host: string): Promise<string | null> {
   const cached = domainCache.get(host);
@@ -86,13 +82,17 @@ async function resolveCustomDomain(host: string): Promise<string | null> {
       // belt and suspenders across cold middleware instances.
       { next: { revalidate: 60 } }
     );
-    if (!res.ok) {
-      domainCache.set(host, { subdomain: null, expires: Date.now() + CACHE_TTL_MS });
+    if (res.status === 404) {
+      cacheSet(host, null);
       return null;
     }
+    // 5xx / rate limit: fail closed for this request, but do NOT cache it as
+    // "unknown domain" - a one-second backend blip would otherwise take a
+    // real customer's site offline for the full TTL.
+    if (!res.ok) return null;
     const body = await res.json();
     const subdomain: string | null = body?.data?.subdomain || null;
-    domainCache.set(host, { subdomain, expires: Date.now() + CACHE_TTL_MS });
+    cacheSet(host, subdomain);
     return subdomain;
   } catch {
     // Backend hiccup: fail closed (404) rather than guessing at a tenant.
@@ -109,31 +109,33 @@ export async function middleware(req: NextRequest) {
 
   const host = (req.headers.get("host") || "").toLowerCase();
 
+  if (!HOSTNAME_RE.test(host)) {
+    return new NextResponse(null, { status: 400 });
+  }
+
   // Our own app (dashboard, admin, auth, /book-now, /[subdomain] paths
-  // typed directly) — path-based routing already handles this, don't touch it.
+  // typed directly) - path-based routing already handles this, don't touch it.
   if (APP_HOSTS.includes(host)) {
     return NextResponse.next();
   }
 
-  // A path like /acme or /book-now/acme hit directly on an APP_HOST is
-  // already handled above and falls through unchanged.
+  // Bare root domain and www belong to the marketing site, not a tenant.
+  // This must be checked BEFORE the subdomain branch: "www.cleansera.nl" also
+  // ends with ".cleansera.nl" and would otherwise be treated as the reserved
+  // tenant "www" and 404.
+  if (ROOT_DOMAIN && (host === ROOT_DOMAIN || host === `www.${ROOT_DOMAIN}`)) {
+    return NextResponse.next();
+  }
 
   let subdomain: string | null = null;
 
   if (ROOT_DOMAIN && host.endsWith(`.${ROOT_DOMAIN}`)) {
     const candidate = host.slice(0, -1 * (ROOT_DOMAIN.length + 1));
-    // A dot means someone pointed e.g. foo.bar.cleansera.nl at us — not a
+    // A dot means someone pointed e.g. foo.bar.cleansera.nl at us - not a
     // real tenant subdomain.
-    if (candidate && !candidate.includes(".") && !RESERVED_SUBDOMAINS.has(candidate)) {
+    if (candidate && !candidate.includes(".") && !isReservedSlug(candidate)) {
       subdomain = candidate;
     }
-  } else if (host === ROOT_DOMAIN) {
-    // Bare root domain (cleansera.nl) is the marketing site's job, not
-    // this app's. Let it fall through if this deployment also serves it,
-    // otherwise this 404s — either is fine, just don't treat it as a tenant.
-    return NextResponse.next();
-  } else if (host === ROOT_DOMAIN || host === `www.${ROOT_DOMAIN}`) {
-    return NextResponse.next();
   } else {
     // Anything else is a candidate custom domain (acme-cleaning.nl).
     subdomain = await resolveCustomDomain(host);
@@ -143,8 +145,25 @@ export async function middleware(req: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // Links inside the storefront/portal are written as "/{slug}/portal" (they
+  // also have to work on the plain app host). On a tenant host that would be
+  // rewritten to "/{slug}/{slug}/portal" and 404, so send those to the clean
+  // URL first. The query string is preserved (Stripe tip returns use it).
+  const prefix = `/${subdomain}`;
+  if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+    // Build the Location from the public Host (not nextUrl, which can carry the
+    // internal host behind a reverse proxy).
+    const proto =
+      req.headers.get("x-forwarded-proto")?.split(",")[0].trim() ||
+      req.nextUrl.protocol.replace(":", "");
+    const clean = new URL(`${proto}://${host}`);
+    clean.pathname = pathname.slice(prefix.length) || "/";
+    clean.search = req.nextUrl.search;
+    return NextResponse.redirect(clean, 307);
+  }
+
   const url = req.nextUrl.clone();
-  url.pathname = `/${subdomain}${pathname === "/" ? "" : pathname}`;
+  url.pathname = `${prefix}${pathname === "/" ? "" : pathname}`;
   return NextResponse.rewrite(url);
 }
 
