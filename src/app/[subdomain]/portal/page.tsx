@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { getSlots, getStorefront, type Slot, type StorefrontCancellationPolicy } from "@/app/api/widget.api";
@@ -1190,19 +1190,62 @@ function Modal({
     wide?: boolean;
 }) {
     const t = useTranslations("Portal");
+    const titleId = useId();
+    const dialogRef = useRef<HTMLDivElement>(null);
+
+    // Accessible dialog behaviour: move focus in on open, keep Tab inside, close
+    // on Escape, and hand focus back to whatever opened it.
+    useEffect(() => {
+        const previouslyFocused = document.activeElement as HTMLElement | null;
+        const node = dialogRef.current;
+        node?.focus();
+        return () => previouslyFocused?.focus?.();
+    }, []);
+
+    const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Escape") {
+            e.stopPropagation();
+            onClose();
+            return;
+        }
+        if (e.key !== "Tab") return;
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusable || focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey && (active === first || active === dialogRef.current)) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    };
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-end justify-center bg-gray-900/40 p-4 backdrop-blur-sm sm:items-center"
             onClick={onClose}
         >
             <div
-                className={`w-full rounded-3xl bg-white p-6 shadow-2xl sm:p-7 ${
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                onKeyDown={onKeyDown}
+                className={`w-full rounded-3xl bg-white p-6 shadow-2xl outline-none sm:p-7 ${
                     wide ? "max-w-lg" : "max-w-md"
                 }`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="mb-5 flex items-center justify-between gap-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+                    <h3 id={titleId} className="text-lg font-semibold text-gray-900">
+                        {title}
+                    </h3>
                     <button
                         type="button"
                         onClick={onClose}
