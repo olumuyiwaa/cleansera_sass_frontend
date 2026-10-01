@@ -6,6 +6,9 @@ type SiteHeaderProps = {
   subdomain: string;
   businessName: string;
   logoUrl?: string | null;
+  hasAbout?: boolean;
+  hasTestimonials?: boolean;
+  hasFaq?: boolean;
   primaryColor: string;
   onBook?: () => void;
 };
@@ -14,6 +17,9 @@ export function SiteHeader({
   subdomain,
   businessName,
   logoUrl,
+  hasAbout,
+  hasTestimonials,
+  hasFaq,
   primaryColor,
   onBook,
 }: SiteHeaderProps) {
@@ -30,6 +36,9 @@ export function SiteHeader({
   const nav = [
     { label: "Services", href: "#services" },
     { label: "How it works", href: "#how-it-works" },
+    ...(hasAbout ? [{ label: "About", href: "#about" }] : []),
+    ...(hasTestimonials ? [{ label: "Reviews", href: "#testimonials" }] : []),
+    ...(hasFaq ? [{ label: "FAQ", href: "#faq" }] : []),
     { label: "Contact", href: "#contact" },
   ];
 
@@ -46,25 +55,19 @@ export function SiteHeader({
   }
 
   return (
-    <header
-      className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${
-        scrolled
-          ? "border-[#E2DED3] bg-[#FBFBF8]/90 backdrop-blur-xl"
-          : "border-transparent bg-[#FBFBF8]/80 backdrop-blur-md"
-      }`}
-    >
-      <div className="site-container flex items-center justify-between gap-6 py-4">
-        <a href="#top" className="flex items-center gap-2.5 shrink-0">
+    <header className="site-header-shell fixed inset-x-0 top-4 z-50 px-3 sm:top-5 sm:px-6">
+      <div className={`site-header-pill mx-auto flex max-w-[1720px] items-center justify-between gap-3 px-4 py-3 sm:px-7 ${scrolled ? "site-header-pill-scrolled" : ""}`}>
+        <a href="#top" className="flex min-w-0 items-center gap-3 shrink-0">
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={logoUrl}
               alt={businessName}
-              className="h-9 w-9 rounded-xl object-contain"
+              className="h-10 w-10 rounded-lg object-contain sm:h-12 sm:w-12"
             />
           ) : (
             <span
-              className="grid h-9 w-9 place-items-center rounded-xl text-sm font-semibold text-[#FBFBF8] shadow-sm"
+              className="grid h-10 w-10 place-items-center rounded-lg text-base font-semibold text-white shadow-sm sm:h-12 sm:w-12"
               style={{
                 background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)`,
               }}
@@ -72,47 +75,47 @@ export function SiteHeader({
               {initial}
             </span>
           )}
-          <span className="text-lg font-semibold tracking-tight text-[#171B1A]">
+          <span className="truncate text-base font-semibold tracking-tight text-[#102c24] sm:text-lg">
             {businessName}
           </span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-1" aria-label="Site navigation">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Site navigation">
           {nav.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-[#5C5546] transition-colors hover:text-[#171B1A]"
+              className="rounded-full px-3 py-2 text-sm font-semibold text-[#253d34] transition-colors hover:bg-[#f3f0e9] hover:text-[#102c24] xl:px-4"
             >
               {item.label}
             </a>
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-2 shrink-0">
+        <div className="hidden items-center gap-2 shrink-0 md:flex">
           <a
             href={portalHref}
-            className="inline-flex min-h-[42px] items-center rounded-[12px] border border-[#E2DED3] bg-white px-3.5 py-2 text-sm font-medium text-[#5C5546] transition-colors hover:text-[#171B1A]"
+            className="inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold text-[#253d34] transition-colors hover:bg-[#f3f0e9]"
           >
-            My Account
+            Client portal
           </a>
           <a
             href={bookHref}
             onClick={handleBook}
-            className="inline-flex min-h-[42px] items-center rounded-[12px] px-4 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#082e25] px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
             style={{
-              backgroundColor: primaryColor,
-              boxShadow: `0 10px 24px ${primaryColor}33`,
+              boxShadow: "0 8px 24px rgba(8, 46, 37, .18)",
             }}
           >
-            Book now
+            Book cleaning
+            <span aria-hidden="true">↗</span>
           </a>
         </div>
 
         <button
           type="button"
-          className="md:hidden grid h-9 w-9 place-items-center rounded-lg border border-[#E2DED3]"
-          aria-label="Toggle menu"
+          className="grid h-11 w-11 place-items-center rounded-full border border-[#e6e4dc] bg-[#f8f8f5] lg:hidden"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
         >
@@ -132,13 +135,13 @@ export function SiteHeader({
       </div>
 
       {menuOpen && (
-        <div className="md:hidden border-t border-[#E2DED3] bg-[#FBFBF8]">
-          <div className="site-container flex flex-col py-3">
+        <div className="site-mobile-menu mx-auto mt-3 max-w-[1720px] lg:hidden">
+          <div className="flex flex-col p-3">
             {nav.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="py-2.5 text-sm font-medium text-[#5C5546]"
+                className="rounded-xl px-3 py-3 text-sm font-semibold text-[#253d34] hover:bg-[#f3f0e9]"
                 onClick={() => setMenuOpen(false)}
               >
                 {item.label}
@@ -146,18 +149,17 @@ export function SiteHeader({
             ))}
             <a
               href={portalHref}
-              className="mt-2 rounded-[12px] border border-[#E2DED3] px-4 py-2.5 text-center text-sm font-medium text-[#5C5546]"
+              className="mt-2 rounded-full border border-[#e6e4dc] px-4 py-3 text-center text-sm font-semibold text-[#253d34]"
               onClick={() => setMenuOpen(false)}
             >
-              My Account
+              Client portal
             </a>
             <a
               href={bookHref}
               onClick={handleBook}
-              className="mt-2 rounded-[12px] px-4 py-2.5 text-center text-sm font-semibold text-white"
-              style={{ backgroundColor: primaryColor }}
+              className="mt-2 rounded-full bg-[#082e25] px-4 py-3 text-center text-sm font-semibold text-white"
             >
-              Book now
+              Book cleaning
             </a>
           </div>
         </div>

@@ -27,7 +27,7 @@ export function SiteFaq({ items, primaryColor }: SiteFaqProps) {
   };
 
   return (
-    <section id="faq" className="scroll-mt-24 border-t border-[#E8E4DE] bg-[#F6F2ED] py-16 sm:py-20">
+    <section id="faq" className="site-section-light scroll-mt-24 border-t border-[#e7e3d9] py-20 sm:py-24">
       <script
         type="application/ld+json"
         // FAQ text is tenant-supplied: safeJsonLd escapes "<" so it cannot close the script tag.
@@ -35,17 +35,18 @@ export function SiteFaq({ items, primaryColor }: SiteFaqProps) {
       />
       <div className="site-container">
         <Reveal>
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <span className="site-eyebrow">
               <span
                 className="site-eyebrow-dot"
                 style={{ backgroundColor: primaryColor, boxShadow: `0 0 0 5px ${primaryColor}1f` }}
               />
-              Questions
+              Frequently asked questions
             </span>
+            <h2 className="site-section-title mt-5">Good to know before you book.</h2>
           </div>
         </Reveal>
-        <div className="mt-10 max-w-3xl divide-y divide-[#E8E4DE] rounded-2xl border border-[#E8E4DE] bg-white">
+        <div className="mt-10 max-w-3xl divide-y divide-[#e7e3d9] border-y border-[#e7e3d9]">
           {faqs.map((faq, i) => {
             const isOpen = open === i;
             return (
@@ -58,7 +59,7 @@ export function SiteFaq({ items, primaryColor }: SiteFaqProps) {
                 >
                   <span className="text-sm font-semibold text-[#171B1A] sm:text-base">{faq.question}</span>
                   <span
-                    className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-sm font-bold"
+                    className="flex h-8 w-8 flex-none items-center justify-center rounded-full text-lg font-medium"
                     style={{ backgroundColor: `${primaryColor}1f`, color: primaryColor }}
                   >
                     {isOpen ? "−" : "+"}

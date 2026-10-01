@@ -76,6 +76,7 @@ export type WidgetBranding = {
 export type WidgetBusiness = {
   id: string;
   name: string;
+  phone?: string | null;
   subdomain?: string | null;
   branding?: WidgetBranding | null;
   /** IANA timezone, e.g. Europe/Amsterdam. Slots are computed in it. */

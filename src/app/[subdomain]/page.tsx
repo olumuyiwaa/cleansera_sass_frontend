@@ -18,7 +18,8 @@ import { SiteCtaBand } from "@/components/site/SiteCtaBand";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { BookingWidgetModal } from "@/components/widget/BookingWidgetModal";
 
-const DEFAULT_PRIMARY = "#3F6B52";
+const DEFAULT_PRIMARY = "#0B352A";
+const DEFAULT_ACCENT = "#D0AA62";
 const DEFAULT_SECTION_ORDER: NonNullable<WidgetSectionsEnabled["order"]> = [
   "about",
   "testimonials",
@@ -88,6 +89,7 @@ export default function BusinessSitePage({
   const business = data.business;
   const branding = business.branding;
   const primaryColor = branding?.primaryColor || DEFAULT_PRIMARY;
+  const accentColor = branding?.accentColor || DEFAULT_ACCENT;
   const name = business.name;
   const logoUrl = branding?.logoUrl ?? null;
   const tagline = branding?.tagline ?? null;
@@ -130,6 +132,9 @@ export default function BusinessSitePage({
         businessName={name}
         logoUrl={logoUrl}
         primaryColor={primaryColor}
+        hasAbout={Boolean(branding?.aboutTitle || branding?.aboutBody)}
+        hasTestimonials={Boolean(branding?.testimonials?.length)}
+        hasFaq={Boolean(branding?.faqItems?.length)}
         onBook={openBook}
       />
       <main>
@@ -137,7 +142,9 @@ export default function BusinessSitePage({
           subdomain={subdomain}
           businessName={name}
           tagline={tagline}
-          primaryColor={primaryColor}
+          heroImageUrl={branding?.heroImageUrl}
+          phoneNumber={business.phone}
+          accentColor={accentColor}
           onBook={openBook}
         />
         <SiteServices
@@ -152,14 +159,12 @@ export default function BusinessSitePage({
         <SiteCtaBand
           subdomain={subdomain}
           businessName={name}
-          primaryColor={primaryColor}
           onBook={openBook}
         />
       </main>
       <SiteFooter
         subdomain={subdomain}
         businessName={name}
-        primaryColor={primaryColor}
         onBook={openBook}
         socialLinks={branding?.socialLinks}
       />

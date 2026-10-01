@@ -16,7 +16,7 @@ export function SiteAbout({ title, body, heroImageUrl, primaryColor }: SiteAbout
   if (!title && !body) return null;
 
   return (
-    <section id="about" className="scroll-mt-24 border-t border-[#E8E4DE] bg-white py-16 sm:py-20">
+    <section id="about" className="site-section-light scroll-mt-24 border-t border-[#e7e3d9] py-20 sm:py-24">
       <div className="site-container grid gap-10 lg:grid-cols-2 lg:items-center">
         <Reveal>
           <div>
@@ -25,13 +25,13 @@ export function SiteAbout({ title, body, heroImageUrl, primaryColor }: SiteAbout
                 className="site-eyebrow-dot"
                 style={{ backgroundColor: primaryColor, boxShadow: `0 0 0 5px ${primaryColor}1f` }}
               />
-              About us
+                About the service
             </span>
             {title && (
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#171B1A] sm:text-4xl">{title}</h2>
+              <h2 className="site-section-title mt-5">{title}</h2>
             )}
             {body && (
-              <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-[#5F6664] sm:text-lg">{body}</p>
+              <p className="mt-5 whitespace-pre-line text-base leading-relaxed text-[#616963] sm:text-lg">{body}</p>
             )}
           </div>
         </Reveal>

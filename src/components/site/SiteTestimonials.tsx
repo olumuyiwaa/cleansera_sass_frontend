@@ -13,25 +13,29 @@ export function SiteTestimonials({ testimonials, primaryColor }: SiteTestimonial
   if (items.length === 0) return null;
 
   return (
-    <section id="testimonials" className="scroll-mt-24 border-t border-[#E8E4DE] bg-[#F6F2ED] py-16 sm:py-20">
+    <section id="testimonials" className="site-section-cream scroll-mt-24 border-t border-[#e7e3d9] py-20 sm:py-24">
       <div className="site-container">
         <Reveal>
-          <div className="max-w-2xl">
+          <div className="mx-auto max-w-3xl text-center">
             <span className="site-eyebrow">
               <span
                 className="site-eyebrow-dot"
                 style={{ backgroundColor: primaryColor, boxShadow: `0 0 0 5px ${primaryColor}1f` }}
               />
-              What customers say
+              Client testimonials
             </span>
+            <h2 className="site-section-title mt-5">Trusted by our customers.</h2>
           </div>
         </Reveal>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((t, i) => (
             <Reveal key={`${t.name}-${i}`} delay={i * 80}>
               <figure className="h-full rounded-2xl border border-[#E8E4DE] bg-white p-6 shadow-sm">
-                <blockquote className="text-sm leading-relaxed text-[#3A413E]">&ldquo;{t.quote}&rdquo;</blockquote>
-                <figcaption className="mt-4 text-sm font-semibold text-[#171B1A]">{t.name}</figcaption>
+                <blockquote className="font-serif text-lg leading-relaxed text-[#263a32]">&ldquo;{t.quote}&rdquo;</blockquote>
+                <figcaption className="mt-6 flex items-center gap-3 text-sm font-semibold text-[#102c24]">
+                  <span className="h-px w-8 bg-[#caa35e]" aria-hidden="true" />
+                  {t.name}
+                </figcaption>
               </figure>
             </Reveal>
           ))}

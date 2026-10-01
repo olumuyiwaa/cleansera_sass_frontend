@@ -2,7 +2,6 @@
 
 import { Reveal } from "./Reveal";
 import { formatMoneyUnits } from "@/app/services/currency";
-import type { Service } from "@/app/api/cleansera-types";
 import type { WidgetService } from "@/app/api/widget.api";
 
 type SiteServicesProps = {
@@ -37,10 +36,10 @@ export function SiteServices({
   }
 
   return (
-    <section id="services" className="scroll-mt-24 bg-white py-16 sm:py-20">
+    <section id="services" className="site-section-light scroll-mt-24 py-20 sm:py-24">
       <div className="site-container">
         <Reveal>
-          <div className="max-w-2xl">
+          <div className="mx-auto max-w-3xl text-center">
             <span className="site-eyebrow">
               <span
                 className="site-eyebrow-dot"
@@ -49,47 +48,48 @@ export function SiteServices({
                   boxShadow: `0 0 0 5px ${primaryColor}1f`,
                 }}
               />
-              What we offer
+              Cleaning services
             </span>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#171B1A] sm:text-4xl">
-              Services tailored to your space
+            <h2 className="site-section-title mt-5">
+              A clean for every kind of home.
             </h2>
-            <p className="mt-3 text-base text-[#5F6664] sm:text-lg">
-              Pick a service, add extras if you need them, and book a time that
-              works for you.
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[#616963] sm:text-lg">
+              Choose the service that fits your space, see clear starting prices,
+              and book a time that works for you.
             </p>
           </div>
         </Reveal>
 
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((svc, i) => (
             <Reveal key={svc.id} delay={i * 60}>
-              <li className="flex h-full flex-col justify-between rounded-[20px] border border-[#E8E4DE] bg-[#FAF9F6] p-5 sm:p-6 transition-shadow hover:shadow-[0_16px_40px_rgba(22,35,28,0.08)]">
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-lg font-semibold text-[#171B1A]">
-                      {svc.name}
-                    </h3>
-                    <span className="shrink-0 rounded-full border border-[#E8E4DE] bg-white px-3 py-1 text-sm font-semibold text-[#5C5546]">
-                      from {centsToDisplay(svc.basePriceCents, currency)}
+              <li className="site-service-item flex h-full flex-col justify-between border-t border-[#d9d4c8] py-6 sm:py-7">
+                <div className="flex h-full flex-col">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="site-service-index">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="site-service-price">
+                      From {centsToDisplay(svc.basePriceCents, currency)}
                     </span>
                   </div>
+                  <h3 className="mt-5 text-xl font-semibold text-[#102c24] sm:text-2xl">
+                    {svc.name}
+                  </h3>
                   {svc.description && (
-                    <p className="mt-2 text-sm leading-relaxed text-[#5F6664]">
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-[#616963]">
                       {svc.description}
                     </p>
                   )}
                   {svc.estimatedMinutes ? (
-                    <p className="mt-3 text-xs font-medium uppercase tracking-wider text-[#9C9483]">
-                      ~{svc.estimatedMinutes} min
+                    <p className="mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-[#91856b]">
+                      Approx. {svc.estimatedMinutes} min
                     </p>
                   ) : null}
                 </div>
                 <a
                   href={bookHref}
                   onClick={handleBook}
-                  className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-80"
-                  style={{ color: primaryColor }}
+                  className="site-service-link mt-6 inline-flex items-center gap-2 text-sm font-semibold"
+                  style={{ "--service-color": primaryColor } as React.CSSProperties}
                 >
                   Book this service
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
