@@ -1596,7 +1596,8 @@
       "rescheduleFailed": "Reschedule failed",
       "reviewFailed": "Review failed",
       "tipFailed": "Tip failed",
-      "couldNotStartTipCheckout": "Could not start tip checkout"
+      "couldNotStartTipCheckout": "Could not start tip checkout",
+      "sessionExpired": "Your session expired. Please sign in again."
     },
     "success": {
       "codeSent": "If we found your account, a code was sent by SMS or email.",

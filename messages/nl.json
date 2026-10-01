@@ -1596,7 +1596,8 @@
       "rescheduleFailed": "Verzetten is mislukt",
       "reviewFailed": "Beoordeling versturen is mislukt",
       "tipFailed": "Fooi geven is mislukt",
-      "couldNotStartTipCheckout": "Kon de fooi-betaling niet starten"
+      "couldNotStartTipCheckout": "Kon de fooi-betaling niet starten",
+      "sessionExpired": "Je sessie is verlopen. Log opnieuw in."
     },
     "success": {
       "codeSent": "Als we uw account hebben gevonden, is er een code verstuurd per sms of e-mail.",

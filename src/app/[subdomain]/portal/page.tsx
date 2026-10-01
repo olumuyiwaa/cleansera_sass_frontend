@@ -84,6 +84,30 @@ export default function CustomerPortalPage() {
     const [tipId, setTipId] = useState<string | null>(null);
     const [tipCents, setTipCents] = useState(500);
 
+    // Only an expired/invalid token (401) should end the session. Any other
+    // failure - a network blip, a 5xx - used to wipe the token and bounce the
+    // customer back to the phone screen even though they were still signed in.
+    const isUnauthorized = (e: unknown) => (e as { status?: number } | null)?.status === 401;
+
+    const clearSession = useCallback(() => {
+        localStorage.removeItem(tokenKey(slug));
+        localStorage.removeItem(customerKey(slug));
+        setToken(null);
+        setCustomer(null);
+        setBookings([]);
+        setStep("phone");
+    }, [slug]);
+
+    /** Shared catch for every token-authenticated call. */
+    const handleActionError = (err: unknown, fallback: string) => {
+        if (isUnauthorized(err)) {
+            clearSession();
+            setError(t("errors.sessionExpired"));
+            return;
+        }
+        setError(err instanceof Error ? err.message : fallback);
+    };
+
     const loadBookings = useCallback(
         async (tok: string) => {
             const list = await listPortalBookings(slug, tok);
@@ -118,12 +142,12 @@ export default function CustomerPortalPage() {
                 await loadBookings(token);
             } catch (e) {
                 if (!cancelled) {
-                    setError(e instanceof Error ? e.message : t("errors.failedToLoadBookings"));
-                    localStorage.removeItem(tokenKey(slug));
-                    localStorage.removeItem(customerKey(slug));
-                    setToken(null);
-                    setCustomer(null);
-                    setStep("phone");
+                    if ((e as { status?: number } | null)?.status === 401) {
+                        clearSession();
+                        setError(t("errors.sessionExpired"));
+                    } else {
+                        setError(e instanceof Error ? e.message : t("errors.failedToLoadBookings"));
+                    }
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -132,7 +156,7 @@ export default function CustomerPortalPage() {
         return () => {
             cancelled = true;
         };
-    }, [step, token, slug, loadBookings, t]);
+    }, [step, token, slug, loadBookings, clearSession, t]);
 
     const filtered = useMemo(() => {
         const now = Date.now();
@@ -193,14 +217,7 @@ export default function CustomerPortalPage() {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem(tokenKey(slug));
-        localStorage.removeItem(customerKey(slug));
-        setToken(null);
-        setCustomer(null);
-        setBookings([]);
-        setStep("phone");
-    };
+    const logout = () => clearSession();
 
     const handleCancel = async (id: string) => {
         if (!token) return;
@@ -215,7 +232,7 @@ export default function CustomerPortalPage() {
             setDetail(null);
             setMsg(t("success.bookingCancelled"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : t("errors.cancelFailed"));
+            handleActionError(err, t("errors.cancelFailed"));
         } finally {
             setLoading(false);
         }
@@ -236,7 +253,7 @@ export default function CustomerPortalPage() {
             await loadBookings(token);
             setMsg(t("success.bookingRescheduled"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : t("errors.rescheduleFailed"));
+            handleActionError(err, t("errors.rescheduleFailed"));
         } finally {
             setLoading(false);
         }
@@ -253,7 +270,7 @@ export default function CustomerPortalPage() {
             await loadBookings(token);
             setMsg(t("success.reviewThanks"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : t("errors.reviewFailed"));
+            handleActionError(err, t("errors.reviewFailed"));
         } finally {
             setLoading(false);
         }
@@ -280,7 +297,7 @@ export default function CustomerPortalPage() {
             }
             setError(t("errors.couldNotStartTipCheckout"));
         } catch (err) {
-            setError(err instanceof Error ? err.message : t("errors.tipFailed"));
+            handleActionError(err, t("errors.tipFailed"));
         } finally {
             setLoading(false);
         }
