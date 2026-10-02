@@ -8,6 +8,7 @@ import { isoDateInTimeZone, setActiveCurrency } from "@/app/services/currency";
 import { useActiveCurrency } from "@/app/services/useActiveCurrency";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import { cancellationPolicyLabel } from "@/components/booking/types";
 import {
     requestPortalAccess,
@@ -451,49 +452,32 @@ export default function CustomerPortalPage() {
         !["COMPLETED", "CANCELLED", "IN_PROGRESS"].includes(b.status);
 
     return (
-        <div className="min-h-screen bg-[#f4f7f5] text-gray-900">
-            {/* Ambient background */}
-            <div
-                className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-                aria-hidden
-            >
-                <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-200/40 blur-3xl" />
-                <div className="absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-teal-100/50 blur-3xl" />
-                <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-100/30 blur-3xl" />
-            </div>
-
+        <div className="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-white/90">
             {/* Header */}
-            <header className="sticky top-0 z-30 border-b border-white/60 bg-white/80 shadow-sm backdrop-blur-md">
-                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+            <header className="sticky top-0 z-30 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25">
-                            <SparkleIcon className="h-5 w-5" />
-                        </div>
+                        <Link
+                            href={`/${encodeURIComponent(slug)}`}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white shadow-theme-xs transition hover:bg-brand-400"
+                        >
+                                <SparkleIcon className="h-5 w-5" />
+                        </Link>
                         <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-500 dark:text-brand-400">
                                 {t("header.badge")}
                             </p>
-                            <h1 className="text-base font-semibold tracking-tight text-gray-900 sm:text-lg">
+                            <h1 className="text-base font-semibold tracking-tight text-gray-800 dark:text-white/90 sm:text-lg">
                                 {t("header.title")}
                             </h1>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3">
-                        {customer && (
-                            <span className="hidden text-sm text-gray-500 sm:inline">
-                {customer.firstName} {customer.lastName}
-              </span>
-                        )}
                         <LanguageSwitcher />
-                        <Link
-                            href={`/${encodeURIComponent(slug)}`}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-                        >
-                            {t("header.site")}
-                        </Link>
+                        <ThemeToggleButton />
                         <Link
                             href={`/book-now/${encodeURIComponent(slug)}`}
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-3.5 py-2 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
                         >
                             <PlusIcon className="h-4 w-4" />
                             <span className="hidden sm:inline">{t("header.bookAgain")}</span>
@@ -503,7 +487,7 @@ export default function CustomerPortalPage() {
                             <button
                                 type="button"
                                 onClick={logout}
-                                className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                                className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 transition hover:bg-gray-50 dark:hover:bg-white/5"
                             >
                                 {t("header.signOut")}
                             </button>
@@ -512,14 +496,14 @@ export default function CustomerPortalPage() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+            <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
                 {/* Alerts */}
                 {(error || msg) && (
                     <div className="mb-6 space-y-2">
                         {error && (
                             <div
                                 role="alert"
-                                className="flex items-start gap-3 rounded-2xl border border-red-200/80 bg-red-50 px-4 py-3 text-sm text-red-800"
+                                className="flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400"
                             >
                                 <span className="mt-0.5 text-red-500">●</span>
                                 <span className="flex-1">{error}</span>
@@ -535,14 +519,14 @@ export default function CustomerPortalPage() {
                         {msg && (
                             <div
                                 role="status"
-                                className="flex items-start gap-3 rounded-2xl border border-emerald-200/80 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+                                className="flex items-start gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400"
                             >
-                                <span className="mt-0.5 text-emerald-500">●</span>
+                                <span className="mt-0.5 text-success-500">●</span>
                                 <span className="flex-1">{msg}</span>
                                 <button
                                     type="button"
                                     onClick={() => setMsg("")}
-                                    className="text-emerald-400 hover:text-emerald-700"
+                                    className="text-success-500 hover:text-brand-600 dark:text-brand-400"
                                 >
                                     ✕
                                 </button>
@@ -556,23 +540,23 @@ export default function CustomerPortalPage() {
                     <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2 lg:items-center lg:gap-16">
                         {/* Marketing panel — desktop only */}
                         <div className="hidden lg:block">
-                            <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-emerald-700">
+                            <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-brand-500">
                                 {t("marketing.selfService")}
                             </p>
-                            <h2 className="text-3xl font-semibold tracking-tight text-gray-900 xl:text-4xl">
+                            <h2 className="text-3xl font-semibold tracking-tight text-gray-800 dark:text-white/90 xl:text-4xl">
                                 {t("marketing.heading")}
                             </h2>
-                            <p className="mt-4 max-w-md text-base leading-relaxed text-gray-600">
+                            <p className="mt-4 max-w-md text-base leading-relaxed text-gray-500 dark:text-gray-400 dark:text-gray-400">
                                 {t("marketing.description")}
                             </p>
-                            <ul className="mt-8 space-y-3 text-sm text-gray-600">
+                            <ul className="mt-8 space-y-3 text-sm text-gray-600 dark:text-gray-300">
                                 {[
                                     t("marketing.feature1"),
                                     t("marketing.feature2"),
                                     t("marketing.feature3"),
                                 ].map((item) => (
                                     <li key={item} className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
                       <CheckIcon className="h-3.5 w-3.5" />
                     </span>
                                         {item}
@@ -585,13 +569,13 @@ export default function CustomerPortalPage() {
                             {step === "phone" && (
                                 <form
                                     onSubmit={sendCode}
-                                    className="rounded-3xl border border-gray-200/80 bg-white p-6 shadow-xl shadow-gray-200/50 sm:p-8"
+                                    className="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-md dark:border-gray-800 dark:bg-gray-900 sm:p-8"
                                 >
                                     <div className="mb-6 text-center lg:text-left">
-                                        <h2 className="text-xl font-semibold text-gray-900">
+                                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
                                             {t("phoneStep.heading")}
                                         </h2>
-                                        <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                                        <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
                                             {t("phoneStep.description")}
                                         </p>
                                     </div>
@@ -599,7 +583,7 @@ export default function CustomerPortalPage() {
                                         {t("phoneStep.phoneLabel")}
                                     </label>
                                     <input
-                                        className="mb-5 h-12 w-full rounded-2xl border border-gray-200 bg-gray-50/80 px-4 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
+                                        className="mb-5 h-12 w-full rounded-xl border border-gray-300 bg-transparent dark:border-gray-700 px-4 text-sm outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:focus:border-brand-500"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
                                         placeholder={t("phoneStep.phonePlaceholder")}
@@ -611,7 +595,7 @@ export default function CustomerPortalPage() {
                                     <button
                                         type="submit"
                                         disabled={loading || !phone.trim()}
-                                        className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
+                                        className="h-12 w-full rounded-2xl bg-brand-500 text-sm font-semibold text-white shadow-theme-xs transition hover:bg-brand-600 disabled:opacity-60"
                                     >
                                         {loading ? t("phoneStep.sending") : t("phoneStep.sendCode")}
                                     </button>
@@ -621,13 +605,13 @@ export default function CustomerPortalPage() {
                             {step === "code" && (
                                 <form
                                     onSubmit={verify}
-                                    className="rounded-3xl border border-gray-200/80 bg-white p-6 shadow-xl shadow-gray-200/50 sm:p-8"
+                                    className="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-md dark:border-gray-800 dark:bg-gray-900 sm:p-8"
                                 >
                                     <div className="mb-6 text-center lg:text-left">
-                                        <h2 className="text-xl font-semibold text-gray-900">
+                                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
                                             {t("codeStep.heading")}
                                         </h2>
-                                        <p className="mt-2 text-sm text-gray-500">
+                                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                             {t("codeStep.sentTo")}{" "}
                                             <span className="font-medium text-gray-800">{phone}</span>
                                         </p>
@@ -636,7 +620,7 @@ export default function CustomerPortalPage() {
                                         {t("codeStep.codeLabel")}
                                     </label>
                                     <input
-                                        className="mb-5 h-14 w-full rounded-2xl border border-gray-200 bg-gray-50/80 px-4 text-center text-2xl font-semibold tracking-[0.5em] outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
+                                        className="mb-5 h-14 w-full rounded-xl border border-gray-300 bg-transparent dark:border-gray-700 px-4 text-center text-2xl font-semibold tracking-[0.5em] outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:focus:border-brand-500"
                                         value={code}
                                         onChange={(e) =>
                                             setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
@@ -649,7 +633,7 @@ export default function CustomerPortalPage() {
                                     <button
                                         type="submit"
                                         disabled={loading || code.length < 6}
-                                        className="h-12 w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
+                                        className="h-12 w-full rounded-2xl bg-brand-500 text-sm font-semibold text-white shadow-theme-xs transition hover:bg-brand-600 disabled:opacity-60"
                                     >
                                         {loading ? t("codeStep.verifying") : t("codeStep.continue")}
                                     </button>
@@ -659,7 +643,7 @@ export default function CustomerPortalPage() {
                                             setStep("phone");
                                             setCode("");
                                         }}
-                                        className="mt-4 w-full text-sm text-gray-500 transition hover:text-gray-800"
+                                        className="mt-4 w-full text-sm text-gray-500 dark:text-gray-400 transition hover:text-gray-800"
                                     >
                                         {t("codeStep.useDifferentPhone")}
                                     </button>
@@ -675,10 +659,10 @@ export default function CustomerPortalPage() {
                         {/* Welcome + stats */}
                         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                             <div>
-                                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
+                                <h2 className="text-2xl font-semibold tracking-tight text-gray-800 dark:text-white/90 sm:text-3xl">
                                     {t("welcome", { name: customer.firstName })}
                                 </h2>
-                                <p className="mt-1 text-sm text-gray-500">{customer.phone}</p>
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{customer.phone}</p>
                             </div>
                             <div className="grid grid-cols-3 gap-3 sm:gap-4">
                                 <StatCard label={t("stats.upcoming")} value={stats.upcoming} accent />
@@ -689,7 +673,7 @@ export default function CustomerPortalPage() {
 
                         {/* Filters */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="inline-flex rounded-2xl bg-white p-1 shadow-sm ring-1 ring-gray-200/80">
+                            <div className="inline-flex rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
                                 {(
                                     [
                                         ["upcoming", t("filters.upcoming")],
@@ -703,8 +687,8 @@ export default function CustomerPortalPage() {
                                         onClick={() => setFilter(key)}
                                         className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
                                             filter === key
-                                                ? "bg-emerald-600 text-white shadow-sm"
-                                                : "text-gray-600 hover:text-gray-900"
+                                                ? "bg-brand-500 text-white shadow-sm"
+                                                : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:text-white/90"
                                         }`}
                                     >
                                         {label}
@@ -722,24 +706,24 @@ export default function CustomerPortalPage() {
                                 {[1, 2, 3].map((i) => (
                                     <div
                                         key={i}
-                                        className="h-48 animate-pulse rounded-3xl bg-white/80 ring-1 ring-gray-100"
+                                        className="h-48 animate-pulse rounded-2xl bg-white ring-1 ring-gray-100 dark:bg-white/[0.03] dark:ring-gray-800"
                                     />
                                 ))}
                             </div>
                         ) : filtered.length === 0 ? (
-                            <div className="rounded-3xl border border-dashed border-gray-200 bg-white/70 px-6 py-16 text-center">
-                                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                            <div className="rounded-2xl border border-dashed border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:bg-white/[0.03] px-6 py-16 text-center">
+                                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-500">
                                     <CalendarIcon className="h-7 w-7" />
                                 </div>
-                                <p className="text-base font-medium text-gray-900">
+                                <p className="text-base font-medium text-gray-800 dark:text-white/90">
                                     {t("empty.noBookings")}
                                 </p>
-                                <p className="mt-1 text-sm text-gray-500">
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                     {t("empty.scheduleWhenReady")}
                                 </p>
                                 <Link
                                     href={`/book-now/${encodeURIComponent(slug)}`}
-                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
                                 >
                                     <PlusIcon className="h-4 w-4" />
                                     {t("empty.bookACleaning")}
@@ -750,14 +734,14 @@ export default function CustomerPortalPage() {
                                 {filtered.map((b) => (
                                     <article
                                         key={b.id}
-                                        className="group flex flex-col rounded-3xl border border-gray-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-900/5"
+                                        className="group flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 p-5 dark:border-gray-800 dark:bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-brand-200 dark:hover:border-brand-500/40"
                                     >
                                         <div className="mb-3 flex items-start justify-between gap-3">
                                             <div className="min-w-0">
-                                                <h3 className="truncate text-base font-semibold text-gray-900">
+                                                <h3 className="truncate text-base font-semibold text-gray-800 dark:text-white/90">
                                                     {b.service?.name || t("card.defaultServiceName")}
                                                 </h3>
-                                                <p className="mt-1 text-sm text-gray-500">
+                                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                                     {formatWhen(b.scheduledStart)}
                                                 </p>
                                             </div>
@@ -771,7 +755,7 @@ export default function CustomerPortalPage() {
                                         </div>
 
                                         {(b.city || cleanerName(b)) && (
-                                            <div className="mb-4 space-y-1.5 text-xs text-gray-500">
+                                            <div className="mb-4 space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
                                                 {b.city && (
                                                     <p className="flex items-center gap-1.5 truncate">
                                                         <PinIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
@@ -789,7 +773,7 @@ export default function CustomerPortalPage() {
 
                                         <div className="mt-auto border-t border-gray-100 pt-4">
                                             <div className="mb-3 flex items-center justify-between">
-                                                <p className="text-lg font-semibold tabular-nums text-gray-900">
+                                                <p className="text-lg font-semibold tabular-nums text-gray-800 dark:text-white/90">
                                                     {money(b.quotedPriceCents)}
                                                 </p>
                                             </div>
@@ -896,7 +880,7 @@ export default function CustomerPortalPage() {
 
             {rescheduleId && (
                 <Modal onClose={() => setRescheduleId(null)} title={t("rescheduleModal.title")}>
-                    <p className="mb-4 text-sm text-gray-600">
+                    <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
                         {t("rescheduleModal.description")}
                     </p>
                     {!rescheduleServiceId ? (
@@ -907,7 +891,7 @@ export default function CustomerPortalPage() {
                         <>
                             <label
                                 htmlFor="reschedule-date"
-                                className="mb-1.5 block text-xs font-medium text-gray-500"
+                                className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400"
                             >
                                 {t("rescheduleModal.dateLabel")}
                             </label>
@@ -915,16 +899,16 @@ export default function CustomerPortalPage() {
                                 id="reschedule-date"
                                 type="date"
                                 min={dayInBusinessTz(new Date())}
-                                className="mb-4 h-12 w-full rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+                                className="mb-4 h-12 w-full rounded-xl border border-gray-300 dark:border-gray-700 px-4 text-sm outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:focus:border-brand-500"
                                 value={rescheduleDate}
                                 onChange={(e) => pickRescheduleDate(e.target.value)}
                             />
-                            <p className="mb-1.5 text-xs font-medium text-gray-500">
+                            <p className="mb-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
                                 {t("rescheduleModal.timeLabel")}
                             </p>
                             <div className="mb-5 min-h-[3rem]">
                                 {slotsLoading && (
-                                    <p className="text-sm text-gray-500">{tSchedule("loadingTimes")}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{tSchedule("loadingTimes")}</p>
                                 )}
                                 {!slotsLoading && slotsError && (
                                     <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">
@@ -932,7 +916,7 @@ export default function CustomerPortalPage() {
                                     </p>
                                 )}
                                 {!slotsLoading && !slotsError && rescheduleDate && slots.length === 0 && (
-                                    <p className="text-sm text-gray-500">{tSchedule("noTimesAvailable")}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{tSchedule("noTimesAvailable")}</p>
                                 )}
                                 {!slotsLoading && slots.length > 0 && (
                                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -946,8 +930,8 @@ export default function CustomerPortalPage() {
                                                     onClick={() => setRescheduleStart(slot.start)}
                                                     className={`rounded-xl border px-2 py-2.5 text-sm font-medium transition ${
                                                         active
-                                                            ? "border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-500/20"
-                                                            : "border-gray-200 text-gray-700 hover:border-gray-300"
+                                                            ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 ring-2 ring-brand-500/20"
+                                                            : "border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300"
                                                     }`}
                                                 >
                                                     {formatSlotTime(slot.start)}
@@ -980,7 +964,7 @@ export default function CustomerPortalPage() {
                                 className={`text-3xl transition ${
                                     n <= rating
                                         ? "text-amber-400 scale-110"
-                                        : "text-gray-200 hover:text-amber-200"
+                                        : "text-gray-200 dark:text-gray-600 hover:text-amber-200"
                                 }`}
                                 aria-label={t("reviewModal.starsAriaLabel", { n })}
                             >
@@ -989,7 +973,7 @@ export default function CustomerPortalPage() {
                         ))}
                     </div>
                     <textarea
-                        className="mb-5 w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+                        className="mb-5 w-full rounded-xl border border-gray-300 dark:border-gray-700 px-4 py-3 text-sm outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:focus:border-brand-500"
                         rows={3}
                         placeholder={t("reviewModal.commentPlaceholder")}
                         value={comment}
@@ -1011,21 +995,21 @@ export default function CustomerPortalPage() {
                         className={`mb-3 rounded-xl px-3 py-2 text-sm ${
                             cancelPreview.feeCents > 0
                                 ? "bg-amber-50 text-amber-900"
-                                : "bg-emerald-50 text-emerald-900"
+                                : "bg-brand-50 dark:bg-brand-500/10 text-brand-800 dark:text-brand-200"
                         }`}
                     >
                         {cancelPreview.feeCents > 0
                             ? t("cancelModal.fee", { fee: money(cancelPreview.feeCents) })
                             : t("cancelModal.free")}
                     </p>
-                    <p className="mb-5 text-xs text-gray-500">
+                    <p className="mb-5 text-xs text-gray-500 dark:text-gray-400">
                         {cancellationPolicyLabel(policy, tPolicy)}
                     </p>
                     <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                         <button
                             type="button"
                             onClick={() => setCancelPreview(null)}
-                            className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-800"
+                            className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800"
                         >
                             {t("cancelModal.keep")}
                         </button>
@@ -1043,7 +1027,7 @@ export default function CustomerPortalPage() {
 
             {tipId && (
                 <Modal onClose={() => setTipId(null)} title={t("tipModal.title")}>
-                    <p className="mb-4 text-sm text-gray-600">
+                    <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
                         {t("tipModal.description")}
                     </p>
                     <div className="mb-4 grid grid-cols-4 gap-2">
@@ -1054,21 +1038,21 @@ export default function CustomerPortalPage() {
                                 onClick={() => selectTipPreset(c)}
                                 className={`rounded-xl border py-2.5 text-sm font-semibold transition ${
                                     tipCents === c
-                                        ? "border-emerald-600 bg-emerald-50 text-emerald-800 ring-2 ring-emerald-500/20"
-                                        : "border-gray-200 text-gray-700 hover:border-gray-300"
+                                        ? "border-brand-500 bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 ring-2 ring-brand-500/20"
+                                        : "border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300"
                                 }`}
                             >
                                 {money(c)}
                             </button>
                         ))}
                     </div>
-                    <label className="mb-1.5 block text-xs font-medium text-gray-500">
+                    <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">
                         {t("tipModal.customAmount", { currency })}
                     </label>
                     <input
                         type="text"
                         inputMode="decimal"
-                        className="mb-1.5 h-12 w-full rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+                        className="mb-1.5 h-12 w-full rounded-xl border border-gray-300 dark:border-gray-700 px-4 text-sm outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:focus:border-brand-500"
                         value={tipInput}
                         onChange={(e) => typeTipAmount(e.target.value)}
                         aria-invalid={tipInput.trim() !== "" && tipCents < MIN_TIP_CENTS}
@@ -1108,22 +1092,22 @@ function StatCard({
 }) {
     return (
         <div
-            className={`min-w-[5.5rem] rounded-2xl px-4 py-3 text-center shadow-sm ring-1 ${
+            className={`min-w-[5.5rem] rounded-2xl px-4 py-3 text-center shadow-theme-xs ring-1 ${
                 accent
-                    ? "bg-emerald-600 text-white ring-emerald-600"
-                    : "bg-white text-gray-900 ring-gray-200/80"
+                    ? "bg-brand-500 text-white ring-brand-500"
+                    : "bg-white text-gray-800 ring-gray-200 dark:bg-white/[0.03] dark:text-white/90 dark:ring-gray-800"
             }`}
         >
             <p
                 className={`text-2xl font-semibold tabular-nums ${
-                    accent ? "text-white" : "text-gray-900"
+                    accent ? "text-white" : "text-gray-800 dark:text-white/90"
                 }`}
             >
                 {value}
             </p>
             <p
                 className={`text-[11px] font-medium uppercase tracking-wide ${
-                    accent ? "text-emerald-100" : "text-gray-500"
+                    accent ? "text-brand-100" : "text-gray-500 dark:text-gray-400"
                 }`}
             >
                 {label}
@@ -1161,7 +1145,7 @@ function ActionBtn({
             <button
                 type="button"
                 onClick={onClick}
-                className={`${base} bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-300`}
+                className={`${base} bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-300`}
             >
                 {children}
             </button>
@@ -1171,7 +1155,7 @@ function ActionBtn({
         <button
             type="button"
             onClick={onClick}
-            className={`${base} border border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-gray-200`}
+            className={`${base} border border-gray-200 text-gray-700 hover:bg-gray-50 dark:hover:bg-white/5 focus:ring-gray-200`}
         >
             {children}
         </button>
@@ -1237,19 +1221,19 @@ function Modal({
                 aria-labelledby={titleId}
                 tabIndex={-1}
                 onKeyDown={onKeyDown}
-                className={`w-full rounded-3xl bg-white p-6 shadow-2xl outline-none sm:p-7 ${
+                className={`w-full rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-lg outline-none dark:border-gray-800 dark:bg-gray-900 sm:p-7 ${
                     wide ? "max-w-lg" : "max-w-md"
                 }`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="mb-5 flex items-center justify-between gap-3">
-                    <h3 id={titleId} className="text-lg font-semibold text-gray-900">
+                    <h3 id={titleId} className="text-lg font-semibold text-gray-800 dark:text-white/90">
                         {title}
                     </h3>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-300"
                         aria-label={t("closeAria")}
                     >
                         ✕
@@ -1280,7 +1264,7 @@ function ModalActions({
             <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-800"
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800"
             >
                 {t("modalCancel")}
             </button>
@@ -1288,7 +1272,7 @@ function ModalActions({
                 type="button"
                 onClick={onConfirm}
                 disabled={disabled}
-                className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
+                className="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-600 disabled:opacity-60"
             >
                 {loading ? t("pleaseWait") : confirmLabel}
             </button>
@@ -1302,7 +1286,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
             <dt className="text-xs font-medium uppercase tracking-wide text-gray-400">
                 {label}
             </dt>
-            <dd className="mt-0.5 text-sm font-medium text-gray-900">{value || "—"}</dd>
+            <dd className="mt-0.5 text-sm font-medium text-gray-800 dark:text-white/90">{value || "—"}</dd>
         </div>
     );
 }
