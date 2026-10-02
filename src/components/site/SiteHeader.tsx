@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type SiteHeaderProps = {
   subdomain: string;
@@ -23,6 +24,7 @@ export function SiteHeader({
                              primaryColor,
                              onBook,
                            }: SiteHeaderProps) {
+  const t = useTranslations("Site.nav");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -34,12 +36,12 @@ export function SiteHeader({
   }, []);
 
   const nav = [
-    { label: "Services", href: "#services" },
-    { label: "How it works", href: "#how-it-works" },
-    ...(hasAbout ? [{ label: "About", href: "#about" }] : []),
-    ...(hasTestimonials ? [{ label: "Reviews", href: "#testimonials" }] : []),
-    ...(hasFaq ? [{ label: "FAQ", href: "#faq" }] : []),
-    { label: "Contact", href: "#contact" },
+    { label: t("services"), href: "#services" },
+    { label: t("howItWorks"), href: "#how-it-works" },
+    ...(hasAbout ? [{ label: t("about"), href: "#about" }] : []),
+    ...(hasTestimonials ? [{ label: t("reviews"), href: "#testimonials" }] : []),
+    ...(hasFaq ? [{ label: t("faq"), href: "#faq" }] : []),
+    { label: t("contact"), href: "#contact" },
   ];
 
   const initial = businessName.trim().charAt(0).toUpperCase() || "C";
@@ -80,7 +82,7 @@ export function SiteHeader({
           </span>
           </a>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Site navigation">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label={t("siteNav")}>
             {nav.map((item) => (
                 <a
                     key={item.href}
@@ -97,7 +99,7 @@ export function SiteHeader({
                 href={portalHref}
                 className="inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold text-[#253d34] transition-colors hover:bg-[#f3f0e9]"
             >
-              Client portal
+              {t("portal")}
             </a>
             <a
                 href={bookHref}
@@ -107,7 +109,7 @@ export function SiteHeader({
                   boxShadow: "0 8px 24px rgba(8, 46, 37, .18)",
                 }}
             >
-              Book cleaning
+              {t("book")}
               <span aria-hidden="true">↗</span>
             </a>
           </div>
@@ -115,7 +117,7 @@ export function SiteHeader({
           <button
               type="button"
               className="grid h-11 w-11 place-items-center rounded-full border border-[#e6e4dc] bg-[#f8f8f5] lg:hidden"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-label={menuOpen ? t("closeMenu") : t("openMenu")}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
           >
@@ -152,14 +154,14 @@ export function SiteHeader({
                     className="mt-2 rounded-full border border-[#e6e4dc] px-4 py-3 text-center text-sm font-semibold text-[#253d34]"
                     onClick={() => setMenuOpen(false)}
                 >
-                  Client portal
+                  {t("portal")}
                 </a>
                 <a
                     href={bookHref}
                     onClick={handleBook}
                     className="mt-2 rounded-full bg-[#082e25] px-4 py-3 text-center text-sm font-semibold text-white"
                 >
-                  Book cleaning
+                  {t("book")}
                 </a>
               </div>
             </div>
