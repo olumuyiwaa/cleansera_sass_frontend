@@ -180,6 +180,11 @@ const AppSidebar: React.FC = () => {
         path: "/admin/users",
       },
       {
+        icon: <ChatIcon />,
+        name: t("inquiries"),
+        path: "/admin/inquiries",
+      },
+      {
         icon: <EnvelopeIcon />,
         name: t("supportTickets"),
         path: "/admin/tickets",

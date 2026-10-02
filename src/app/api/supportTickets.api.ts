@@ -19,6 +19,9 @@ export async function createTicket(body: {
   category?: string;
   customerId?: string;
   bookingId?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
 }) {
   return authFetch(`/support-tickets`, { method: "POST", body: JSON.stringify(body) });
 }

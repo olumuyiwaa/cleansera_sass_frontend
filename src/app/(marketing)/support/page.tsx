@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import Reveal from "@/components/marketing/Reveal"
+import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/booking/Turnstile";
+import { apiBaseUrl, formErrorMessage, type ApiError } from "@/lib/formErrors";
 const CATEGORIES = [
   {
     title: "For business owners",
@@ -36,37 +38,56 @@ function ArrowIcon() {
   );
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
-
 export default function Support() {
   const [supportForm, setSupportForm] = useState({ name: "", email: "", message: "" });
   const [supportStatus, setSupportStatus] = useState("idle"); // idle | loading | success | error
   const [supportError, setSupportError] = useState("");
+  const [supportReference, setSupportReference] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
 
   const handleSupportSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (supportStatus === "loading") return;
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setSupportStatus("error");
+      setSupportError("Please complete the verification first.");
+      return;
+    }
     setSupportStatus("loading");
     setSupportError("");
     try {
-      const res = await fetch(`${API_BASE_URL}/support`, {
+      const res = await fetch(`${apiBaseUrl()}/support`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: supportForm.name,
-          email: supportForm.email,
-          message: supportForm.message,
+          name: supportForm.name.trim(),
+          email: supportForm.email.trim(),
+          message: supportForm.message.trim(),
           source: "website-support",
+          website: honeypot,
+          captchaToken: captchaToken || undefined,
         }),
       });
-      const result = await res.json();
+      const result = await res.json().catch(() => ({}));
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Something went wrong — please try again.");
+        // Keep the server's reason (e.g. "Message must be between 10 and 5000
+        // characters", or the rate-limit text) instead of one generic line.
+        const err = new Error(result.message || "Request failed") as ApiError;
+        err.status = res.status;
+        err.errors = Array.isArray(result.errors) ? result.errors : null;
+        throw err;
       }
+      setSupportReference(result.data?.reference || "");
       setSupportStatus("success");
     } catch (err) {
       setSupportStatus("error");
-      setSupportError("Something went wrong — please try again.");
+      setSupportError(formErrorMessage(err, "Something went wrong — please try again."));
+    } finally {
+      // Turnstile tokens are single-use.
+      setCaptchaToken(null);
+      setCaptchaNonce((n) => n + 1);
     }
   };
 
@@ -500,7 +521,11 @@ export default function Support() {
                     {supportStatus === "success" ? (
                         <div className="form-card form-success">
                           <h3>Message sent</h3>
-                          <p>Thanks — we've received your message and will get back to you shortly.</p>
+                          <p>
+                            Thanks — we've received your message
+                            {supportForm.email ? <> and will reply to {supportForm.email}</> : null}.
+                          </p>
+                          {supportReference ? <p>Your reference is <strong>{supportReference}</strong>.</p> : null}
                         </div>
                     ) : (
                         <form className="form-card" onSubmit={handleSupportSubmit}>
@@ -516,6 +541,8 @@ export default function Support() {
                                   placeholder="Your name"
                                   value={supportForm.name}
                                   onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })}
+                                  autoComplete="name"
+                                  maxLength={100}
                                   required
                               />
                             </div>
@@ -530,6 +557,8 @@ export default function Support() {
                                   placeholder="you@example.com"
                                   value={supportForm.email}
                                   onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })}
+                                  autoComplete="email"
+                                  maxLength={254}
                                   required
                               />
                             </div>
@@ -543,11 +572,21 @@ export default function Support() {
                                   placeholder="Share a few details so we can help faster…"
                                   value={supportForm.message}
                                   onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })}
+                                  minLength={10}
+                                  maxLength={5000}
                                   required
                               />
                             </div>
                           </div>
-                          {supportStatus === "error" && <p className="form-error">{supportError}</p>}
+                          {/* Honeypot: hidden from people and assistive tech; bots fill it. */}
+                          <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+                            <label>
+                              Website
+                              <input type="text" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+                            </label>
+                          </div>
+                          <Turnstile onToken={setCaptchaToken} resetKey={captchaNonce} />
+                          {supportStatus === "error" && <p className="form-error" role="alert">{supportError}</p>}
                           <button type="submit" className="form-submit" disabled={supportStatus === "loading"}>
                             {supportStatus === "loading" ? "Sending…" : "Send message"}
                             <ArrowIcon />

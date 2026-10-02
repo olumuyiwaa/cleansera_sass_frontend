@@ -36,8 +36,13 @@ async function widgetFetch(
       result.message ||
       result.error ||
       (typeof result === "string" ? result : "Request failed");
-    const err = new Error(message) as Error & { status?: number };
+    const err = new Error(message) as Error & {
+      status?: number;
+      errors?: { field?: string; message?: string }[] | null;
+    };
     err.status = res.status;
+    // Per-field validation messages (HTTP 422), so forms can say what is wrong.
+    err.errors = Array.isArray(result.errors) ? result.errors : null;
     throw err;
   }
 
@@ -295,4 +300,27 @@ export async function joinWaitlist(slug: string, payload: JoinWaitlistPayload) {
     body: JSON.stringify(payload),
   });
   return result.data as { id: string; status: string };
+}
+
+export type SubmitContactPayload = {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+  /** Honeypot - must stay empty; real visitors never see the field. */
+  website?: string;
+  captchaToken?: string;
+};
+
+/**
+ * A message from the storefront's contact form. Becomes a ticket for the
+ * business and is emailed to them; the visitor gets an acknowledgement and a
+ * reference number.
+ */
+export async function submitContact(slug: string, payload: SubmitContactPayload) {
+  const result = await widgetFetch(slug, "/contact", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return result.data as { reference: string };
 }

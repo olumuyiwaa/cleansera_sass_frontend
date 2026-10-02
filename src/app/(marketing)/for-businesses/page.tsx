@@ -3,6 +3,8 @@
 import Link from "next/link";
 import {useState } from "react";
 import Reveal from "@/components/marketing/Reveal"
+import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/booking/Turnstile";
+import { apiBaseUrl, formErrorMessage, type ApiError } from "@/lib/formErrors";
 
 const COMPARE_ROWS = [
   { label: "Booking site", cleansera: "Your own branded booking experience", marketplace: "Shared listing inside a crowded marketplace" },
@@ -54,33 +56,52 @@ function CheckIcon() {
   );
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
-
 export default function ForBusinesses() {
   const [demoName, setDemoName] = useState("");
   const [demoEmail, setDemoEmail] = useState("");
   const [demoStatus, setDemoStatus] = useState("idle"); // idle | loading | success | error
   const [demoError, setDemoError] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
 
   const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (demoStatus === "loading") return;
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setDemoStatus("error");
+      setDemoError("Please complete the verification first.");
+      return;
+    }
     setDemoStatus("loading");
     setDemoError("");
     try {
-      const res = await fetch(`${API_BASE_URL}/demo-requests`, {
+      const res = await fetch(`${apiBaseUrl()}/demo-requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: demoName, email: demoEmail, source: "for-businesses" }),
+        body: JSON.stringify({
+          name: demoName.trim(),
+          email: demoEmail.trim(),
+          source: "for-businesses",
+          website: honeypot,
+          captchaToken: captchaToken || undefined,
+        }),
       });
-      const result = await res.json();
+      const result = await res.json().catch(() => ({}));
       if (!res.ok || !result.success) {
-        throw new Error(result.message || "Something went wrong — please try again.");
+        const err = new Error(result.message || "Request failed") as ApiError;
+        err.status = res.status;
+        err.errors = Array.isArray(result.errors) ? result.errors : null;
+        throw err;
       }
       setDemoStatus("success");
     } catch (err) {
       setDemoStatus("error");
-      setDemoError("Something went wrong — please try again.");
+      setDemoError(formErrorMessage(err, "Something went wrong — please try again."));
+    } finally {
+      // Turnstile tokens are single-use.
+      setCaptchaToken(null);
+      setCaptchaNonce((n) => n + 1);
     }
   };
 
@@ -774,6 +795,8 @@ export default function ForBusinesses() {
                               aria-label="Your name"
                               value={demoName}
                               onChange={(e) => setDemoName(e.target.value)}
+                              autoComplete="name"
+                              maxLength={100}
                               required
                           />
                           <input
@@ -783,14 +806,26 @@ export default function ForBusinesses() {
                               aria-label="Email address"
                               value={demoEmail}
                               onChange={(e) => setDemoEmail(e.target.value)}
+                              autoComplete="email"
+                              maxLength={254}
                               required
                           />
+                          {/* Honeypot: hidden from people and assistive tech; bots fill it. */}
+                          <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+                            <label>
+                              Website
+                              <input type="text" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+                            </label>
+                          </div>
                           <button type="submit" className="demo-button" disabled={demoStatus === "loading"}>
                             {demoStatus === "loading" ? "Booking…" : "Book"}
                           </button>
                         </form>
                     )}
-                    {demoStatus === "error" && <p className="demo-error">{demoError}</p>}
+                    <div style={{ marginTop: 12 }}>
+                      <Turnstile onToken={setCaptchaToken} resetKey={captchaNonce} />
+                    </div>
+                    {demoStatus === "error" && <p className="demo-error" role="alert">{demoError}</p>}
                   </Reveal>
                 </div>
               </div>

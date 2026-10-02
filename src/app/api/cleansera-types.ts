@@ -182,6 +182,10 @@ export type Business = {
     vatNumber?: string | null;
     invoiceIban?: string | null;
     vatRateBps?: number;
+    /** Where website contact-form messages are delivered (private) and the Reply-To on replies. */
+    contactEmail?: string | null;
+    /** Shown on the storefront. */
+    contactPhone?: string | null;
     branding?: {
         logoKey: string | null;
         primaryColor: string | null;

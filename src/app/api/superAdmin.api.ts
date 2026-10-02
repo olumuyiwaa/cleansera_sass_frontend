@@ -235,3 +235,49 @@ export function listTickets(params?: {
 export function updateTicketStatus(id: string, status: string) {
   return patchJson<TicketListItem>(`/tickets/${id}/status`, { status });
 }
+
+// ---- Platform inbox: support messages + demo requests from the marketing site
+
+export type InquiryKind = "SUPPORT" | "DEMO";
+export type InquiryStatus = "NEW" | "IN_PROGRESS" | "RESOLVED" | "SPAM";
+
+export type PlatformInquiry = {
+  id: string;
+  reference: string;
+  kind: InquiryKind;
+  name: string;
+  email: string;
+  company: string | null;
+  phone: string | null;
+  subject: string | null;
+  category: string | null;
+  message: string | null;
+  source: string | null;
+  status: InquiryStatus;
+  /** Set when the team notification email was handed to the mail provider. */
+  notifiedAt: string | null;
+  createdAt: string;
+};
+
+export function listInquiries(params?: {
+  status?: string;
+  kind?: string;
+  q?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const sp = new URLSearchParams();
+  if (params?.status) sp.set("status", params.status);
+  if (params?.kind) sp.set("kind", params.kind);
+  if (params?.q) sp.set("q", params.q);
+  if (params?.page) sp.set("page", String(params.page));
+  if (params?.limit) sp.set("limit", String(params.limit));
+  const qs = sp.toString();
+  return getJson<{ data: PlatformInquiry[]; newCount: number; pagination: Pagination }>(
+    `/inquiries${qs ? `?${qs}` : ""}`
+  );
+}
+
+export function updateInquiryStatus(id: string, status: InquiryStatus) {
+  return patchJson<PlatformInquiry>(`/inquiries/${id}/status`, { status });
+}

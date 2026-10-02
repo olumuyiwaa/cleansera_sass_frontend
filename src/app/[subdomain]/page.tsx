@@ -18,6 +18,7 @@ import { SiteGallery } from "@/components/site/SiteGallery";
 import { SiteFaq } from "@/components/site/SiteFaq";
 import { SiteCtaBand } from "@/components/site/SiteCtaBand";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteContact } from "@/components/site/SiteContact";
 import { BookingWidgetModal } from "@/components/widget/BookingWidgetModal";
 
 const DEFAULT_PRIMARY = "#0B352A";
@@ -193,6 +194,12 @@ export default function BusinessSitePage({
         />
         <SiteHowItWorks primaryColor={primaryColor} />
         {order.map((key) => optionalSections[key])}
+        <SiteContact
+          subdomain={subdomain}
+          businessName={name}
+          primaryColor={primaryColor}
+          phoneNumber={business.phone}
+        />
         <SiteCtaBand
           subdomain={subdomain}
           businessName={name}

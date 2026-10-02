@@ -44,6 +44,7 @@ export default function BusinessSettingsPage() {
 
   const [nameForm, setNameForm] = useState({ name: "", timezone: "", customDomain: "" });
   const [taxForm, setTaxForm] = useState({ legalName: "", kvkNumber: "", vatNumber: "", invoiceIban: "", vatRateBps: "2100" });
+  const [contactForm, setContactForm] = useState({ contactEmail: "", contactPhone: "" });
   const [brandForm, setBrandForm] = useState({ tagline: "", primaryColor: "", accentColor: "" });
 
   const load = useCallback(async () => {
@@ -62,6 +63,7 @@ export default function BusinessSettingsPage() {
         invoiceIban: b.invoiceIban || "",
         vatRateBps: String(b.vatRateBps ?? 2100),
       });
+      setContactForm({ contactEmail: b.contactEmail || "", contactPhone: b.contactPhone || "" });
       setBrandForm({ tagline: br.tagline || "", primaryColor: br.primaryColor || "", accentColor: br.accentColor || "" });
       setAreas(await listServiceAreas());
     } catch (err) {
@@ -106,6 +108,25 @@ export default function BusinessSettingsPage() {
       setSaved(t("invoicingSaved"));
     } catch (err) {
       setError(err instanceof Error ? err.message : t("invoicingSaveFailed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSaved("");
+    try {
+      // Blank clears the field (messages then go to account owners and managers).
+      await updateBusiness({
+        contactEmail: contactForm.contactEmail.trim(),
+        contactPhone: contactForm.contactPhone.trim(),
+      });
+      setSaved(t("contactSaved"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("contactSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -285,6 +306,33 @@ export default function BusinessSettingsPage() {
             </select>
           </div>
           <Button type="submit" disabled={saving}>{saving ? t("saving") : t("saveInvoicing")}</Button>
+        </form>
+      </section>
+
+      {/* Contact details */}
+      <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.02]">
+        <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t("contactDetails")}</h2>
+        <p className="mb-4 max-w-md text-xs text-gray-500 dark:text-gray-400">{t("contactHint")}</p>
+        <form onSubmit={saveContact} className="space-y-4 max-w-md">
+          <div>
+            <Label>{t("contactEmail")}</Label>
+            <Input
+              type="email"
+              value={contactForm.contactEmail}
+              onChange={(e) => setContactForm({ ...contactForm, contactEmail: e.target.value })}
+              placeholder="info@yourbusiness.nl"
+            />
+          </div>
+          <div>
+            <Label>{t("contactPhone")}</Label>
+            <Input
+              type="tel"
+              value={contactForm.contactPhone}
+              onChange={(e) => setContactForm({ ...contactForm, contactPhone: e.target.value })}
+              placeholder="+31 20 123 4567"
+            />
+          </div>
+          <Button type="submit" disabled={saving}>{saving ? t("saving") : t("saveContact")}</Button>
         </form>
       </section>
 

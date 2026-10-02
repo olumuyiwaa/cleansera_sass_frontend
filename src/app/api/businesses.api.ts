@@ -96,6 +96,8 @@ export async function updateBusiness(patch: {
     vatNumber?: string | null;
     invoiceIban?: string | null;
     vatRateBps?: number;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
 }) {
     const result = await authFetch(`/businesses`, {
         method: "PUT",

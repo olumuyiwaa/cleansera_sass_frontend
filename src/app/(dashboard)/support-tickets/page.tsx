@@ -25,6 +25,12 @@ type Ticket = {
   customerId?: string | null;
   bookingId?: string | null;
   assignedTo?: string | null;
+  /** Who replies are emailed to. Set for website contact-form tickets. */
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  /** 'WEBSITE' when it came from the public site's contact form. */
+  source?: string | null;
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string | null;
@@ -36,6 +42,8 @@ type TicketMessage = {
   body: string;
   isInternal: boolean;
   authorId?: string | null;
+  /** Only set when the reply was really handed to the mail provider. */
+  emailedAt?: string | null;
   createdAt: string;
 };
 
@@ -47,6 +55,7 @@ const CATEGORY_OPTIONS = [
   "SHIFTS_SCHEDULING",
   "PAYMENTS_BILLING",
   "TECHNICAL",
+  "WEBSITE",
   "OTHER",
 ];
 
@@ -94,8 +103,13 @@ export default function SupportTicketsPage() {
     category: "OTHER",
     customerId: "",
     bookingId: "",
+    contactName: "",
+    contactEmail: "",
+    contactPhone: "",
   });
   const [creating, setCreating] = useState(false);
+  // Email typed in for a ticket that has none (replies need somewhere to go).
+  const [emailDraft, setEmailDraft] = useState("");
 
   const [selected, setSelected] = useState<Ticket | null>(null);
   const [selectedLoading, setSelectedLoading] = useState(false);
@@ -135,6 +149,7 @@ export default function SupportTicketsPage() {
       const res = await getTicket(id);
       if (!res.success) throw new Error(res.message);
       setSelected(res.data);
+      setEmailDraft("");
     } catch (e: any) {
       setError(e.message || t("loadTicketFailed"));
     } finally {
@@ -154,10 +169,13 @@ export default function SupportTicketsPage() {
         category: createForm.category,
         customerId: createForm.customerId || undefined,
         bookingId: createForm.bookingId || undefined,
+        contactName: createForm.contactName.trim() || undefined,
+        contactEmail: createForm.contactEmail.trim() || undefined,
+        contactPhone: createForm.contactPhone.trim() || undefined,
       });
       if (!res.success) throw new Error(res.message);
       setShowCreate(false);
-      setCreateForm({ subject: "", description: "", priority: "MEDIUM", category: "OTHER", customerId: "", bookingId: "" });
+      setCreateForm({ subject: "", description: "", priority: "MEDIUM", category: "OTHER", customerId: "", bookingId: "", contactName: "", contactEmail: "", contactPhone: "" });
       load(1);
     } catch (e: any) {
       setError(e.message || t("createFailed"));
@@ -186,6 +204,12 @@ export default function SupportTicketsPage() {
       if (!res.success) throw new Error(res.message);
       setReplyBody("");
       setReplyInternal(false);
+      // A customer-facing reply to a ticket with an address should have gone out
+      // by email. If the server says it did not, say so rather than let the
+      // team assume the customer was told.
+      if (!replyInternal && selected.contactEmail && !res.data?.emailedAt) {
+        setError(t("replyNotEmailed"));
+      }
       await openTicket(selected.id);
     } catch (e: any) {
       setError(e.message || t("replyFailed"));
@@ -270,6 +294,29 @@ export default function SupportTicketsPage() {
             onChange={(e) => setCreateForm({ ...createForm, bookingId: e.target.value })}
             className={inputCls}
           />
+          <input
+            placeholder={t("contactName")}
+            value={createForm.contactName}
+            maxLength={100}
+            onChange={(e) => setCreateForm({ ...createForm, contactName: e.target.value })}
+            className={inputCls}
+          />
+          <input
+            type="email"
+            placeholder={t("contactEmail")}
+            value={createForm.contactEmail}
+            maxLength={254}
+            onChange={(e) => setCreateForm({ ...createForm, contactEmail: e.target.value })}
+            className={inputCls}
+          />
+          <input
+            type="tel"
+            placeholder={t("contactPhone")}
+            value={createForm.contactPhone}
+            maxLength={40}
+            onChange={(e) => setCreateForm({ ...createForm, contactPhone: e.target.value })}
+            className={inputCls}
+          />
           <button
             type="submit"
             disabled={creating}
@@ -327,7 +374,14 @@ export default function SupportTicketsPage() {
                   className="cursor-pointer border-t hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.02]"
                   onClick={() => openTicket(ticket.id)}
                 >
-                  <td className="px-4 py-3 font-medium text-gray-800 dark:text-white/90">{ticket.subject}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800 dark:text-white/90">
+                    {ticket.subject}
+                    {ticket.source === "WEBSITE" && (
+                      <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-500/15 dark:text-brand-400">
+                        {t("fromWebsite")}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLS[ticket.status]}`}>
                       {t(`statuses.${ticket.status}`)}
@@ -401,6 +455,22 @@ export default function SupportTicketsPage() {
                   <div>
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">{selected.subject}</h2>
                     <p className="mt-1 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-300">{selected.description}</p>
+                    {(selected.contactName || selected.contactEmail || selected.contactPhone) && (
+                      <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
+                        <span className="text-xs uppercase text-gray-400">{t("contactFrom")}</span>
+                        {selected.contactName && <span className="font-medium">{selected.contactName}</span>}
+                        {selected.contactEmail && (
+                          <a href={`mailto:${selected.contactEmail}`} className="text-brand-600 hover:underline">
+                            {selected.contactEmail}
+                          </a>
+                        )}
+                        {selected.contactPhone && (
+                          <a href={`tel:${selected.contactPhone.replace(/[^\d+]/g, "")}`} className="text-brand-600 hover:underline">
+                            {selected.contactPhone}
+                          </a>
+                        )}
+                      </p>
+                    )}
                   </div>
                   <button type="button" onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600">
                     ✕
@@ -459,7 +529,16 @@ export default function SupportTicketsPage() {
                         }`}
                       >
                         <div className="flex justify-between text-xs text-gray-500">
-                          <span>{m.isInternal ? t("internalNote") : t("reply")}</span>
+                          <span>
+                            {m.isInternal ? t("internalNote") : t("reply")}
+                            {!m.isInternal && selected.contactEmail && (
+                              <span
+                                className={`ml-2 ${m.emailedAt ? "text-green-600" : "text-amber-600"}`}
+                              >
+                                {m.emailedAt ? `✓ ${t("emailedOn", { date: fmt(m.emailedAt, locale) })}` : t("notEmailed")}
+                              </span>
+                            )}
+                          </span>
                           <span>{fmt(m.createdAt, locale)}</span>
                         </div>
                         <p className="mt-1 whitespace-pre-wrap text-gray-700 dark:text-gray-200">{m.body}</p>
@@ -477,6 +556,37 @@ export default function SupportTicketsPage() {
                       placeholder={t("replyPlaceholder")}
                       className={`${inputCls} h-20 py-2`}
                     />
+                    {!replyInternal && (
+                      <p className={`text-xs ${selected.contactEmail ? "text-gray-500" : "text-amber-600"}`}>
+                        {selected.contactEmail
+                          ? t("replyWillEmail", { email: selected.contactEmail })
+                          : t("replyNoEmail")}
+                      </p>
+                    )}
+                    {!selected.contactEmail && (
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          value={emailDraft}
+                          maxLength={254}
+                          onChange={(e) => setEmailDraft(e.target.value)}
+                          placeholder={t("addEmailPrompt")}
+                          aria-label={t("addEmailPrompt")}
+                          className={`${inputCls} h-9`}
+                        />
+                        <button
+                          type="button"
+                          disabled={!emailDraft.trim()}
+                          onClick={async () => {
+                            await patchSelected({ contactEmail: emailDraft.trim() });
+                            setEmailDraft("");
+                          }}
+                          className="h-9 shrink-0 rounded-lg border px-3 text-sm disabled:opacity-50"
+                        >
+                          {t("saveEmail")}
+                        </button>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <label className="flex items-center gap-2 text-xs text-gray-500">
                         <input

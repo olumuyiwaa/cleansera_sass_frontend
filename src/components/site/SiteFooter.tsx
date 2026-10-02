@@ -41,7 +41,7 @@ export function SiteFooter({
   }
 
   return (
-    <footer id="contact" className="site-footer border-t border-[#e4dfd4]">
+    <footer id="site-footer" className="site-footer border-t border-[#e4dfd4]">
       <div className="site-container py-12 sm:py-14">
         <div className="grid gap-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:gap-12">
           <div>

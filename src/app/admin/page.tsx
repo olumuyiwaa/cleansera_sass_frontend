@@ -142,7 +142,7 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       {/* Metric cards — overview component */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Kpi label="Businesses" value={kpis.totalBusinesses} hint={`${kpis.activeBusinesses} active`} />
         <Kpi label="MRR" value={`${currencySymbol()}${kpis.mrrFormatted}`} hint="Active + trialing plans" />
         <Kpi label="Users" value={kpis.totalUsers} />
@@ -265,11 +265,12 @@ export default function SuperAdminDashboardPage() {
       </section>
 
       {/* Quick links */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[
           { href: "/admin/businesses", label: "Businesses", hint: "Activate / suspend tenants" },
           { href: "/admin/subscriptions", label: "Subscriptions", hint: "Plans & billing status" },
           { href: "/admin/users", label: "Users", hint: "Global roles & access" },
+          { href: "/admin/inquiries", label: "Inquiries", hint: "Marketing-site messages & demos" },
           { href: "/admin/tickets", label: "Support tickets", hint: "Cross-tenant issues" },
         ].map((a) => (
           <Link
