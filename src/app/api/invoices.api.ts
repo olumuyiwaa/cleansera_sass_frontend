@@ -2,7 +2,7 @@ import { authFetch } from "./authFetch";
 import { refreshAccessToken } from "./client";
 import { sessionService } from "../services/session.service";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://cleansera-sass.onrender.com/api/v1";
 
 export type Invoice = {
   id: string;

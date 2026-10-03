@@ -4,7 +4,7 @@ import axios from "axios";
 // refresh-token rotation) is the client actually in use. Kept consistent
 // with the other two API base URLs in case this gets picked up later.
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1",
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "https://cleansera-sass.onrender.com/api/v1",
 });
 
 api.interceptors.request.use((config) => {

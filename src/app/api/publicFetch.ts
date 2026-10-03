@@ -4,7 +4,7 @@
 import { ApiError } from "@/app/api/errors";
 
 const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+    process.env.NEXT_PUBLIC_API_BASE_URL || "https://cleansera-sass.onrender.com/api/v1";
 
 export async function publicFetch(url: string, options: RequestInit = {}) {
     const response = await fetch(`${API_BASE_URL}${url}`, {

@@ -33,6 +33,6 @@ export function fieldErrorMap(err: unknown): Record<string, string> {
 export function apiBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (url) return url;
-  if (process.env.NODE_ENV !== "production") return "http://localhost:8000/api/v1";
+  if (process.env.NODE_ENV !== "production") return "https://cleansera-sass.onrender.com/api/v1";
   throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
 }
